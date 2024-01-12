@@ -5,7 +5,7 @@ NAME = webserv
 GREEN=\033[32m
 RESET=\033[0m
 
-SOURCES = ./main.cpp
+SOURCES = ./src/main.cpp ./src/server/Server.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
