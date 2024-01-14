@@ -1,30 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 16:06:59 by njantsch         ###   ########.fr       */
+/*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
+/*   Updated: 2024/01/14 19:22:57 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/Server.hpp"
-#include "../includes/ResponseFiles.hpp"
+#pragma once
 
-int main(void)
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+
+class RequestParser
 {
-  try
-  {
-    ResponseFiles files;
-    files.storeFileIntoMap("index", "./responseFiles/index.html");
-    Server httpServer(files);
-    httpServer.serverLoop();
-  }
-  catch(const std::exception& e)
-  {
-    std::cout << e.what() << '\n';
-  }
-  return (0);
-}
+private:
+  std::vector<std::string> _requestLines;
+  std::string              _requestType;
+  std::string              _uri;
+  std::string              _host;
+public:
+  RequestParser();
+  ~RequestParser();
+
+  void  parseRequestBuffer(const char* buffer);
+};

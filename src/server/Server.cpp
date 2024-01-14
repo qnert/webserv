@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/13 21:01:10 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/14 19:33:53 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ void  Server::serverLoop()
     }
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
+    this->_requests.parseRequestBuffer(buffer);
     this->handleRequest(files);
   }
   close(this->_clientSocket);
