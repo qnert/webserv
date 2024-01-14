@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseFiles.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:09:55 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 18:04:15 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/14 19:39:22 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
