@@ -1,41 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
+/*   ResponseFiles.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/13 21:01:13 by njantsch         ###   ########.fr       */
+/*   Created: 2024/01/13 15:10:23 by njantsch          #+#    #+#             */
+/*   Updated: 2024/01/13 16:33:03 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "ResponseFiles.hpp"
 #include <iostream>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <cstdio>
-#include <unistd.h>
+#include <fstream>
+#include <sstream>
 #include <string>
-#include <cstdlib>
+#include <map>
 
-#define PORT 8080
-
-class Server
+class ResponseFiles
 {
 private:
-  int _serverSocket;
-  int _clientSocket;
-  sockaddr_in _serverAdress;
-  const ResponseFiles _responses;
-
-  void  handleRequest(std::map<std::string, std::string>& files);
+  std::map<std::string, std::string> _responseFiles; // stores response files with name as key and content as value
 public:
-  Server(const ResponseFiles& responses);
-  ~Server();
+  ResponseFiles();
+  ~ResponseFiles();
 
-  void  serverLoop();
+  const std::map<std::string, std::string>& getResponseFiles() const;
+
+  void  storeFileIntoMap(const std::string& name, const std::string& path);
 };
