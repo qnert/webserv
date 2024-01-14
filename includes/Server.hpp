@@ -6,13 +6,14 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/13 21:01:13 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/14 18:08:33 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "ResponseFiles.hpp"
+#include "RequestParser.hpp"
 #include <iostream>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -27,10 +28,11 @@
 class Server
 {
 private:
-  int _serverSocket;
-  int _clientSocket;
-  sockaddr_in _serverAdress;
+  int                 _serverSocket;
+  int                 _clientSocket;
+  sockaddr_in         _serverAdress;
   const ResponseFiles _responses;
+  RequestParser       _requests;
 
   void  handleRequest(std::map<std::string, std::string>& files);
 public:
