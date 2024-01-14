@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 16:28:14 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/14 17:52:01 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,14 +42,7 @@ Server::~Server()
 
 void  Server::handleRequest(std::map<std::string, std::string>& files)
 {
-  static int i;
-  if (i == 0){
-    i++;
     send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
-  }
-  else{
-    send(this->_clientSocket, ("HTTP/1.1 200 OK\r\nContent-Type: image/gif\r\n\r\n" + files["giphy"]).c_str(), 50 + files["giphy"].size(), 0);
-  }
 }
 
 void  Server::serverLoop()
