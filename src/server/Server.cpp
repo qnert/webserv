@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:33:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/14 19:43:48 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ Server::~Server()
 
 void  Server::handleRequest(std::map<std::string, std::string>& files)
 {
-  send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
+    send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
 }
 
 void  Server::serverLoop()
