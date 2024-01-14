@@ -6,11 +6,11 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:09:55 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:39:22 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/14 19:43:44 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./ResponseFiles.hpp"
+#include "../../includes/ResponseFiles.hpp"
 
 std::string get_type(std::string type){
   if (type == "html")

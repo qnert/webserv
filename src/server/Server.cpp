@@ -6,11 +6,11 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:39:50 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/14 19:43:48 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./Server.hpp"
+#include "../../includes/Server.hpp"
 
 Server::Server(const ResponseFiles& responses) : _responses(responses)
 {
