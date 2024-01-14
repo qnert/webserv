@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:09:55 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 15:46:15 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/14 16:15:08 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ const std::map<std::string, std::string>& ResponseFiles::getResponseFiles() cons
 
 void  ResponseFiles::storeFileIntoMap(const std::string& name, const std::string& path)
 {
-  std::ifstream file(path);
+  std::ifstream file(path, std::ios::binary);
   if (!file.is_open())
     throw(std::runtime_error("couldn't open file in storeFileIntoMap"));
 
