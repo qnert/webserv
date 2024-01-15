@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/15 11:51:17 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/15 13:49:55 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int main(void)
     ResponseFiles files;
     files.storeFileIntoMap("index", "./responseFiles/index.html");
     files.storeFileIntoMap("image", "./responseFiles/image.webp");
-    files.storeFileIntoMap("giphy", "./responseFiles/giphy.gif");
+    files.storeFileIntoMap("error", "./responseFiles/error.html");
     Server httpServer(files);
     httpServer.serverLoop();
   }
