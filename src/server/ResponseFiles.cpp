@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseFiles.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:09:55 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:43:44 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/15 11:42:36 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 std::string get_type(std::string type){
   if (type == "html")
     return ("text/html");
+  if (type == "webp")
+    return ("image/webp");
+  if (type == "gif")
+    return ("image/gif");
   return ("");
 }
 
@@ -24,7 +28,8 @@ std::string  check_and_add_header(std::string const& fileContent, std::string co
     header << "HTTP/1.1 200 OK\r\n";
   else
     header << "HTTP/1.1 404 Not Found\r\n";
-  header << "Content-Length: " << fileContent.size() << "\r\n";
+  if (fileContent == "")
+    header << "Content-Length: " << fileContent.size() << "\r\n";
   header << "Content-Type: "<< get_type(type) << "\r\n";
   header << "\r\n";
   return (header.str());
@@ -55,7 +60,7 @@ void  ResponseFiles::storeFileIntoMap(const std::string& name, const std::string
       buffer << file.rdbuf();
       fileContent = buffer.str();
     }
-    fileContent = check_and_add_header(fileContent, "html", is_valid) + fileContent;
+    fileContent = check_and_add_header(fileContent, path.substr(path.find_last_of(".") + 1), is_valid) + fileContent;
     this->_responseFiles.insert(std::pair<std::string, std::string>(name, fileContent));
   }
   file.close();

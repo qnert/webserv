@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/15 11:29:12 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/15 11:52:28 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ void  Server::handleRequest(std::map<std::string, std::string>& files)
     if (this->_requests.getUri() == "/")
       send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
     else if (this->_requests.getUri() == "/image.webp")
+      send(this->_clientSocket, files["image"].c_str(), files["image"].size(), 0);
+    else if (this->_requests.getUri() == "/giphy.gif")
       send(this->_clientSocket, files["giphy"].c_str(), files["giphy"].size(), 0);
     else if (this->_requests.getUri() == "/shutdown") {
       close(this->_clientSocket);

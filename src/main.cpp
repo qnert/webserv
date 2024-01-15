@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/15 11:34:36 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/15 11:51:17 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ int main(void)
   {
     ResponseFiles files;
     files.storeFileIntoMap("index", "./responseFiles/index.html");
-    files.storeFileIntoMap("giphy", "./responseFiles/image.webp");
+    files.storeFileIntoMap("image", "./responseFiles/image.webp");
+    files.storeFileIntoMap("giphy", "./responseFiles/giphy.gif");
     Server httpServer(files);
     httpServer.serverLoop();
   }
