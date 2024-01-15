@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:22:57 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/14 19:57:31 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,4 +29,9 @@ public:
   ~RequestParser();
 
   void  parseRequestBuffer(const char* buffer);
+  void  cleanUp();
+
+  const std::string& getRequestType() const;
+  const std::string& getUri() const;
+  const std::string& getHost() const;
 };

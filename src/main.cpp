@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:44:52 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/15 11:34:36 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int main(void)
   {
     ResponseFiles files;
     files.storeFileIntoMap("index", "./responseFiles/index.html");
-    // files.storeFileIntoMap("giphy", "./responseFiles/Donquixote_Doflamingo_render.webp");
+    files.storeFileIntoMap("giphy", "./responseFiles/image.webp");
     Server httpServer(files);
     httpServer.serverLoop();
   }

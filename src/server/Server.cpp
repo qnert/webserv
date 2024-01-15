@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:43:48 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/15 11:29:12 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,10 @@
 
 Server::Server(const ResponseFiles& responses) : _responses(responses)
 {
-  if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    throw(std::runtime_error("Error getting socket"));
+  if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    perror("socket");
+    throw(std::runtime_error(""));
+  }
 
   this->_serverAdress.sin_family = AF_INET;
   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
@@ -23,14 +25,29 @@ Server::Server(const ResponseFiles& responses) : _responses(responses)
 
   // associates the server socket with the local address
   // and port specified in the "serverAddress" structure
-  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
-    close(this->_serverSocket);
-    throw(std::runtime_error("Error binding socket"));
+  // if server is closed then socket goes into TIME_WAIT state and waits
+  // for more incomming packages. This is a retrying mechanism that tries to
+  // bind the socket for 20s. After that a timeout is thrown.
+  int idx = 0;
+  while (1)
+  {
+    if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
+      perror("bind");
+      std::cout << "Retrying..." << std::endl;
+      sleep(1);
+      if (idx++ == 20) {
+        close(this->_serverSocket);
+        throw(std::runtime_error("Error timeouted trying to bind socket"));
+      }
+      continue;
+    }
+    break;
   }
 
   // listens for incomming connection requests
   if (listen(this->_serverSocket, SOMAXCONN) == -1) {
     close(this->_serverSocket);
+    perror("listen");
     throw(std::runtime_error("Error listening for connections"));
   }
 }
@@ -42,7 +59,18 @@ Server::~Server()
 
 void  Server::handleRequest(std::map<std::string, std::string>& files)
 {
-    send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
+  if (this->_requests.getRequestType() == "GET")
+  {
+    if (this->_requests.getUri() == "/")
+      send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
+    else if (this->_requests.getUri() == "/image.webp")
+      send(this->_clientSocket, files["giphy"].c_str(), files["giphy"].size(), 0);
+    else if (this->_requests.getUri() == "/shutdown") {
+      close(this->_clientSocket);
+      close(this->_serverSocket);
+      exit(EXIT_SUCCESS);
+    }
+  }
 }
 
 void  Server::serverLoop()
@@ -77,6 +105,7 @@ void  Server::serverLoop()
     std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
     this->handleRequest(files);
+    this->_requests.cleanUp();
   }
   close(this->_clientSocket);
 }
