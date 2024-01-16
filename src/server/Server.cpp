@@ -6,11 +6,23 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 12:04:45 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/16 18:09:37 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
+
+void  handle_Request_post(int fd, RequestParser req){
+  char *argv[5];
+  char cgi_filename[] = "first.cgi";
+  std::string str2 = std::to_string(fd);
+  argv[0] = cgi_filename;
+  argv[1] = const_cast<char*>(str2.c_str());
+  argv[2] = const_cast<char*>(req.getBody().substr(0, req.getBody().find_first_of("=")).c_str());
+  argv[3] = const_cast<char*>(req.getBody().substr(req.getBody().find_last_of("="), req.getBody().size()).c_str());
+  argv[4] = NULL;
+  execve("/Users/skunert/Documents/webserv/responseFiles/first.cgi", argv, NULL);
+}
 
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
   std::ostringstream header;
@@ -88,6 +100,14 @@ void  Server::handleRequest(std::map<std::string, std::string>& files, std::stri
          (check_and_add_header(404, type, data, codes) + files["error"]).size(), 0);
     }
   }
+  if (this->_requests.getRequestType() == "POST"){
+    int pid = fork();
+    if (pid == 0){
+        handle_Request_post(this->_clientSocket, this->_requests);
+    }
+    waitpid(0, NULL, 0);
+  }
+  std::cout << this->_clientSocket << std::endl;
 }
 
 void  Server::serverLoop(MIME_type data, Statuscodes codes)
