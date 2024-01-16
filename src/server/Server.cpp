@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/15 13:49:49 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/16 10:08:45 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,8 @@ void  Server::handleRequest(std::map<std::string, std::string>& files)
       send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
     else if (this->_requests.getUri() == "/image.webp")
       send(this->_clientSocket, files["image"].c_str(), files["image"].size(), 0);
+    else if (this->_requests.getUri() == "/background.webp")
+      send(this->_clientSocket, files["backg"].c_str(), files["backg"].size(), 0);
     else if (this->_requests.getUri() == "/shutdown") {
       close(this->_clientSocket);
       close(this->_serverSocket);

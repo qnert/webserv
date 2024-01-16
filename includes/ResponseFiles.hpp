@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseFiles.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/13 16:33:03 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/16 09:59:23 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,9 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include "./MIME_type.hpp"
+
+class MIME_type;
 
 class ResponseFiles
 {
@@ -28,5 +31,5 @@ public:
 
   const std::map<std::string, std::string>& getResponseFiles() const;
 
-  void  storeFileIntoMap(const std::string& name, const std::string& path);
+  void  storeFileIntoMap(const std::string& name, const std::string& path, MIME_type data);
 };
