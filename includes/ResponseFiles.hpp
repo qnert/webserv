@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 11:24:57 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/16 11:49:05 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,5 +33,5 @@ public:
 
   const std::map<std::string, std::string>& getResponseFiles() const;
 
-  void  storeFileIntoMap(const std::string& name, const std::string& path, MIME_type data, Statuscodes codes);
+  void  storeFileIntoMap(const std::string& name, const std::string& path);
 };

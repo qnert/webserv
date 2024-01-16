@@ -6,11 +6,19 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 10:08:45 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/16 12:04:45 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
+
+std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
+  std::ostringstream header;
+  header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
+  header << "Content-Type: "<< data[type] << "\r\n";
+  header << "\r\n";
+  return (header.str());
+}
 
 Server::Server(const ResponseFiles& responses) : _responses(responses)
 {
@@ -57,28 +65,32 @@ Server::~Server()
   close(this->_serverSocket);
 }
 
-void  Server::handleRequest(std::map<std::string, std::string>& files)
+void  Server::handleRequest(std::map<std::string, std::string>& files, std::string type, MIME_type data, Statuscodes codes)
 {
   if (this->_requests.getRequestType() == "GET")
   {
     if (this->_requests.getUri() == "/")
-      send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
+      send(this->_clientSocket, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
+         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
     else if (this->_requests.getUri() == "/image.webp")
-      send(this->_clientSocket, files["image"].c_str(), files["image"].size(), 0);
+      send(this->_clientSocket, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
+         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
     else if (this->_requests.getUri() == "/background.webp")
-      send(this->_clientSocket, files["backg"].c_str(), files["backg"].size(), 0);
+      send(this->_clientSocket, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
+         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
     else if (this->_requests.getUri() == "/shutdown") {
       close(this->_clientSocket);
       close(this->_serverSocket);
       exit(EXIT_SUCCESS);
     }
     else{
-      send(this->_clientSocket, files["error"].c_str(), files["error"].size(), 0);
+      send(this->_clientSocket, (check_and_add_header(404, type, data, codes) + files["error"]).c_str(),
+         (check_and_add_header(404, type, data, codes) + files["error"]).size(), 0);
     }
   }
 }
 
-void  Server::serverLoop()
+void  Server::serverLoop(MIME_type data, Statuscodes codes)
 {
   std::map<std::string, std::string> files(this->_responses.getResponseFiles());
   while (true)
@@ -109,7 +121,7 @@ void  Server::serverLoop()
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
-    this->handleRequest(files);
+    this->handleRequest(files, this->_requests.getRequestType(), data, codes);
     this->_requests.cleanUp();
   }
   close(this->_clientSocket);

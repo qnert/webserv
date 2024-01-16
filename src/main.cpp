@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 11:24:15 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/16 12:01:47 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,12 @@ int main(void)
     MIME_type     data_types;
     Statuscodes   statuscodes;
     ResponseFiles files;
-    files.storeFileIntoMap("index", "./responseFiles/index.html", data_types, statuscodes);
-    files.storeFileIntoMap("image", "./responseFiles/image.webp", data_types, statuscodes);
-    files.storeFileIntoMap("error", "./responseFiles/error.html", data_types, statuscodes);
-    files.storeFileIntoMap("backg", "./responseFiles/background.webp", data_types, statuscodes);
+    files.storeFileIntoMap("/", "./responseFiles/index.html");
+    files.storeFileIntoMap("/image.webp", "./responseFiles/image.webp");
+    files.storeFileIntoMap("error", "./responseFiles/error.html");
+    files.storeFileIntoMap("/background.webp", "./responseFiles/background.webp");
     Server httpServer(files);
-    httpServer.serverLoop();
+    httpServer.serverLoop(data_types, statuscodes);
   }
   catch(const std::exception& e)
   {
