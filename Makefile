@@ -6,7 +6,7 @@ GREEN=\033[32m
 RESET=\033[0m
 
 SOURCES = ./src/main.cpp ./src/server/Server.cpp ./src/server/ResponseFiles.cpp ./src/server/RequestParser.cpp \
-					./src/data_classes/MIME_type.cpp
+					./src/data_classes/MIME_type.cpp ./src/data_classes/Statuscodes.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
