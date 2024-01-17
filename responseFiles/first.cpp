@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 
 int main (int argc, char** argv) {
-  char str[] =
+  std::string str =
     "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE html>\n"
     "<html lang=\"en\">\n"
     "<head>\n"
@@ -36,11 +36,22 @@ int main (int argc, char** argv) {
     "</head>\n"
     "<body>\n"
     "\n"
-    "    <h1>You're next!</h1>\n"
+    "    <h1>You're next ";
+
+    std::string first_name = argv[2];
+    std::string last_name = argv[3];
+
+    str.append(first_name);
+    str.append(" ");
+    str.append(last_name);
+
+    std::string str2 = "!</h1>\n"
     "    <img src=\"https://www.icegif.com/wp-content/uploads/2023/02/icegif-1549.gif\" alt=\"Full Screen GIF\">\n"
     "\n"
     "</body>\n"
     "</html>\n";
-  send(std::atoi(argv[1]), &str, 788, 0);
+  str.append(str2);
+  char const*msg = str.c_str();
+  send(std::atoi(argv[1]), msg, str.size(), 0);
   return 0;
 }

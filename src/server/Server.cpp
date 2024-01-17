@@ -6,20 +6,39 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 18:09:37 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/17 15:03:40 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
 
+std::string get_first_name(std::string body){
+  size_t  start_pos = body.find_first_of("=") + 1;
+  size_t  end_pos = body.find_first_of("&") - body.find_first_of("=") - 1;
+  std::string ret_str = body.substr(start_pos, end_pos);
+
+  return (ret_str);
+}
+
+std::string get_last_name(std::string body){
+  size_t  start_pos = body.find_last_of("=") + 1;
+  size_t  end_pos = body.size();
+  std::string ret_str = body.substr(start_pos, end_pos);
+
+  return (ret_str);
+}
+
 void  handle_Request_post(int fd, RequestParser req){
   char *argv[5];
   char cgi_filename[] = "first.cgi";
-  std::string str2 = std::to_string(fd);
+  std::string first_name = get_first_name(req.getBody());
+  std::string last_name = get_last_name(req.getBody());
+  std::string file_fd = std::to_string(fd);
+
   argv[0] = cgi_filename;
-  argv[1] = const_cast<char*>(str2.c_str());
-  argv[2] = const_cast<char*>(req.getBody().substr(0, req.getBody().find_first_of("=")).c_str());
-  argv[3] = const_cast<char*>(req.getBody().substr(req.getBody().find_last_of("="), req.getBody().size()).c_str());
+  argv[1] = const_cast<char*>(file_fd.c_str());
+  argv[2] = const_cast<char*>(first_name.c_str());
+  argv[3] = const_cast<char*>(last_name.c_str());
   argv[4] = NULL;
   execve("/Users/skunert/Documents/webserv/responseFiles/first.cgi", argv, NULL);
 }
