@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/17 15:03:40 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/17 15:17:07 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ std::string get_last_name(std::string body){
 void  handle_Request_post(int fd, RequestParser req){
   char *argv[5];
   char cgi_filename[] = "first.cgi";
+  std::string file_fd = std::to_string(fd);
   std::string first_name = get_first_name(req.getBody());
   std::string last_name = get_last_name(req.getBody());
-  std::string file_fd = std::to_string(fd);
 
   argv[0] = cgi_filename;
   argv[1] = const_cast<char*>(file_fd.c_str());
