@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/17 15:17:07 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/22 14:07:46 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,17 +30,17 @@ std::string get_last_name(std::string body){
 
 void  handle_Request_post(int fd, RequestParser req){
   char *argv[5];
-  char cgi_filename[] = "first.cgi";
+  std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
   std::string file_fd = std::to_string(fd);
   std::string first_name = get_first_name(req.getBody());
   std::string last_name = get_last_name(req.getBody());
 
-  argv[0] = cgi_filename;
+  argv[0] = const_cast<char*>(cgi_filename.c_str());
   argv[1] = const_cast<char*>(file_fd.c_str());
   argv[2] = const_cast<char*>(first_name.c_str());
   argv[3] = const_cast<char*>(last_name.c_str());
   argv[4] = NULL;
-  execve("/Users/skunert/Documents/webserv/responseFiles/first.cgi", argv, NULL);
+  execve(req.getUri().c_str(), argv, NULL);
 }
 
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
