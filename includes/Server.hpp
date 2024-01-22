@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 11:42:33 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/22 15:46:20 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,9 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <vector>
 #include <cstdio>
 #include <unistd.h>
 #include <string>
@@ -28,13 +31,17 @@
 class Server
 {
 private:
-  int                 _serverSocket;
-  int                 _clientSocket;
-  sockaddr_in         _serverAdress;
-  const ResponseFiles _responses;
-  RequestParser       _requests;
+  int                        _reuse;
+  struct pollfd              _clientPollfds[128];
+  nfds_t                     _nfds;
+  size_t                     _currSize;
+  int                        _serverSocket;
+  sockaddr_in                _serverAdress;
+  const ResponseFiles        _responses;
+  RequestParser              _requests;
 
-  void  handleRequest(std::map<std::string, std::string>& files, std::string type, MIME_type data, Statuscodes codes);
+  void  handleRequest(std::map<std::string, std::string>& files, std::string type, MIME_type data, Statuscodes codes, size_t idx);
+  void  cleanUpClientFds();
 public:
   Server(const ResponseFiles& responses);
   ~Server();

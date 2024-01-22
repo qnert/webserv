@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:59:44 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/16 12:45:27 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,6 @@ void  RequestParser::parseRequestBuffer(const char* buffer)
 
   std::istringstream lineStreamForHost(this->_requestLines[1]);
   lineStreamForHost >> token >> this->_host;
-
-  std::cout << this->_requestType << '\n' << this->_uri << '\n' << this->_host << std::endl;
 }
 
 void  RequestParser::cleanUp()
