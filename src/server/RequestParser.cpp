@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 18:03:45 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/23 13:23:17 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,11 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
     this->_body = "";
   else
     this->_body = buffer.substr(it + 1, buffer.size());
+  char buff[PATH_MAX];
+  if (getcwd(buff, sizeof(buff)) == nullptr)
+    throw std::runtime_error("Couldn't fine working directory!");
+  this->_curr_dir = buff;
+  this->_curr_dir.append("/");
 }
 
 void  RequestParser::cleanUp()
@@ -51,3 +56,5 @@ const std::string& RequestParser::getUri() const {return (this->_uri);}
 const std::string& RequestParser::getHost() const {return (this->_host);}
 
 const std::string& RequestParser::getBody() const {return (this->_body);}
+
+const std::string& RequestParser::getCurrdir() const {return (this->_curr_dir);}

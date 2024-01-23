@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 18:01:20 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/23 13:23:25 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include "unistd.h"
 
 class RequestParser
 {
@@ -25,6 +26,7 @@ private:
   std::string              _uri;
   std::string              _host;
   std::string              _body;
+  std::string              _curr_dir;
 
 public:
   RequestParser();
@@ -37,4 +39,5 @@ public:
   const std::string& getUri() const;
   const std::string& getHost() const;
   const std::string& getBody() const;
+  const std::string& getCurrdir() const;
 };

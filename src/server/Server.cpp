@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/23 13:19:19 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/23 13:23:49 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,10 @@
 
 std::string  storeFileIntoString(RequestParser req, std::string path)
 {
-  char buff[PATH_MAX];
-  if (getcwd(buff, sizeof(buff)) == nullptr)
-    return ("");
-  std::string curr_dir = buff;
-  curr_dir.append("/");
   if (req.getUri() == "/")
-    path = curr_dir + "responseFiles/index.html";
+    path = req.getCurrdir() + "responseFiles/index.html";
   else
-    path = curr_dir + path;
+    path = req.getCurrdir() + path;
   std::ifstream file(path, std::ios::binary);
   if (!file.is_open())
     return ("");
@@ -53,10 +48,6 @@ std::string get_last_name(std::string body){
 
 void  handle_Request_post(int fd, RequestParser req){
   char *argv[5];
-  char buff[PATH_MAX];
-  getcwd(buff, sizeof(buff));
-  std::string curr_dir = buff;
-  curr_dir.append("/");
   std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
   std::string file_fd = std::to_string(fd);
   std::string first_name = get_first_name(req.getBody());
@@ -67,7 +58,7 @@ void  handle_Request_post(int fd, RequestParser req){
   argv[2] = const_cast<char*>(first_name.c_str());
   argv[3] = const_cast<char*>(last_name.c_str());
   argv[4] = NULL;
-  execve((curr_dir + req.getUri()).c_str(), argv, NULL);
+  execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
 }
 
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){

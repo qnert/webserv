@@ -6,12 +6,11 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/23 13:08:21 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/23 13:25:20 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/Server.hpp"
-#include "../includes/ResponseFiles.hpp"
 #include "../includes/MIME_type.hpp"
 #include "../includes/Statuscodes.hpp"
 
