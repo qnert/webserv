@@ -6,11 +6,27 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/22 14:07:46 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/23 12:31:01 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
+
+std::string  storeFileIntoString(RequestParser req, std::string path)
+{
+  if (req.getUri() == "/")
+    path = "/Users/skunert/Documents/webserv/responseFiles/index.html";
+  std::ifstream file(path, std::ios::binary);
+  if (!file.is_open())
+    return ("");
+
+  std::string fileContent;
+  std::ostringstream buffer;
+  buffer << file.rdbuf();
+  fileContent = buffer.str();
+  file.close();
+  return (fileContent);
+}
 
 std::string get_first_name(std::string body){
   size_t  start_pos = body.find_first_of("=") + 1;
@@ -51,7 +67,7 @@ std::string  check_and_add_header(int status, std::string const& type, MIME_type
   return (header.str());
 }
 
-Server::Server(const ResponseFiles& responses) : _responses(responses)
+Server::Server()
 {
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
@@ -96,27 +112,24 @@ Server::~Server()
   close(this->_serverSocket);
 }
 
-void  Server::handleRequest(std::map<std::string, std::string>& files, std::string type, MIME_type data, Statuscodes codes)
+void  Server::handleRequest(RequestParser req, MIME_type data, Statuscodes codes)
 {
   if (this->_requests.getRequestType() == "GET")
   {
-    if (this->_requests.getUri() == "/")
-      send(this->_clientSocket, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
-         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
-    else if (this->_requests.getUri() == "/image.webp")
-      send(this->_clientSocket, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
-         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
-    else if (this->_requests.getUri() == "/background.webp")
-      send(this->_clientSocket, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
-         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
+    std::string msg = storeFileIntoString(req, req.getUri());
+    if (msg != ""){
+      send(this->_clientSocket, (check_and_add_header(200, req.getRequestType(), data, codes) + msg).c_str(),
+         (check_and_add_header(200, req.getRequestType(), data, codes) + msg).size(), 0);
+    }
     else if (this->_requests.getUri() == "/shutdown") {
       close(this->_clientSocket);
       close(this->_serverSocket);
       exit(EXIT_SUCCESS);
     }
     else{
-      send(this->_clientSocket, (check_and_add_header(404, type, data, codes) + files["error"]).c_str(),
-         (check_and_add_header(404, type, data, codes) + files["error"]).size(), 0);
+      msg = storeFileIntoString(req, "/Users/skunert/Documents/webserv/responseFiles/error.html");
+      send(this->_clientSocket, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
+         (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
     }
   }
   if (this->_requests.getRequestType() == "POST"){
@@ -131,7 +144,6 @@ void  Server::handleRequest(std::map<std::string, std::string>& files, std::stri
 
 void  Server::serverLoop(MIME_type data, Statuscodes codes)
 {
-  std::map<std::string, std::string> files(this->_responses.getResponseFiles());
   while (true)
   {
     std::cout << "Waiting for client..." << std::endl;
@@ -160,7 +172,7 @@ void  Server::serverLoop(MIME_type data, Statuscodes codes)
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
-    this->handleRequest(files, this->_requests.getRequestType(), data, codes);
+    this->handleRequest(this->_requests, data, codes);
     this->_requests.cleanUp();
   }
   close(this->_clientSocket);

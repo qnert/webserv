@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 12:01:47 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/23 10:48:45 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,7 @@ int main(void)
   {
     MIME_type     data_types;
     Statuscodes   statuscodes;
-    ResponseFiles files;
-    files.storeFileIntoMap("/", "./responseFiles/index.html");
-    files.storeFileIntoMap("/image.webp", "./responseFiles/image.webp");
-    files.storeFileIntoMap("error", "./responseFiles/error.html");
-    files.storeFileIntoMap("/background.webp", "./responseFiles/background.webp");
-    Server httpServer(files);
+    Server httpServer;
     httpServer.serverLoop(data_types, statuscodes);
   }
   catch(const std::exception& e)
