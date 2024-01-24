@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/22 15:46:20 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/24 13:22:17 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,9 @@ private:
   RequestParser              _requests;
 
   void  handleRequest(std::map<std::string, std::string>& files, std::string type, MIME_type data, Statuscodes codes, size_t idx);
+  void  recieveRequest(std::map<std::string, std::string> files, int i);
+  void  checkRevents(int i);
+  void  acceptConnections(int i);
   void  cleanUpClientFds();
 public:
   Server(const ResponseFiles& responses);

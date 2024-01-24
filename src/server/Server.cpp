@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/22 16:06:37 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/24 13:25:35 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,73 @@ void  Server::handleRequest(std::map<std::string, std::string>& files, std::stri
     }
   }
 }
+void  Server::checkRevents(int i)
+{
+  if (this->_clientPollfds[i].revents != POLLIN)
+  {
+    if (this->_clientPollfds[i].revents & POLLHUP)
+    {
+      close(this->_clientPollfds[i].fd);
+      for (size_t j = i; j < this->_nfds - 1; j++)
+        this->_clientPollfds[j] = this->_clientPollfds[j + 1];
+      std::cout << "before closing: " << this->_nfds << std::endl;
+      this->_nfds--;
+      std::cout << "after closing: " << this->_nfds << std::endl;
+    }
+    else if (this->_clientPollfds[i].revents & POLLERR)
+    {
+      perror("POLLERR");
+      this->cleanUpClientFds();
+      throw(std::runtime_error(""));
+    }
+  }
+}
+
+void  Server::acceptConnections(int i)
+{
+  int newClientSocket;
+  do
+  {
+    if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
+      break;
+
+    std::cout << "New client connected..." << std::endl;
+
+    if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+      perror("fnctl client");
+
+    struct pollfd clientFd;
+    clientFd.fd = newClientSocket;
+    clientFd.events = POLLIN;
+    clientFd.revents = 0;
+    this->_clientPollfds[this->_nfds] = clientFd;
+    std::cout << this->_nfds << std::endl;
+    this->_nfds++;
+  } while (newClientSocket != -1);
+}
+
+void  Server::recieveRequest(std::map<std::string, std::string> files, int i)
+{
+  while (true)
+  {
+    char buffer[1024];
+    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), 0);
+
+    if (bytesRead < 0) {
+      break;
+    }
+    if (bytesRead == 0) {
+      std::cout << "Client has closed the connection" << std::endl;
+      close(this->_clientPollfds[i].fd);
+      break;
+    }
+    buffer[bytesRead] = '\0';
+    std::cout << buffer << std::endl;
+    this->_requests.parseRequestBuffer(buffer);
+    this->handleRequest(files, this->_requests.getRequestType(), data, codes, i);
+    this->_requests.cleanUp();
+  }
+}
 
 void  Server::serverLoop(MIME_type data, Statuscodes codes)
 {
@@ -108,70 +175,13 @@ void  Server::serverLoop(MIME_type data, Statuscodes codes)
       if (this->_clientPollfds[i].revents == 0)
         continue;
 
-      if (this->_clientPollfds[i].revents != POLLIN)
-      {
-        if (this->_clientPollfds[i].revents & POLLHUP)
-        {
-          close(this->_clientPollfds[i].fd);
-          for (size_t j = i; j < this->_nfds - 1; j++)
-            this->_clientPollfds[j] = this->_clientPollfds[j + 1];
-          std::cout << "before closing: " << this->_nfds << std::endl;
-          this->_nfds--;
-          std::cout << "after closing: " << this->_nfds << std::endl;
-        }
-        else if (this->_clientPollfds[i].revents & POLLERR)
-        {
-          perror("POLLERR");
-          this->cleanUpClientFds();
-          throw(std::runtime_error(""));
-        }
-      }
+      this->checkRevents(i);
 
       if (this->_clientPollfds[i].fd == this->_serverSocket)
-      {
-        int newClientSocket;
-        do
-        {
-          if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
-            break;
-
-          std::cout << "New client connected..." << std::endl;
-
-          if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
-            perror("fnctl client");
-
-          struct pollfd clientFd;
-          clientFd.fd = newClientSocket;
-          clientFd.events = POLLIN;
-          clientFd.revents = 0;
-          this->_clientPollfds[this->_nfds] = clientFd;
-          std::cout << this->_nfds << std::endl;
-          this->_nfds++;
-        } while (newClientSocket != -1);
-      }
+        this->acceptConnections(i);
       else
-      {
-        while (true)
-        {
-          char buffer[1024];
-          ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), 0);
-
-          if (bytesRead < 0) {
-            break;
-          }
-          if (bytesRead == 0) {
-            std::cout << "Client has closed the connection" << std::endl;
-            close(this->_clientPollfds[i].fd);
-            break;
-          }
-          buffer[bytesRead] = '\0';
-          std::cout << buffer << std::endl;
-          this->_requests.parseRequestBuffer(buffer);
-          this->handleRequest(files, this->_requests.getRequestType(), data, codes, i);
-          this->_requests.cleanUp();
-        }
-      }
+        this->recieveRequest(files, i);
     } // * END OF CLIENT LOOP *
-  } // * END OF WHILE 1 *
+  } // * END OF SERVER *
   this->cleanUpClientFds();
 }
