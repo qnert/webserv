@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/24 13:25:35 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/25 12:42:05 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ Server::Server(const ResponseFiles& responses) : _reuse(1), _nfds(1), _currSize(
 
 Server::~Server() {}
 
-void  Server::handleRequest(std::map<std::string, std::string>& files, std::string type, MIME_type data, Statuscodes codes, size_t idx)
+void  Server::sendAnswer(std::map<std::string, std::string>& files, std::string type, MIME_type& data, Statuscodes& codes, size_t idx)
 {
   if (this->_requests.getRequestType() == "GET")
   {
@@ -80,6 +80,8 @@ void  Server::handleRequest(std::map<std::string, std::string>& files, std::stri
     }
   }
 }
+
+// checks if readable data is available at the client socket
 void  Server::checkRevents(int i)
 {
   if (this->_clientPollfds[i].revents != POLLIN)
@@ -89,9 +91,7 @@ void  Server::checkRevents(int i)
       close(this->_clientPollfds[i].fd);
       for (size_t j = i; j < this->_nfds - 1; j++)
         this->_clientPollfds[j] = this->_clientPollfds[j + 1];
-      std::cout << "before closing: " << this->_nfds << std::endl;
       this->_nfds--;
-      std::cout << "after closing: " << this->_nfds << std::endl;
     }
     else if (this->_clientPollfds[i].revents & POLLERR)
     {
@@ -102,7 +102,8 @@ void  Server::checkRevents(int i)
   }
 }
 
-void  Server::acceptConnections(int i)
+// accept every client in that wants to connect
+void  Server::acceptConnections(void)
 {
   int newClientSocket;
   do
@@ -113,7 +114,7 @@ void  Server::acceptConnections(int i)
     std::cout << "New client connected..." << std::endl;
 
     if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
-      perror("fnctl client");
+      perror("fcntl client");
 
     struct pollfd clientFd;
     clientFd.fd = newClientSocket;
@@ -125,7 +126,7 @@ void  Server::acceptConnections(int i)
   } while (newClientSocket != -1);
 }
 
-void  Server::recieveRequest(std::map<std::string, std::string> files, int i)
+void  Server::handleRequest(std::map<std::string, std::string>& files, MIME_type& data, Statuscodes& codes, int i)
 {
   while (true)
   {
@@ -143,12 +144,12 @@ void  Server::recieveRequest(std::map<std::string, std::string> files, int i)
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
-    this->handleRequest(files, this->_requests.getRequestType(), data, codes, i);
+    this->sendAnswer(files, this->_requests.getRequestType(), data, codes, i);
     this->_requests.cleanUp();
   }
 }
 
-void  Server::serverLoop(MIME_type data, Statuscodes codes)
+void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
 {
   std::map<std::string, std::string> files(this->_responses.getResponseFiles());
   int timeout = (60 * 1000);
@@ -178,9 +179,9 @@ void  Server::serverLoop(MIME_type data, Statuscodes codes)
       this->checkRevents(i);
 
       if (this->_clientPollfds[i].fd == this->_serverSocket)
-        this->acceptConnections(i);
+        this->acceptConnections();
       else
-        this->recieveRequest(files, i);
+        this->handleRequest(files, data, codes, i);
     } // * END OF CLIENT LOOP *
   } // * END OF SERVER *
   this->cleanUpClientFds();
