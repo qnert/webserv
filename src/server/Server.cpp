@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/25 12:42:05 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/25 17:02:57 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ std::string  check_and_add_header(int status, std::string const& type, MIME_type
   return (header.str());
 }
 
+// server will get initialized. That means a listening socket (serverSocket) will
+// be created, set to non-blocking, set to be reused and binded to the local address.
 Server::Server(const ResponseFiles& responses) : _reuse(1), _nfds(1), _currSize(0), _responses(responses)
 {
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -47,16 +49,19 @@ Server::Server(const ResponseFiles& responses) : _reuse(1), _nfds(1), _currSize(
     throw(std::runtime_error("Error listening for connections"));
   }
 
-  fcntl(this->_serverSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+  if (fcntl(this->_serverSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+    perror("fcntl server");
 
   struct pollfd serverPollfd;
   serverPollfd.fd = this->_serverSocket;
   serverPollfd.events = POLLIN;
+  serverPollfd.revents = 0;
   this->_clientPollfds[0] = serverPollfd;
 }
 
 Server::~Server() {}
 
+// sends an answer to the client
 void  Server::sendAnswer(std::map<std::string, std::string>& files, std::string type, MIME_type& data, Statuscodes& codes, size_t idx)
 {
   if (this->_requests.getRequestType() == "GET")
@@ -87,12 +92,7 @@ void  Server::checkRevents(int i)
   if (this->_clientPollfds[i].revents != POLLIN)
   {
     if (this->_clientPollfds[i].revents & POLLHUP)
-    {
-      close(this->_clientPollfds[i].fd);
-      for (size_t j = i; j < this->_nfds - 1; j++)
-        this->_clientPollfds[j] = this->_clientPollfds[j + 1];
-      this->_nfds--;
-    }
+      this->removeAndCompressFds(i);
     else if (this->_clientPollfds[i].revents & POLLERR)
     {
       perror("POLLERR");
@@ -108,6 +108,10 @@ void  Server::acceptConnections(void)
   int newClientSocket;
   do
   {
+    if (this->_nfds == MAX_CLIENTS) {
+      std::cout << "Maximum amount of clients reached" << std::endl;
+      break ;
+    }
     if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
       break;
 
@@ -121,11 +125,12 @@ void  Server::acceptConnections(void)
     clientFd.events = POLLIN;
     clientFd.revents = 0;
     this->_clientPollfds[this->_nfds] = clientFd;
-    std::cout << this->_nfds << std::endl;
+    this->_timestamp[this->_nfds] = std::time(NULL);
     this->_nfds++;
   } while (newClientSocket != -1);
 }
 
+// recieves, parses and handles client requests
 void  Server::handleRequest(std::map<std::string, std::string>& files, MIME_type& data, Statuscodes& codes, int i)
 {
   while (true)
@@ -149,30 +154,24 @@ void  Server::handleRequest(std::map<std::string, std::string>& files, MIME_type
   }
 }
 
+// main server loop
 void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
 {
   std::map<std::string, std::string> files(this->_responses.getResponseFiles());
-  int timeout = (60 * 1000);
-  int functionStatus = 0;
   while (true)
   {
     std::cout << "Waiting for poll()..." << std::endl;
-    functionStatus = poll(this->_clientPollfds, this->_nfds, timeout);
-
-    if (functionStatus < 0) {
-      perror("poll");
-      close(this->_serverSocket);
-      throw(std::runtime_error(""));
-    }
-    if (functionStatus == 0) {
-      std::cout << "poll() timed out. Closing server..." << std::endl;
-      close(this->_serverSocket);
-      return ;
-    }
+      if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
+        perror("poll");
+        close(this->_serverSocket);
+        throw(std::runtime_error(""));
+      }
 
     this->_currSize = this->_nfds;
     for (size_t i = 0; i < this->_currSize; i++)
     {
+      this->checkClientTimeout(i);
+
       if (this->_clientPollfds[i].revents == 0)
         continue;
 
