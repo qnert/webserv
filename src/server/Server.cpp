@@ -6,11 +6,60 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/25 17:02:57 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/23 13:23:49 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
+
+std::string  storeFileIntoString(RequestParser req, std::string path)
+{
+  if (req.getUri() == "/")
+    path = req.getCurrdir() + "responseFiles/index.html";
+  else
+    path = req.getCurrdir() + path;
+  std::ifstream file(path, std::ios::binary);
+  if (!file.is_open())
+    return ("");
+
+  std::string fileContent;
+  std::ostringstream buffer;
+  buffer << file.rdbuf();
+  fileContent = buffer.str();
+  file.close();
+  return (fileContent);
+}
+
+std::string get_first_name(std::string body){
+  size_t  start_pos = body.find_first_of("=") + 1;
+  size_t  end_pos = body.find_first_of("&") - body.find_first_of("=") - 1;
+  std::string ret_str = body.substr(start_pos, end_pos);
+
+  return (ret_str);
+}
+
+std::string get_last_name(std::string body){
+  size_t  start_pos = body.find_last_of("=") + 1;
+  size_t  end_pos = body.size();
+  std::string ret_str = body.substr(start_pos, end_pos);
+
+  return (ret_str);
+}
+
+void  handle_Request_post(int fd, RequestParser req){
+  char *argv[5];
+  std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
+  std::string file_fd = std::to_string(fd);
+  std::string first_name = get_first_name(req.getBody());
+  std::string last_name = get_last_name(req.getBody());
+
+  argv[0] = const_cast<char*>(cgi_filename.c_str());
+  argv[1] = const_cast<char*>(file_fd.c_str());
+  argv[2] = const_cast<char*>(first_name.c_str());
+  argv[3] = const_cast<char*>(last_name.c_str());
+  argv[4] = NULL;
+  execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
+}
 
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
   std::ostringstream header;
@@ -22,7 +71,7 @@ std::string  check_and_add_header(int status, std::string const& type, MIME_type
 
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
-Server::Server(const ResponseFiles& responses) : _reuse(1), _nfds(1), _currSize(0), _responses(responses)
+Server::Server() : _reuse(1), _nfds(1), _currSize(0)
 {
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
@@ -62,28 +111,36 @@ Server::Server(const ResponseFiles& responses) : _reuse(1), _nfds(1), _currSize(
 Server::~Server() {}
 
 // sends an answer to the client
-void  Server::sendAnswer(std::map<std::string, std::string>& files, std::string type, MIME_type& data, Statuscodes& codes, size_t idx)
+void  Server::sendAnswer((RequestParser& req, MIME_type& data, Statuscodes& codes, size_t idx)
 {
   if (this->_requests.getRequestType() == "GET")
   {
-    if (this->_requests.getUri() == "/")
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
-         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
-    else if (this->_requests.getUri() == "/image.webp")
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
-         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
-    else if (this->_requests.getUri() == "/background.webp")
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
-         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
-    else if (this->_requests.getUri() == "/shutdown") {
+    std::string msg = storeFileIntoString(req, req.getUri());
+    if (msg != "")
+    {
+      send(this->_clientSocket, (check_and_add_header(200, req.getRequestType(), data, codes) + msg).c_str(),
+         (check_and_add_header(200, req.getRequestType(), data, codes) + msg).size(), 0);
+    }
+    else if (this->_requests.getUri() == "/shutdown")
+    {
       this->cleanUpClientFds();
       exit(EXIT_SUCCESS);
     }
-    else{
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(404, type, data, codes) + files["error"]).c_str(),
-         (check_and_add_header(404, type, data, codes) + files["error"]).size(), 0);
+    else
+    {
+      msg = storeFileIntoString(req, "responseFiles/error.html");
+      send(this->_clientSocket, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
+         (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
     }
   }
+  if (this->_requests.getRequestType() == "POST")
+  {
+    int pid = fork();
+    if (pid == 0)
+        handle_Request_post(this->_clientSocket, this->_requests);
+    waitpid(0, NULL, 0);
+  }
+  std::cout << this->_clientSocket << std::endl;
 }
 
 // checks if readable data is available at the client socket
@@ -131,7 +188,7 @@ void  Server::acceptConnections(void)
 }
 
 // recieves, parses and handles client requests
-void  Server::handleRequest(std::map<std::string, std::string>& files, MIME_type& data, Statuscodes& codes, int i)
+void  Server::handleRequest(RequestParser& req, MIME_type& data, Statuscodes& codes, int i)
 {
   while (true)
   {
@@ -149,15 +206,14 @@ void  Server::handleRequest(std::map<std::string, std::string>& files, MIME_type
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
-    this->sendAnswer(files, this->_requests.getRequestType(), data, codes, i);
+    this->sendAnswer(req, data, codes, i);
     this->_requests.cleanUp();
   }
 }
 
 // main server loop
-void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
+void  Server::serverLoop(RequestParser& req, MIME_type& data, Statuscodes& codes)
 {
-  std::map<std::string, std::string> files(this->_responses.getResponseFiles());
   while (true)
   {
     std::cout << "Waiting for poll()..." << std::endl;
@@ -180,7 +236,7 @@ void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
       if (this->_clientPollfds[i].fd == this->_serverSocket)
         this->acceptConnections();
       else
-        this->handleRequest(files, data, codes, i);
+        this->handleRequest(req, data, codes, i);
     } // * END OF CLIENT LOOP *
   } // * END OF SERVER *
   this->cleanUpClientFds();

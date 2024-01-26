@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/16 12:45:27 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/23 13:23:17 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ RequestParser::RequestParser() {}
 
 RequestParser::~RequestParser() {}
 
-void  RequestParser::parseRequestBuffer(const char* buffer)
+void  RequestParser::parseRequestBuffer(const std::string& buffer)
 {
   std::istringstream bufferStream(buffer);
   std::string token;
@@ -29,6 +29,17 @@ void  RequestParser::parseRequestBuffer(const char* buffer)
 
   std::istringstream lineStreamForHost(this->_requestLines[1]);
   lineStreamForHost >> token >> this->_host;
+  
+  size_t it = buffer.find_last_of("\n\n");
+  if (it == buffer.size())
+    this->_body = "";
+  else
+    this->_body = buffer.substr(it + 1, buffer.size());
+  char buff[PATH_MAX];
+  if (getcwd(buff, sizeof(buff)) == nullptr)
+    throw std::runtime_error("Couldn't fine working directory!");
+  this->_curr_dir = buff;
+  this->_curr_dir.append("/");
 }
 
 void  RequestParser::cleanUp()
@@ -44,3 +55,7 @@ const std::string& RequestParser::getRequestType() const {return (this->_request
 const std::string& RequestParser::getUri() const {return (this->_uri);}
 
 const std::string& RequestParser::getHost() const {return (this->_host);}
+
+const std::string& RequestParser::getBody() const {return (this->_body);}
+
+const std::string& RequestParser::getCurrdir() const {return (this->_curr_dir);}
