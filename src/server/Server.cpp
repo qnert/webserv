@@ -6,17 +6,30 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:43:48 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/25 17:02:57 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
 
-Server::Server(const ResponseFiles& responses) : _responses(responses)
-{
-  if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    throw(std::runtime_error("Error getting socket"));
+std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
+  std::ostringstream header;
+  header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
+  header << "Content-Type: "<< data[type] << "\r\n";
+  header << "\r\n";
+  return (header.str());
+}
 
+// server will get initialized. That means a listening socket (serverSocket) will
+// be created, set to non-blocking, set to be reused and binded to the local address.
+Server::Server(const ResponseFiles& responses) : _reuse(1), _nfds(1), _currSize(0), _responses(responses)
+{
+  if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    perror("socket");
+    throw(std::runtime_error(""));
+  }
+
+  setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse));
   this->_serverAdress.sin_family = AF_INET;
   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
   this->_serverAdress.sin_port = htons(PORT);
@@ -24,59 +37,151 @@ Server::Server(const ResponseFiles& responses) : _responses(responses)
   // associates the server socket with the local address
   // and port specified in the "serverAddress" structure
   if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
+    perror("bind");
     close(this->_serverSocket);
-    throw(std::runtime_error("Error binding socket"));
+    throw(std::runtime_error("Error timeouted trying to bind socket"));
   }
 
   // listens for incomming connection requests
   if (listen(this->_serverSocket, SOMAXCONN) == -1) {
     close(this->_serverSocket);
+    perror("listen");
     throw(std::runtime_error("Error listening for connections"));
+  }
+
+  if (fcntl(this->_serverSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+    perror("fcntl server");
+
+  struct pollfd serverPollfd;
+  serverPollfd.fd = this->_serverSocket;
+  serverPollfd.events = POLLIN;
+  serverPollfd.revents = 0;
+  this->_clientPollfds[0] = serverPollfd;
+}
+
+Server::~Server() {}
+
+// sends an answer to the client
+void  Server::sendAnswer(std::map<std::string, std::string>& files, std::string type, MIME_type& data, Statuscodes& codes, size_t idx)
+{
+  if (this->_requests.getRequestType() == "GET")
+  {
+    if (this->_requests.getUri() == "/")
+      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
+         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
+    else if (this->_requests.getUri() == "/image.webp")
+      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
+         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
+    else if (this->_requests.getUri() == "/background.webp")
+      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).c_str(),
+         (check_and_add_header(200, type, data, codes) + files[this->_requests.getUri()]).size(), 0);
+    else if (this->_requests.getUri() == "/shutdown") {
+      this->cleanUpClientFds();
+      exit(EXIT_SUCCESS);
+    }
+    else{
+      send(this->_clientPollfds[idx].fd, (check_and_add_header(404, type, data, codes) + files["error"]).c_str(),
+         (check_and_add_header(404, type, data, codes) + files["error"]).size(), 0);
+    }
   }
 }
 
-Server::~Server()
+// checks if readable data is available at the client socket
+void  Server::checkRevents(int i)
 {
-  close(this->_serverSocket);
+  if (this->_clientPollfds[i].revents != POLLIN)
+  {
+    if (this->_clientPollfds[i].revents & POLLHUP)
+      this->removeAndCompressFds(i);
+    else if (this->_clientPollfds[i].revents & POLLERR)
+    {
+      perror("POLLERR");
+      this->cleanUpClientFds();
+      throw(std::runtime_error(""));
+    }
+  }
 }
 
-void  Server::handleRequest(std::map<std::string, std::string>& files)
+// accept every client in that wants to connect
+void  Server::acceptConnections(void)
 {
-    send(this->_clientSocket, files["index"].c_str(), files["index"].size(), 0);
+  int newClientSocket;
+  do
+  {
+    if (this->_nfds == MAX_CLIENTS) {
+      std::cout << "Maximum amount of clients reached" << std::endl;
+      break ;
+    }
+    if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
+      break;
+
+    std::cout << "New client connected..." << std::endl;
+
+    if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+      perror("fcntl client");
+
+    struct pollfd clientFd;
+    clientFd.fd = newClientSocket;
+    clientFd.events = POLLIN;
+    clientFd.revents = 0;
+    this->_clientPollfds[this->_nfds] = clientFd;
+    this->_timestamp[this->_nfds] = std::time(NULL);
+    this->_nfds++;
+  } while (newClientSocket != -1);
 }
 
-void  Server::serverLoop()
+// recieves, parses and handles client requests
+void  Server::handleRequest(std::map<std::string, std::string>& files, MIME_type& data, Statuscodes& codes, int i)
 {
-  std::map<std::string, std::string> files(this->_responses.getResponseFiles());
   while (true)
   {
-    std::cout << "Waiting for client..." << std::endl;
-
-    if ((this->_clientSocket = accept(this->_serverSocket, NULL, NULL)) == -1) {
-      const std::string errorResponse = "503 Service Unavailable\n";
-      send(this->_clientSocket, errorResponse.c_str(), errorResponse.size(), 0);
-      close(this->_clientSocket);
-      continue;
-    }
-    std::cout << "Proccessing request..." << std::endl;
-
     char buffer[1024];
-    ssize_t bytesRead;
-    bytesRead = recv(this->_clientSocket, buffer, sizeof(buffer), 0);
+    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), 0);
 
     if (bytesRead < 0) {
-      close(this->_clientSocket);
-      throw(std::runtime_error("Error in recieving client data"));
+      break;
     }
     if (bytesRead == 0) {
-      std::cout << "client has closed the connection" << std::endl;
-      close(this->_clientSocket);
-      continue;
+      std::cout << "Client has closed the connection" << std::endl;
+      close(this->_clientPollfds[i].fd);
+      break;
     }
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
-    this->handleRequest(files);
+    this->sendAnswer(files, this->_requests.getRequestType(), data, codes, i);
+    this->_requests.cleanUp();
   }
-  close(this->_clientSocket);
+}
+
+// main server loop
+void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
+{
+  std::map<std::string, std::string> files(this->_responses.getResponseFiles());
+  while (true)
+  {
+    std::cout << "Waiting for poll()..." << std::endl;
+      if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
+        perror("poll");
+        close(this->_serverSocket);
+        throw(std::runtime_error(""));
+      }
+
+    this->_currSize = this->_nfds;
+    for (size_t i = 0; i < this->_currSize; i++)
+    {
+      this->checkClientTimeout(i);
+
+      if (this->_clientPollfds[i].revents == 0)
+        continue;
+
+      this->checkRevents(i);
+
+      if (this->_clientPollfds[i].fd == this->_serverSocket)
+        this->acceptConnections();
+      else
+        this->handleRequest(files, data, codes, i);
+    } // * END OF CLIENT LOOP *
+  } // * END OF SERVER *
+  this->cleanUpClientFds();
 }

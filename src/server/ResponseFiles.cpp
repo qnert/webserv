@@ -3,32 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseFiles.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:09:55 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/14 19:43:44 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/16 11:48:55 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/ResponseFiles.hpp"
-
-std::string get_type(std::string type){
-  if (type == "html")
-    return ("text/html");
-  return ("");
-}
-
-std::string  check_and_add_header(std::string const& fileContent, std::string const& type, bool is_valid){
-  std::ostringstream header;
-  if (is_valid == true)
-    header << "HTTP/1.1 200 OK\r\n";
-  else
-    header << "HTTP/1.1 404 Not Found\r\n";
-  header << "Content-Length: " << fileContent.size() << "\r\n";
-  header << "Content-Type: "<< get_type(type) << "\r\n";
-  header << "\r\n";
-  return (header.str());
-}
 
 ResponseFiles::ResponseFiles() {}
 
@@ -55,7 +37,6 @@ void  ResponseFiles::storeFileIntoMap(const std::string& name, const std::string
       buffer << file.rdbuf();
       fileContent = buffer.str();
     }
-    fileContent = check_and_add_header(fileContent, "html", is_valid) + fileContent;
     this->_responseFiles.insert(std::pair<std::string, std::string>(name, fileContent));
   }
   file.close();

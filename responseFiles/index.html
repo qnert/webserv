@@ -7,16 +7,18 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            background-image: url("background.webp"); /* Replace 'path/to/your/image.jpg' with the actual path to your image file */
+            background-size: cover; /* Adjust as needed */
+            background-position: center; /* Adjust as needed */
         }
         .cool-container {
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.8); /* Add some transparency to the container */
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
@@ -49,8 +51,9 @@
 <body>
     <div class="cool-container">
         <h1>Welcome to Webserv!</h1>
-        <p>Please click to get bitches.</p>
+        <p>Please click to get some.</p>
         <button>Click Me</button>
+        <img id="myImage" src="image.webp" alt="Default Image">
     </div>
 </body>
 </html>

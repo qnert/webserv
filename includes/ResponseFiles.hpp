@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseFiles.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/13 16:33:03 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/16 11:49:05 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,11 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include "./MIME_type.hpp"
+#include "./Statuscodes.hpp"
+
+class MIME_type;
+class Statuscodes;
 
 class ResponseFiles
 {
