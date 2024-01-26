@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
 /*   Updated: 2024/01/23 13:23:49 by skunert          ###   ########.fr       */
@@ -69,36 +69,26 @@ std::string  check_and_add_header(int status, std::string const& type, MIME_type
   return (header.str());
 }
 
-Server::Server()
+// server will get initialized. That means a listening socket (serverSocket) will
+// be created, set to non-blocking, set to be reused and binded to the local address.
+Server::Server() : _reuse(1), _nfds(1), _currSize(0)
 {
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
     throw(std::runtime_error(""));
   }
 
+  setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse));
   this->_serverAdress.sin_family = AF_INET;
   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
   this->_serverAdress.sin_port = htons(PORT);
 
   // associates the server socket with the local address
   // and port specified in the "serverAddress" structure
-  // if server is closed then socket goes into TIME_WAIT state and waits
-  // for more incomming packages. This is a retrying mechanism that tries to
-  // bind the socket for 20s. After that a timeout is thrown.
-  int idx = 0;
-  while (1)
-  {
-    if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
-      perror("bind");
-      std::cout << "Retrying..." << std::endl;
-      sleep(1);
-      if (idx++ == 20) {
-        close(this->_serverSocket);
-        throw(std::runtime_error("Error timeouted trying to bind socket"));
-      }
-      continue;
-    }
-    break;
+  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
+    perror("bind");
+    close(this->_serverSocket);
+    throw(std::runtime_error("Error timeouted trying to bind socket"));
   }
 
   // listens for incomming connection requests
@@ -107,75 +97,147 @@ Server::Server()
     perror("listen");
     throw(std::runtime_error("Error listening for connections"));
   }
+
+  if (fcntl(this->_serverSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+    perror("fcntl server");
+
+  struct pollfd serverPollfd;
+  serverPollfd.fd = this->_serverSocket;
+  serverPollfd.events = POLLIN;
+  serverPollfd.revents = 0;
+  this->_clientPollfds[0] = serverPollfd;
 }
 
-Server::~Server()
-{
-  close(this->_serverSocket);
-}
+Server::~Server() {}
 
-void  Server::handleRequest(RequestParser req, MIME_type data, Statuscodes codes)
+// sends an answer to the client
+void  Server::sendAnswer((RequestParser& req, MIME_type& data, Statuscodes& codes, size_t idx)
 {
   if (this->_requests.getRequestType() == "GET")
   {
     std::string msg = storeFileIntoString(req, req.getUri());
-    if (msg != ""){
+    if (msg != "")
+    {
       send(this->_clientSocket, (check_and_add_header(200, req.getRequestType(), data, codes) + msg).c_str(),
          (check_and_add_header(200, req.getRequestType(), data, codes) + msg).size(), 0);
     }
-    else if (this->_requests.getUri() == "/shutdown") {
-      close(this->_clientSocket);
-      close(this->_serverSocket);
+    else if (this->_requests.getUri() == "/shutdown")
+    {
+      this->cleanUpClientFds();
       exit(EXIT_SUCCESS);
     }
-    else{
+    else
+    {
       msg = storeFileIntoString(req, "responseFiles/error.html");
       send(this->_clientSocket, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
          (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
     }
   }
-  if (this->_requests.getRequestType() == "POST"){
+  if (this->_requests.getRequestType() == "POST")
+  {
     int pid = fork();
-    if (pid == 0){
+    if (pid == 0)
         handle_Request_post(this->_clientSocket, this->_requests);
-    }
     waitpid(0, NULL, 0);
   }
   std::cout << this->_clientSocket << std::endl;
 }
 
-void  Server::serverLoop(MIME_type data, Statuscodes codes)
+// checks if readable data is available at the client socket
+void  Server::checkRevents(int i)
+{
+  if (this->_clientPollfds[i].revents != POLLIN)
+  {
+    if (this->_clientPollfds[i].revents & POLLHUP)
+      this->removeAndCompressFds(i);
+    else if (this->_clientPollfds[i].revents & POLLERR)
+    {
+      perror("POLLERR");
+      this->cleanUpClientFds();
+      throw(std::runtime_error(""));
+    }
+  }
+}
+
+// accept every client in that wants to connect
+void  Server::acceptConnections(void)
+{
+  int newClientSocket;
+  do
+  {
+    if (this->_nfds == MAX_CLIENTS) {
+      std::cout << "Maximum amount of clients reached" << std::endl;
+      break ;
+    }
+    if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
+      break;
+
+    std::cout << "New client connected..." << std::endl;
+
+    if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+      perror("fcntl client");
+
+    struct pollfd clientFd;
+    clientFd.fd = newClientSocket;
+    clientFd.events = POLLIN;
+    clientFd.revents = 0;
+    this->_clientPollfds[this->_nfds] = clientFd;
+    this->_timestamp[this->_nfds] = std::time(NULL);
+    this->_nfds++;
+  } while (newClientSocket != -1);
+}
+
+// recieves, parses and handles client requests
+void  Server::handleRequest(RequestParser& req, MIME_type& data, Statuscodes& codes, int i)
 {
   while (true)
   {
-    std::cout << "Waiting for client..." << std::endl;
-
-    if ((this->_clientSocket = accept(this->_serverSocket, NULL, NULL)) == -1) {
-      const std::string errorResponse = "503 Service Unavailable\n";
-      send(this->_clientSocket, errorResponse.c_str(), errorResponse.size(), 0);
-      close(this->_clientSocket);
-      continue;
-    }
-    std::cout << "Proccessing request..." << std::endl;
-
     char buffer[1024];
-    ssize_t bytesRead;
-    bytesRead = recv(this->_clientSocket, buffer, sizeof(buffer), 0);
+    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), 0);
 
     if (bytesRead < 0) {
-      close(this->_clientSocket);
-      throw(std::runtime_error("Error in recieving client data"));
+      break;
     }
     if (bytesRead == 0) {
-      std::cout << "client has closed the connection" << std::endl;
-      close(this->_clientSocket);
-      continue;
+      std::cout << "Client has closed the connection" << std::endl;
+      close(this->_clientPollfds[i].fd);
+      break;
     }
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
-    this->handleRequest(this->_requests, data, codes);
+    this->sendAnswer(req, data, codes, i);
     this->_requests.cleanUp();
   }
-  close(this->_clientSocket);
+}
+
+// main server loop
+void  Server::serverLoop(RequestParser& req, MIME_type& data, Statuscodes& codes)
+{
+  while (true)
+  {
+    std::cout << "Waiting for poll()..." << std::endl;
+      if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
+        perror("poll");
+        close(this->_serverSocket);
+        throw(std::runtime_error(""));
+      }
+
+    this->_currSize = this->_nfds;
+    for (size_t i = 0; i < this->_currSize; i++)
+    {
+      this->checkClientTimeout(i);
+
+      if (this->_clientPollfds[i].revents == 0)
+        continue;
+
+      this->checkRevents(i);
+
+      if (this->_clientPollfds[i].fd == this->_serverSocket)
+        this->acceptConnections();
+      else
+        this->handleRequest(req, data, codes, i);
+    } // * END OF CLIENT LOOP *
+  } // * END OF SERVER *
+  this->cleanUpClientFds();
 }

@@ -29,6 +29,7 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
 
   std::istringstream lineStreamForHost(this->_requestLines[1]);
   lineStreamForHost >> token >> this->_host;
+  
   size_t it = buffer.find_last_of("\n\n");
   if (it == buffer.size())
     this->_body = "";
