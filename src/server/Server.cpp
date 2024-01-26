@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/23 13:23:49 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/26 14:09:45 by simonkunert      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,15 +111,15 @@ Server::Server() : _reuse(1), _nfds(1), _currSize(0)
 Server::~Server() {}
 
 // sends an answer to the client
-void  Server::sendAnswer((RequestParser& req, MIME_type& data, Statuscodes& codes, size_t idx)
+void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 {
   if (this->_requests.getRequestType() == "GET")
   {
-    std::string msg = storeFileIntoString(req, req.getUri());
+    std::string msg = storeFileIntoString(this->_requests, this->_requests.getUri());
     if (msg != "")
     {
-      send(this->_clientSocket, (check_and_add_header(200, req.getRequestType(), data, codes) + msg).c_str(),
-         (check_and_add_header(200, req.getRequestType(), data, codes) + msg).size(), 0);
+      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, this->_requests.getRequestType(), data, codes) + msg).c_str(),
+         (check_and_add_header(200, this->_requests.getRequestType(), data, codes) + msg).size(), 0);
     }
     else if (this->_requests.getUri() == "/shutdown")
     {
@@ -128,8 +128,8 @@ void  Server::sendAnswer((RequestParser& req, MIME_type& data, Statuscodes& code
     }
     else
     {
-      msg = storeFileIntoString(req, "responseFiles/error.html");
-      send(this->_clientSocket, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
+      msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
+      send(this->_clientPollfds[idx].fd, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
          (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
     }
   }
@@ -137,10 +137,10 @@ void  Server::sendAnswer((RequestParser& req, MIME_type& data, Statuscodes& code
   {
     int pid = fork();
     if (pid == 0)
-        handle_Request_post(this->_clientSocket, this->_requests);
+        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
     waitpid(0, NULL, 0);
   }
-  std::cout << this->_clientSocket << std::endl;
+  std::cout << this->_clientPollfds[idx].fd << std::endl;
 }
 
 // checks if readable data is available at the client socket
@@ -188,7 +188,7 @@ void  Server::acceptConnections(void)
 }
 
 // recieves, parses and handles client requests
-void  Server::handleRequest(RequestParser& req, MIME_type& data, Statuscodes& codes, int i)
+void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
 {
   while (true)
   {
@@ -206,13 +206,13 @@ void  Server::handleRequest(RequestParser& req, MIME_type& data, Statuscodes& co
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
-    this->sendAnswer(req, data, codes, i);
+    this->sendAnswer(data, codes, i);
     this->_requests.cleanUp();
   }
 }
 
 // main server loop
-void  Server::serverLoop(RequestParser& req, MIME_type& data, Statuscodes& codes)
+void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
 {
   while (true)
   {
@@ -236,7 +236,7 @@ void  Server::serverLoop(RequestParser& req, MIME_type& data, Statuscodes& codes
       if (this->_clientPollfds[i].fd == this->_serverSocket)
         this->acceptConnections();
       else
-        this->handleRequest(req, data, codes, i);
+        this->handleRequest(data, codes, i);
     } // * END OF CLIENT LOOP *
   } // * END OF SERVER *
   this->cleanUpClientFds();

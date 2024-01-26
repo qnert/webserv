@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/23 13:25:47 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/26 14:09:55 by simonkunert      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,10 @@ private:
   size_t                     _currSize;
   int                        _serverSocket;
   sockaddr_in                _serverAdress;
-  const ResponseFiles        _responses;
   RequestParser              _requests;
 
-  void  sendAnswer(RequestParser& req, MIME_type& data, Statuscodes& codes, size_t idx);
-  void  handleRequest(RequestParser& req, MIME_type& data, Statuscodes& codes, int i);
+  void  sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx);
+  void  handleRequest(MIME_type& data, Statuscodes& codes, int i);
   void  checkRevents(int i);
   void  acceptConnections(void);
   void  cleanUpClientFds();
