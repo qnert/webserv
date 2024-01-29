@@ -6,68 +6,11 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 14:15:16 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/29 18:34:57 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
-
-std::string  storeFileIntoString(RequestParser& req, std::string path)
-{
-  if (req.getUri() == "/")
-    path = req.getCurrdir() + "responseFiles/index.html";
-  else
-    path = req.getCurrdir() + path;
-  std::ifstream file(path.c_str(), std::ios::binary);
-  if (!file.is_open())
-    return ("");
-
-  std::string fileContent;
-  std::ostringstream buffer;
-  buffer << file.rdbuf();
-  fileContent = buffer.str();
-  file.close();
-  return (fileContent);
-}
-
-std::string get_first_name(std::string body){
-  size_t  start_pos = body.find_first_of("=") + 1;
-  size_t  end_pos = body.find_first_of("&") - body.find_first_of("=") - 1;
-  std::string ret_str = body.substr(start_pos, end_pos);
-
-  return (ret_str);
-}
-
-std::string get_last_name(std::string body){
-  size_t  start_pos = body.find_last_of("=") + 1;
-  size_t  end_pos = body.size();
-  std::string ret_str = body.substr(start_pos, end_pos);
-
-  return (ret_str);
-}
-
-void  handle_Request_post(int fd, RequestParser& req){
-  char *argv[5];
-  std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
-  std::string file_fd = Server::ft_itos(fd);
-  std::string first_name = get_first_name(req.getBody());
-  std::string last_name = get_last_name(req.getBody());
-
-  argv[0] = const_cast<char*>(cgi_filename.c_str());
-  argv[1] = const_cast<char*>(file_fd.c_str());
-  argv[2] = const_cast<char*>(first_name.c_str());
-  argv[3] = const_cast<char*>(last_name.c_str());
-  argv[4] = NULL;
-  execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
-}
-
-std::string  check_and_add_header(int status, std::string const& type, MIME_type& data, Statuscodes& codes){
-  std::ostringstream header;
-  header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
-  header << "Content-Type: "<< data[type] << "\r\n";
-  header << "\r\n";
-  return (header.str());
-}
 
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
@@ -113,34 +56,33 @@ Server::~Server() {}
 // sends an answer to the client
 void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 {
-  if (this->_requests.getRequestType() == "GET")
+  const std::string& requestType = this->_requests.getRequestType();
+
+  if (requestType == "GET")
   {
-    std::string msg = storeFileIntoString(this->_requests, this->_requests.getUri());
-    if (msg != "")
+    std::string uri = this->_requests.getUri();
+    std::string msg = storeFileIntoString(this->_requests, uri);
+
+    if (!msg.empty())
     {
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, this->_requests.getRequestType(), data, codes) + msg).c_str(),
-         (check_and_add_header(200, this->_requests.getRequestType(), data, codes) + msg).size(), 0);
-    }
-    else if (this->_requests.getUri() == "/shutdown")
-    {
-      this->cleanUpClientFds();
-      exit(EXIT_SUCCESS);
+      int statusCode = this->_requests.getRefreshed() ? 304 : 200;
+      std::string response = check_and_add_header(statusCode, requestType, data, codes) + msg;
+      send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
     else
     {
-      msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
-         (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
+      std::string errorMsg = storeFileIntoString(this->_requests, "responseFiles/error.html");
+      std::string response = check_and_add_header(404, ".html", data, codes) + errorMsg;
+      send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
   }
-  if (this->_requests.getRequestType() == "POST")
+  if (requestType == "POST")
   {
     pid_t pid = fork();
     if (pid == 0)
       handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
     waitpid(pid, NULL, 0);
   }
-  std::cout << idx << std::endl;
 }
 
 // checks if readable data is available at the client socket
@@ -205,6 +147,7 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
     }
     buffer[bytesRead] = '\0';
     std::cout << buffer << std::endl;
+    std::cout << "number of clients connected: " << this->_nfds << std::endl;
     this->_requests.parseRequestBuffer(buffer);
     this->sendAnswer(data, codes, i);
     this->_requests.cleanUp();

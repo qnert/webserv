@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 14:15:51 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/29 18:25:20 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,10 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
 
   std::istringstream lineStreamForHost(this->_requestLines[1]);
   lineStreamForHost >> token >> this->_host;
+
+  this->_refreshed = false;
+  if (buffer.find("Cache-Control:") != std::string::npos)
+    this->_refreshed = true;
 
   size_t it = buffer.find_last_of("\n\n");
   if (it == buffer.size())
@@ -59,3 +63,5 @@ const std::string& RequestParser::getHost() const {return (this->_host);}
 const std::string& RequestParser::getBody() const {return (this->_body);}
 
 const std::string& RequestParser::getCurrdir() const {return (this->_curr_dir);}
+
+bool RequestParser::getRefreshed() const {return (this->_refreshed);}

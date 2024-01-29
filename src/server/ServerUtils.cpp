@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 14:15:35 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/29 15:49:04 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void  Server::checkClientTimeout(int i)
 {
   if (i != 0 && (std::time(NULL) - this->_timestamp[i]) >= CLIENT_TIMEOUT) {
     this->removeAndCompressFds(i);
-    std::cout << "Client " << i << " timed out." << std::endl;
+    std::cout << "Client index " << i << " timed out." << std::endl;
   }
 }
 
