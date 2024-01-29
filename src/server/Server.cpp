@@ -3,22 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/26 14:09:45 by simonkunert      ###   ########.fr       */
+/*   Updated: 2024/01/29 14:15:16 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
 
-std::string  storeFileIntoString(RequestParser req, std::string path)
+std::string  storeFileIntoString(RequestParser& req, std::string path)
 {
   if (req.getUri() == "/")
     path = req.getCurrdir() + "responseFiles/index.html";
   else
     path = req.getCurrdir() + path;
-  std::ifstream file(path, std::ios::binary);
+  std::ifstream file(path.c_str(), std::ios::binary);
   if (!file.is_open())
     return ("");
 
@@ -46,10 +46,10 @@ std::string get_last_name(std::string body){
   return (ret_str);
 }
 
-void  handle_Request_post(int fd, RequestParser req){
+void  handle_Request_post(int fd, RequestParser& req){
   char *argv[5];
   std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
-  std::string file_fd = std::to_string(fd);
+  std::string file_fd = Server::ft_itos(fd);
   std::string first_name = get_first_name(req.getBody());
   std::string last_name = get_last_name(req.getBody());
 
@@ -61,7 +61,7 @@ void  handle_Request_post(int fd, RequestParser req){
   execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
 }
 
-std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
+std::string  check_and_add_header(int status, std::string const& type, MIME_type& data, Statuscodes& codes){
   std::ostringstream header;
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
   header << "Content-Type: "<< data[type] << "\r\n";
@@ -135,12 +135,12 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
   }
   if (this->_requests.getRequestType() == "POST")
   {
-    int pid = fork();
+    pid_t pid = fork();
     if (pid == 0)
-        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
-    waitpid(0, NULL, 0);
+      handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
+    waitpid(pid, NULL, 0);
   }
-  std::cout << this->_clientPollfds[idx].fd << std::endl;
+  std::cout << idx << std::endl;
 }
 
 // checks if readable data is available at the client socket
@@ -217,11 +217,11 @@ void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
   while (true)
   {
     std::cout << "Waiting for poll()..." << std::endl;
-      if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
-        perror("poll");
-        close(this->_serverSocket);
-        throw(std::runtime_error(""));
-      }
+    if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
+      perror("poll");
+      close(this->_serverSocket);
+      throw(std::runtime_error(""));
+    }
 
     this->_currSize = this->_nfds;
     for (size_t i = 0; i < this->_currSize; i++)

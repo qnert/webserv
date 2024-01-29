@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/26 14:09:55 by simonkunert      ###   ########.fr       */
+/*   Updated: 2024/01/29 14:19:16 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,13 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <vector>
 #include <cstdio>
 #include <unistd.h>
 #include <string>
-#include <cstdlib>
 #include <ctime>
 
 #define PORT 8080
@@ -45,16 +45,17 @@ private:
   sockaddr_in                _serverAdress;
   RequestParser              _requests;
 
-  void  sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx);
-  void  handleRequest(MIME_type& data, Statuscodes& codes, int i);
-  void  checkRevents(int i);
-  void  acceptConnections(void);
-  void  cleanUpClientFds();
-  void  removeAndCompressFds(int i);
-  void  checkClientTimeout(int i);
+  void         sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx);
+  void         handleRequest(MIME_type& data, Statuscodes& codes, int i);
+  void         checkRevents(int i);
+  void         acceptConnections(void);
+  void         cleanUpClientFds();
+  void         removeAndCompressFds(int i);
+  void         checkClientTimeout(int i);
 public:
   Server();
   ~Server();
 
   void  serverLoop(MIME_type& data, Statuscodes& codes);
+  static std::string  ft_itos(int num);
 };

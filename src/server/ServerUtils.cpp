@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/25 14:31:40 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:15:35 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void  Server::cleanUpClientFds()
 void  Server::removeAndCompressFds(int i)
 {
   close(this->_clientPollfds[i].fd);
-  for (size_t j = i; j < this->_nfds - 1; j++)
+  for (size_t j = i; j != 0 && j < this->_nfds - 1; j++)
   {
     this->_clientPollfds[j] = this->_clientPollfds[j + 1];
     this->_timestamp[j] = this->_timestamp[j + 1];
@@ -35,4 +35,11 @@ void  Server::checkClientTimeout(int i)
     this->removeAndCompressFds(i);
     std::cout << "Client " << i << " timed out." << std::endl;
   }
+}
+
+std::string Server::ft_itos(int num)
+{
+  std::ostringstream oss;
+  oss << num;
+  return (oss.str());
 }
