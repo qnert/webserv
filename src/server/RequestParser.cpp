@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/23 13:23:17 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/29 12:40:20 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
 
   std::istringstream lineStreamForHost(this->_requestLines[1]);
   lineStreamForHost >> token >> this->_host;
-  
+
   size_t it = buffer.find_last_of("\n\n");
   if (it == buffer.size())
     this->_body = "";

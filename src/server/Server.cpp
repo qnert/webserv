@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/26 14:09:45 by simonkunert      ###   ########.fr       */
+/*   Updated: 2024/01/29 13:37:53 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,13 @@ std::string get_first_name(std::string body){
 }
 
 std::string get_last_name(std::string body){
-  size_t  start_pos = body.find_last_of("=") + 1;
-  size_t  end_pos = body.size();
-  std::string ret_str = body.substr(start_pos, end_pos);
+  std::string ret_str = body.substr(body.find("last_name=") + 10);
+  ret_str = ret_str.substr(0, ret_str.find('&'));
 
   return (ret_str);
 }
 
-void  handle_Request_post(int fd, RequestParser req){
+void  handle_name_input(int fd, RequestParser req){
   char *argv[5];
   std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
   std::string file_fd = std::to_string(fd);
@@ -59,6 +58,19 @@ void  handle_Request_post(int fd, RequestParser req){
   argv[3] = const_cast<char*>(last_name.c_str());
   argv[4] = NULL;
   execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
+}
+
+void  handle_file_upload(int fd, RequestParser req){
+  std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
+  std::string file_fd = std::to_string(fd);
+  exit(0);
+}
+
+void  handle_Request_post(int fd, RequestParser req){
+  if (req.getUri() == "/responseFiles/first.cgi")
+    handle_name_input(fd, req);
+  else if (req.getUri() == "/responseFiles/cpp_uploadfile.cgi")
+    handle_file_upload(fd, req);
 }
 
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
@@ -133,14 +145,20 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
          (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
     }
   }
-  if (this->_requests.getRequestType() == "POST")
+  if (this->_requests.getRequestType() == "POST" && this->_requests.getUri() == "/responseFiles/first.cgi")
   {
     int pid = fork();
     if (pid == 0)
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
     waitpid(0, NULL, 0);
   }
-  std::cout << this->_clientPollfds[idx].fd << std::endl;
+  else if (this->_requests.getRequestType() == "POST")
+  {
+    int pid = fork();
+    if (pid == 0)
+        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
+    waitpid(0, NULL, 0);
+  }
 }
 
 // checks if readable data is available at the client socket
