@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 13:37:53 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/29 16:43:47 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,25 @@ std::string get_first_name(std::string body){
 }
 
 std::string get_last_name(std::string body){
-  std::string ret_str = body.substr(body.find("last_name=") + 10);
-  ret_str = ret_str.substr(0, ret_str.find('&'));
+  size_t  start_pos = body.find_last_of("=") + 1;
+  size_t  end_pos = body.find_last_of("&") - body.find_last_of("=") - 1;
+  std::string ret_str = body.substr(start_pos, end_pos);
 
   return (ret_str);
+}
+
+std::string get_filecontent(std::string body){
+  size_t start = body.find("\n\n") + 2;
+  size_t end = body.find("\n------");
+  std::string filecontent = body.substr(start, end - start);
+
+  return (filecontent);
+}
+
+std::string get_filename(std::string body){
+  std::string filename = body.substr(body.find("filename=") + 10);
+  filename = filename.substr(0, filename.find('\n') - 2);
+  return (filename);
 }
 
 void  handle_name_input(int fd, RequestParser req){
@@ -61,15 +76,23 @@ void  handle_name_input(int fd, RequestParser req){
 }
 
 void  handle_file_upload(int fd, RequestParser req){
-  std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
+  char *argv[5];
+  std::string cgi_filename = "./cpp_uploadfile.cgi";
   std::string file_fd = std::to_string(fd);
-  exit(0);
+  std::string filename = get_filename(req.getBody());
+  std::string filecontent = get_filecontent(req. getBody());
+  argv[0] = const_cast<char*>(cgi_filename.c_str());
+  argv[1] = const_cast<char*>(file_fd.c_str());
+  argv[2] = const_cast<char*>(filename.c_str());
+  argv[3] = const_cast<char*>(filecontent.c_str());
+  argv[4] = NULL;
+  execve("/Users/skunert/Documents/webserv/responseFiles/cpp_uploadfile.cgi", argv, NULL);
 }
 
 void  handle_Request_post(int fd, RequestParser req){
   if (req.getUri() == "/responseFiles/first.cgi")
     handle_name_input(fd, req);
-  else if (req.getUri() == "/responseFiles/cpp_uploadfile.cgi")
+  else if (req.getUri() == "upload")
     handle_file_upload(fd, req);
 }
 
@@ -143,6 +166,7 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
       msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
       send(this->_clientPollfds[idx].fd, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
          (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
+      return ;
     }
   }
   if (this->_requests.getRequestType() == "POST" && this->_requests.getUri() == "/responseFiles/first.cgi")
@@ -152,7 +176,7 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
     waitpid(0, NULL, 0);
   }
-  else if (this->_requests.getRequestType() == "POST")
+  else if (this->_requests.getUri() == "upload")
   {
     int pid = fork();
     if (pid == 0)
@@ -210,7 +234,7 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
 {
   while (true)
   {
-    char buffer[1024];
+    char buffer[10000];
     ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), 0);
 
     if (bytesRead < 0) {
@@ -222,7 +246,6 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
       break;
     }
     buffer[bytesRead] = '\0';
-    std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
     this->sendAnswer(data, codes, i);
     this->_requests.cleanUp();
