@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/01/30 11:04:09 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/30 13:21:29 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ void  handle_file_upload(int fd, RequestParser req){
   argv[2] = const_cast<char*>(filename.c_str());
   argv[3] = const_cast<char*>(filecontent.c_str());
   argv[4] = NULL;
+  std::cout << "execve\n";
   execve("/Users/skunert/Documents/webserv/responseFiles/cpp_uploadfile.cgi", argv, NULL);
 }
 
