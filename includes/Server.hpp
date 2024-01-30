@@ -13,6 +13,7 @@
 #pragma once
 
 #include "RequestParser.hpp"
+#include "RequestUtils.hpp"
 #include "MIME_type.hpp"
 #include "Statuscodes.hpp"
 #include <iostream>

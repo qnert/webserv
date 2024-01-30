@@ -57,7 +57,13 @@
           Last Name: <input type = "text" name = "last_name" />
           <br>
           <input type = "submit" value = "Submit" />
-        <form>
+        </form>
+          <br>
+        <form enctype = "multipart/form-data" action = "responseFiles/cpp_uploadfile.cgi"
+               method = "post">
+               <p>File: <input type = "file" name = "userfile" /></p>
+               <p><input type = "submit" value = "Upload" /></p>
+        </form>
         <img id="myImage" src="responseFiles/image.webp" alt="Default Image">
     </div>
 </body>

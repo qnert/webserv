@@ -76,7 +76,14 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
   }
-  if (requestType == "POST")
+  if (requestType == "POST" && this->_requests.getUri() == "/responseFiles/first.cgi")
+  {
+    int pid = fork();
+    if (pid == 0)
+        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
+    waitpid(0, NULL, 0);
+  }
+  else if (this->_requests.getUri() == "upload")
   {
     pid_t pid = fork();
     if (pid == 0)
@@ -134,7 +141,7 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
 {
   while (true)
   {
-    char buffer[1024];
+    char buffer[10000];
     ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), 0);
 
     if (bytesRead < 0) {
