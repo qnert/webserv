@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/23 13:23:17 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/29 14:41:19 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,13 @@ RequestParser::~RequestParser() {}
 
 void  RequestParser::parseRequestBuffer(const std::string& buffer)
 {
+  static int i;
+  if (i == 1){
+    this->_uri = "upload";
+    this->_body = buffer;
+    i = 0;
+    return ;
+  }
   std::istringstream bufferStream(buffer);
   std::string token;
 
@@ -29,7 +36,7 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
 
   std::istringstream lineStreamForHost(this->_requestLines[1]);
   lineStreamForHost >> token >> this->_host;
-  
+
   size_t it = buffer.find_last_of("\n\n");
   if (it == buffer.size())
     this->_body = "";
@@ -40,6 +47,8 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
     throw std::runtime_error("Couldn't fine working directory!");
   this->_curr_dir = buff;
   this->_curr_dir.append("/");
+  if (this->_uri == "/responseFiles/cpp_uploadfile.cgi")
+    i = 1;
 }
 
 void  RequestParser::cleanUp()

@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/26 14:09:55 by simonkunert      ###   ########.fr       */
+/*   Updated: 2024/01/30 11:03:31 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "RequestParser.hpp"
+#include "RequestUtils.hpp"
 #include "MIME_type.hpp"
 #include "Statuscodes.hpp"
 #include <iostream>
