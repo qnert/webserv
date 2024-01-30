@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/30 11:01:40 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/29 18:34:57 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,28 +56,27 @@ Server::~Server() {}
 // sends an answer to the client
 void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 {
-  if (this->_requests.getRequestType() == "GET")
+  const std::string& requestType = this->_requests.getRequestType();
+
+  if (requestType == "GET")
   {
-    std::string msg = storeFileIntoString(this->_requests, this->_requests.getUri());
-    if (msg != "")
+    std::string uri = this->_requests.getUri();
+    std::string msg = storeFileIntoString(this->_requests, uri);
+
+    if (!msg.empty())
     {
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(200, this->_requests.getRequestType(), data, codes) + msg).c_str(),
-         (check_and_add_header(200, this->_requests.getRequestType(), data, codes) + msg).size(), 0);
-    }
-    else if (this->_requests.getUri() == "/shutdown")
-    {
-      this->cleanUpClientFds();
-      exit(EXIT_SUCCESS);
+      int statusCode = this->_requests.getRefreshed() ? 304 : 200;
+      std::string response = check_and_add_header(statusCode, requestType, data, codes) + msg;
+      send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
     else
     {
-      msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
-         (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
-      return ;
+      std::string errorMsg = storeFileIntoString(this->_requests, "responseFiles/error.html");
+      std::string response = check_and_add_header(404, ".html", data, codes) + errorMsg;
+      send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
   }
-  if (this->_requests.getRequestType() == "POST" && this->_requests.getUri() == "/responseFiles/first.cgi")
+  if (requestType == "POST" && this->_requests.getUri() == "/responseFiles/first.cgi")
   {
     int pid = fork();
     if (pid == 0)
@@ -86,10 +85,10 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
   }
   else if (this->_requests.getUri() == "upload")
   {
-    int pid = fork();
+    pid_t pid = fork();
     if (pid == 0)
-        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
-    waitpid(0, NULL, 0);
+      handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
+    waitpid(pid, NULL, 0);
   }
 }
 
@@ -154,6 +153,8 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
       break;
     }
     buffer[bytesRead] = '\0';
+    std::cout << buffer << std::endl;
+    std::cout << "number of clients connected: " << this->_nfds << std::endl;
     this->_requests.parseRequestBuffer(buffer);
     this->sendAnswer(data, codes, i);
     this->_requests.cleanUp();
@@ -166,11 +167,11 @@ void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
   while (true)
   {
     std::cout << "Waiting for poll()..." << std::endl;
-      if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
-        perror("poll");
-        close(this->_serverSocket);
-        throw(std::runtime_error(""));
-      }
+    if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
+      perror("poll");
+      close(this->_serverSocket);
+      throw(std::runtime_error(""));
+    }
 
     this->_currSize = this->_nfds;
     for (size_t i = 0; i < this->_currSize; i++)

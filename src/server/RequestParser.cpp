@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 14:41:19 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/29 18:25:20 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,17 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
   std::istringstream lineStreamForHost(this->_requestLines[1]);
   lineStreamForHost >> token >> this->_host;
 
+  this->_refreshed = false;
+  if (buffer.find("Cache-Control:") != std::string::npos)
+    this->_refreshed = true;
+  
   size_t it = buffer.find_last_of("\n\n");
   if (it == buffer.size())
     this->_body = "";
   else
     this->_body = buffer.substr(it + 1, buffer.size());
   char buff[PATH_MAX];
-  if (getcwd(buff, sizeof(buff)) == nullptr)
+  if (getcwd(buff, sizeof(buff)) == NULL)
     throw std::runtime_error("Couldn't fine working directory!");
   this->_curr_dir = buff;
   this->_curr_dir.append("/");
@@ -68,3 +72,5 @@ const std::string& RequestParser::getHost() const {return (this->_host);}
 const std::string& RequestParser::getBody() const {return (this->_body);}
 
 const std::string& RequestParser::getCurrdir() const {return (this->_curr_dir);}
+
+bool RequestParser::getRefreshed() const {return (this->_refreshed);}

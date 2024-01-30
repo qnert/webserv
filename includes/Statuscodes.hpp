@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Statuscodes.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/16 09:26:18 by skunert           #+#    #+#             */
-/*   Updated: 2024/01/23 12:58:32 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/29 14:19:19 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <map>
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 
 class Statuscodes{
   private:
