@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/31 13:34:11 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/31 17:10:55 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,8 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
     waitpid(0, NULL, 0);
   }
-  else if (this->_requests.getUri() == "upload")
+  else if (this->_requests.getUri() == "upload"
+        || (this->_requests.getRequestType() == "POST" && this->_requests.getUri() == "/responseFiles/cpp_fileupload.cgi"))
   {
     int pid = fork();
     if (pid == 0)
@@ -154,8 +155,6 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
       break;
     }
     buffer[bytesRead] = '\0';
-    std::cout << "Here comes the request: \n";
-    std::cout << buffer;
     this->_requests.parseRequestBuffer(buffer);
     this->sendAnswer(data, codes, i);
     this->_requests.cleanUp();
