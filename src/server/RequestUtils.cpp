@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/01/30 13:21:29 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/31 16:43:11 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,11 +48,23 @@ std::string get_last_name(std::string body){
 }
 
 std::string get_filecontent(std::string body){
-  size_t start = body.find("\n\n") + 2;
-  size_t end = body.find("\n------");
-  std::string filecontent = body.substr(start, end - start);
+  std::istringstream iss(body);
 
-  return (filecontent);
+  std::string line;
+  std::string trash;
+  std::ostringstream fileContent;
+
+  for (int i = 0; i < 4; i++)
+    std::getline(iss, trash);
+  while (std::getline(iss, line)) {
+    if (line.find("------WebKitFormBoundary") != std::string::npos)
+      break;
+    else if (line.empty())
+      fileContent << std::endl;
+    else
+      fileContent << line << std::endl;
+  }
+  return (fileContent.str());
 }
 
 std::string get_filename(std::string body){

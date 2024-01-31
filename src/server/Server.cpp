@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/30 11:01:40 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/31 13:34:11 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,8 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
       break;
     }
     buffer[bytesRead] = '\0';
+    std::cout << "Here comes the request: \n";
+    std::cout << buffer;
     this->_requests.parseRequestBuffer(buffer);
     this->sendAnswer(data, codes, i);
     this->_requests.cleanUp();
