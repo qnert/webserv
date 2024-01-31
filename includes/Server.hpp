@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 18:19:10 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/31 17:08:25 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 #include <string>
 #include <ctime>
 
-#define PORT 8080
+#define PORT 1234
 #define MAX_CLIENTS 200
 #define CLIENT_TIMEOUT 5
 
@@ -43,7 +43,7 @@ private:
   nfds_t                     _nfds;
   size_t                     _currSize;
   int                        _serverSocket;
-  sockaddr_in                _serverAdress;
+  sockaddr_in                _serverAddress;
   RequestParser              _requests;
 
   void         sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx);

@@ -3,29 +3,35 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/23 13:25:20 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/31 16:42:14 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/Server.hpp"
 #include "../includes/MIME_type.hpp"
 #include "../includes/Statuscodes.hpp"
+#include "../includes/Config.hpp"
 
-int main(void)
+int main(int argc, char** argv)
 {
-  try
-  {
-    MIME_type     data_types;
-    Statuscodes   statuscodes;
-    Server httpServer;
-    httpServer.serverLoop(data_types, statuscodes);
-  }
-  catch(const std::exception& e)
-  {
-    std::cout << e.what() << '\n';
-  }
-  return (0);
+	if (argc != 2)
+	{
+		std::cout << "Usage: ./webserv [path to configuration file]" << std::endl;
+	}
+	try
+	{
+		MIME_type	data_types;
+		Statuscodes	statuscodes;
+		Server httpServer;
+		Config c = Config(argv[1]);
+		httpServer.serverLoop(data_types, statuscodes);
+	}
+	catch(const std::exception& e)
+	{
+		std::cout << e.what() << '\n';
+	}
+	return (0);
 }

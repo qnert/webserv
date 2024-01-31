@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 18:34:57 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/31 17:07:49 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@ Server::Server() : _reuse(1), _nfds(1), _currSize(0)
   }
 
   setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse));
-  this->_serverAdress.sin_family = AF_INET;
-  this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
-  this->_serverAdress.sin_port = htons(PORT);
+  this->_serverAddress.sin_family = AF_INET;
+  this->_serverAddress.sin_addr.s_addr = INADDR_ANY;
+  this->_serverAddress.sin_port = htons(PORT);
 
   // associates the server socket with the local address
   // and port specified in the "serverAddress" structure
-  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
+  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAddress), sizeof(_serverAddress)) == -1) {
     perror("bind");
     close(this->_serverSocket);
     throw(std::runtime_error("Error timeouted trying to bind socket"));
