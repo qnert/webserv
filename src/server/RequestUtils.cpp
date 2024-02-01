@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/01 12:29:54 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/01 20:58:13 by simonkunert      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ std::string get_filecontent(std::string body){
   }
   else{
     for (int i = 0; !trash.find("------WebKitFormBoundary"); i++)
+      (void) i;
       std::getline(iss, trash);
   }
 
@@ -115,6 +116,23 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
   msg = check_and_add_header(200, ".html", data, codes) + msg;
   if (msg != "")
     send(fd, msg.c_str(), msg.size(), 0);
+}
+
+void  handle_file_erasing(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+  std::string filepath = req.getCurrdir() + req.getUri();
+  if (access(filepath.c_str(), F_OK) != 0){
+    std::cout << "No file there\n";
+    return ;
+  }
+  (void) fd;
+  (void) data;
+  (void) codes;
+  char *const args[] = { const_cast<char *>("/bin/rm"), const_cast<char *>("-f"), const_cast<char *>(filepath.c_str()), NULL};
+  int fd_child = fork();
+  if (fd_child == 0)
+    execve("/bin/rm", args, NULL);
+  else
+    waitpid(0, NULL, 0);
 }
 
 void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){

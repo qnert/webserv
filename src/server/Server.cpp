@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/01 12:28:33 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/01 20:52:07 by simonkunert      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ Server::~Server() {}
 // sends an answer to the client
 void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 {
+  std::cout << this->_requests.getRequestType() << std::endl;
   if (this->_requests.getRequestType() == "GET")
   {
     std::string msg = storeFileIntoString(this->_requests, this->_requests.getUri());
@@ -89,6 +90,8 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
   {
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
   }
+  if (this->_requests.getRequestType() == "DELETE")
+    handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, data, codes);
 }
 
 // checks if readable data is available at the client socket
@@ -152,6 +155,7 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
       break;
     }
     buffer[bytesRead] = '\0';
+    std::cout << buffer;
     this->_requests.parseRequestBuffer(buffer);
     this->sendAnswer(data, codes, i);
     this->_requests.cleanUp();
