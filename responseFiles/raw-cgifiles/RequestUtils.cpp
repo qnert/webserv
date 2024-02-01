@@ -6,20 +6,11 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/01 12:29:54 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/31 17:09:21 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <fstream>
 #include <iostream>
-#include <string>
-#include <cstdio>
-#include <unistd.h>
-#include <cstdlib>
-#include <sstream>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include "../../includes/RequestUtils.hpp"
 
 std::string  storeFileIntoString(RequestParser req, std::string path)
@@ -103,25 +94,26 @@ void  handle_name_input(int fd, RequestParser req){
   execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
 }
 
-void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+void  handle_file_upload(int fd, RequestParser req){
+  char *argv[5];
+  std::string cgi_filename = "./cpp_uploadfile.cgi";
+  std::string file_fd = std::to_string(fd);
   std::string filename = get_filename(req.getBody());
   std::string filecontent = get_filecontent(req. getBody());
-  std::ofstream upload(("./responseFiles/Upload/" + filename).c_str(), std::ios::binary);
-  if (!upload.is_open())
-    return ;
-  upload.write(filecontent.c_str(), filecontent.size());
-  upload.close();
-  std::string msg = storeFileIntoString(req, "responseFiles/success.html");
-  msg = check_and_add_header(200, ".html", data, codes) + msg;
-  if (msg != "")
-    send(fd, msg.c_str(), msg.size(), 0);
+  argv[0] = const_cast<char*>(cgi_filename.c_str());
+  argv[1] = const_cast<char*>(file_fd.c_str());
+  argv[2] = const_cast<char*>(filename.c_str());
+  argv[3] = const_cast<char*>(filecontent.c_str());
+  argv[4] = NULL;
+  std::cout << "execve\n";
+  execve("/Users/skunert/Documents/webserv/responseFiles/cpp_uploadfile.cgi", argv, NULL);
 }
 
-void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+void  handle_Request_post(int fd, RequestParser req){
   if (req.getUri() == "/responseFiles/first.cgi")
     handle_name_input(fd, req);
   else if (req.getUri() == "upload")
-    handle_file_upload(fd, req, data, codes);
+    handle_file_upload(fd, req);
 }
 
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
