@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/01 20:58:13 by simonkunert      ###   ########.fr       */
+/*   Updated: 2024/02/02 09:42:09 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
