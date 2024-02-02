@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/02 11:17:16 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/02 11:24:00 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,8 @@ void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscode
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
   std::ostringstream header;
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
-  header << "Content-Type: "<< data[type] << "\r\n";
+  if (type != "No Content")
+    header << "Content-Type: "<< data[type] << "\r\n";
   header << "\r\n";
   return (header.str());
 }
