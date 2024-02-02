@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/02 09:40:57 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/02 11:19:20 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,10 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
     throw std::runtime_error("Couldn't fine working directory!");
   this->_curr_dir = buff;
   this->_curr_dir.append("/");
+  if (this->_uri == "/" || this->_requestType == "POST" || this->_requestType == "DELETE")
+    this->_fileType = "html";
+  else
+    this->_fileType = this->_uri.substr(this->_uri.find_last_of('.') + 1, this->_uri.size() - this->_uri.find_last_of('.'));
   if (this->_uri == "/responseFiles/cpp_uploadfile.cgi")
     i = 1;
 }
@@ -57,6 +61,7 @@ void  RequestParser::cleanUp()
   this->_requestType.clear();
   this->_uri.clear();
   this->_host.clear();
+  this->_fileType.clear();
 }
 
 const std::string& RequestParser::getRequestType() const {return (this->_requestType);}
@@ -68,3 +73,5 @@ const std::string& RequestParser::getHost() const {return (this->_host);}
 const std::string& RequestParser::getBody() const {return (this->_body);}
 
 const std::string& RequestParser::getCurrdir() const {return (this->_curr_dir);}
+
+const std::string& RequestParser::getFileType() const {return (this->_fileType);}
