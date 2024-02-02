@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/02 11:24:00 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/02 11:47:51 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,9 +119,12 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
 }
 
 void  handle_file_erasing(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+  std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri();
   if (access(filepath.c_str(), F_OK) != 0){
-    std::cout << "No file there\n";
+    msg = storeFileIntoString(req, "responseFiles/error.html");
+    msg = check_and_add_header(404, "html", data, codes);
+    send(fd, msg.c_str(), msg.size(), 0);
     return ;
   }
   (void) fd;
@@ -132,6 +135,10 @@ void  handle_file_erasing(int fd, RequestParser req, MIME_type& data, Statuscode
   if (fd_child == 0)
     execve("/bin/rm", args, NULL);
   waitpid(0, NULL, 0);
+  msg = check_and_add_header(204, "No Content", data, codes);
+  if (msg != "")
+    send(fd, msg.c_str(), msg.size(), 0);
+
 }
 
 void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
