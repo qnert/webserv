@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/01 20:52:07 by simonkunert      ###   ########.fr       */
+/*   Updated: 2024/02/02 09:55:30 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
     {
       msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
       send(this->_clientPollfds[idx].fd, (check_and_add_header(404, ".html", data, codes) + msg).c_str(),
-         (check_and_add_header(404, ".html", data, codes) + msg).size(), 0);
+         (check_and_add_header(404, "html", data, codes) + msg).size(), 0);
       return ;
     }
   }

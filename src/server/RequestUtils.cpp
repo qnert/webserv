@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/02 09:42:09 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/02 09:53:28 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
   upload.write(filecontent.c_str(), filecontent.size());
   upload.close();
   std::string msg = storeFileIntoString(req, "responseFiles/success.html");
-  msg = check_and_add_header(200, ".html", data, codes) + msg;
+  msg = check_and_add_header(200, "html", data, codes) + msg;
   if (msg != "")
     send(fd, msg.c_str(), msg.size(), 0);
 }
@@ -131,8 +131,7 @@ void  handle_file_erasing(int fd, RequestParser req, MIME_type& data, Statuscode
   int fd_child = fork();
   if (fd_child == 0)
     execve("/bin/rm", args, NULL);
-  else
-    waitpid(0, NULL, 0);
+  waitpid(0, NULL, 0);
 }
 
 void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
