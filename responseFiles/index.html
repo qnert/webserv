@@ -48,31 +48,29 @@
         }
     </style>
     <script>
-        function sendDeleteRequest() {
-            var searchTerm = document.getElementById('searchTerm').value;
-            var url = 'responseFiles/Upload/' + encodeURIComponent(searchTerm); // Replace with your actual DELETE endpoint URL
+      function sendDeleteRequest() {
+          var searchTerm = document.getElementById('searchTerm').value;
+          var url = 'responseFiles/Upload/' + encodeURIComponent(searchTerm);
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('DELETE', url, true);
+          var xhr = new XMLHttpRequest();
+          xhr.open('DELETE', url, true);
 
-            // Set any headers if needed
-            // xhr.setRequestHeader('HeaderName', 'HeaderValue');
+          xhr.onreadystatechange = function() {
+              if (xhr.readyState == 4) {
+                  if (xhr.status == 200) {
+                      console.log(xhr.responseText);
+                      document.getElementById('resultContainer').innerHTML = xhr.responseText;
+                      return true;
+                  } else {
+                      console.error(xhr.statusText);
+                      return false;
+                  }
+              }
+          };
 
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        // Handle the successful response
-                        console.log(xhr.responseText);
-                    } else {
-                        // Handle errors or other status codes
-                        console.error(xhr.statusText);
-                    }
-                }
-            };
-
-            xhr.send();
-        }
-    </script>
+          xhr.send();
+      }
+  </script>
 </head>
 <body>
     <div class="cool-container">
@@ -91,7 +89,7 @@
                  <p><input type = "submit" value = "Upload" /></p>
           </form>
           <br>
-        <form onsubmit="sendDeleteRequest(); return false;">
+        <form onsubmit="sendDeleteRequest();">
             Search: <input type="text" id="searchTerm" name="searchTerm">
             <input type="submit" value="Delete">
         </form>

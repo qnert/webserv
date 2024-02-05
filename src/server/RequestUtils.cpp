@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/02 11:47:51 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/05 14:52:22 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,27 +118,21 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
     send(fd, msg.c_str(), msg.size(), 0);
 }
 
-void  handle_file_erasing(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+std::string handle_file_erasing(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri();
   if (access(filepath.c_str(), F_OK) != 0){
-    msg = storeFileIntoString(req, "responseFiles/error.html");
-    msg = check_and_add_header(404, "html", data, codes);
-    send(fd, msg.c_str(), msg.size(), 0);
-    return ;
+    return ("");
   }
-  (void) fd;
-  (void) data;
-  (void) codes;
+  (void)fd;
+  (void)data;
+  (void)codes;
   char *const args[] = { const_cast<char *>("/bin/rm"), const_cast<char *>("-f"), const_cast<char *>(filepath.c_str()), NULL};
   int fd_child = fork();
   if (fd_child == 0)
     execve("/bin/rm", args, NULL);
   waitpid(0, NULL, 0);
-  msg = check_and_add_header(204, "No Content", data, codes);
-  if (msg != "")
-    send(fd, msg.c_str(), msg.size(), 0);
-
+  return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
 
 void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){

@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/02 11:17:34 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/05 15:01:27 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ Server::~Server() {}
 // sends an answer to the client
 void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 {
+  static std::string tmp;
   if (this->_requests.getRequestType() == "GET")
   {
     std::string msg = storeFileIntoString(this->_requests, this->_requests.getUri());
@@ -69,10 +70,25 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
       this->cleanUpClientFds();
       exit(EXIT_SUCCESS);
     }
+    else if (this->_requests.getUri().find("/?searchTerm=") != std::string::npos){
+      size_t start = this->_requests.getUri().find("/?searchTerm=") + 13;
+      size_t end = this->_requests.getUri().size();
+      std::string filename = this->_requests.getUri().substr(start, end - start);
+      if (tmp == filename){
+        msg = storeFileIntoString(this->_requests, "responseFiles/erased.html");
+        send(this->_clientPollfds[idx].fd, (check_and_add_header(200, "html", data, codes) + msg).c_str(),
+          (check_and_add_header(200, "html", data, codes) + msg).size(), 0);
+      }
+      else{
+        msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
+        send(this->_clientPollfds[idx].fd, (check_and_add_header(404, "html", data, codes) + msg).c_str(),
+          (check_and_add_header(404, "html", data, codes) + msg).size(), 0);
+      }
+    }
     else
     {
       msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
-      send(this->_clientPollfds[idx].fd, (check_and_add_header(404, "  html", data, codes) + msg).c_str(),
+      send(this->_clientPollfds[idx].fd, (check_and_add_header(404, "html", data, codes) + msg).c_str(),
          (check_and_add_header(404, "html", data, codes) + msg).size(), 0);
       return ;
     }
@@ -90,7 +106,7 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
   }
   if (this->_requests.getRequestType() == "DELETE")
-    handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, data, codes);
+    tmp= handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, data, codes);
 }
 
 // checks if readable data is available at the client socket
@@ -154,6 +170,7 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
       break;
     }
     buffer[bytesRead] = '\0';
+    std::cout << buffer;
     this->_requests.parseRequestBuffer(buffer);
     this->sendAnswer(data, codes, i);
     this->_requests.cleanUp();
