@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/05 15:01:27 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/05 16:23:25 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
   }
   if (this->_requests.getRequestType() == "DELETE")
-    tmp= handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, data, codes);
+    tmp= handle_file_erasing(this->_requests);
 }
 
 // checks if readable data is available at the client socket

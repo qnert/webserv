@@ -6,16 +6,16 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/05 14:52:22 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/05 16:23:06 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <string>
+#include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <string>
-#include <cstdio>
-#include <unistd.h>
-#include <cstdlib>
 #include <sstream>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -118,20 +118,13 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
     send(fd, msg.c_str(), msg.size(), 0);
 }
 
-std::string handle_file_erasing(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+std::string handle_file_erasing(RequestParser req){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri();
   if (access(filepath.c_str(), F_OK) != 0){
     return ("");
   }
-  (void)fd;
-  (void)data;
-  (void)codes;
-  char *const args[] = { const_cast<char *>("/bin/rm"), const_cast<char *>("-f"), const_cast<char *>(filepath.c_str()), NULL};
-  int fd_child = fork();
-  if (fd_child == 0)
-    execve("/bin/rm", args, NULL);
-  waitpid(0, NULL, 0);
+  std::remove(filepath.c_str());
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
 
