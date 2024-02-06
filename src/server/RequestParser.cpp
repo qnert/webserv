@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
 /*   Updated: 2024/02/06 16:13:14 by skunert          ###   ########.fr       */
@@ -19,59 +19,72 @@ RequestParser::~RequestParser() {}
 void  RequestParser::parseRequestBuffer(const std::string& buffer)
 {
   static int i;
+
   if (i == 1){
-    this->_uri = "upload";
-    this->_body = buffer;
+    this->_requestFields["Uri"] = "upload";
+    this->_requestFields["Body"] = buffer;
     i = 0;
     return ;
   }
+
   std::istringstream bufferStream(buffer);
-  std::string token;
+  std::string line;
 
-  while (std::getline(bufferStream, token, '\n'))
-    this->_requestLines.push_back(token);
-
-  std::istringstream typeAndUri(this->_requestLines[0]);
-  typeAndUri >> this->_requestType >> this->_uri;
-
-  std::istringstream lineStreamForHost(this->_requestLines[1]);
-  lineStreamForHost >> token >> this->_host;
+  bufferStream >> this->_requestFields["Type"] \
+    >> this->_requestFields["Uri"] >> this->_requestFields["Version"];
+  while (std::getline(bufferStream, line, '\n'))
+  {
+    size_t pos = line.find(':');
+    if (pos != std::string::npos)
+    {
+      std::string key = line.substr(0, pos);
+      std::string value = line.substr(pos + 2);
+      value.erase(value.end() - 1);
+      this->_requestFields[key] = value;
+    }
+  }
 
   size_t it = buffer.find_last_of("\n\n");
   if (it == buffer.size())
-    this->_body = "";
+    this->_requestFields["Body"] = "";
   else
-    this->_body = buffer.substr(it + 1, buffer.size());
+    this->_requestFields["Body"] = buffer.substr(it + 1, buffer.size());
   char buff[PATH_MAX];
-  if (getcwd(buff, sizeof(buff)) == nullptr)
+  if (getcwd(buff, sizeof(buff)) == NULL)
     throw std::runtime_error("Couldn't fine working directory!");
   this->_curr_dir = buff;
   this->_curr_dir.append("/");
-  if (this->_uri == "/" || this->_requestType == "POST" || this->_requestType == "DELETE")
+  if (this->_requestFields["Uri"] == "/" || this->_requestFields["Type"] == "POST"
+        || this->_requestFields["Type"] == "DELETE")
     this->_fileType = "html";
   else
     this->_fileType = this->_uri.substr(this->_uri.find_last_of('.') + 1, this->_uri.size() - this->_uri.find_last_of('.'));
-  if (this->_uri == "/responseFiles/cpp_uploadfile.cgi")
+  if (this->_requestFields["Uri"] == "/responseFiles/cpp_uploadfile.cgi")
     i = 1;
 }
 
 void  RequestParser::cleanUp()
 {
-  this->_requestLines.clear();
-  this->_requestType.clear();
-  this->_uri.clear();
-  this->_host.clear();
   this->_fileType.clear();
+  this->_requestFields.clear();
 }
 
-const std::string& RequestParser::getRequestType() const {return (this->_requestType);}
+const std::string& RequestParser::getRequestType() {return (this->_requestFields["Type"]);}
 
-const std::string& RequestParser::getUri() const {return (this->_uri);}
+const std::string& RequestParser::getUri() {return (this->_requestFields["Uri"]);}
 
-const std::string& RequestParser::getHost() const {return (this->_host);}
+const std::string& RequestParser::getHost() {return (this->_requestFields["Host"]);}
 
-const std::string& RequestParser::getBody() const {return (this->_body);}
+const std::string& RequestParser::getBody() {return (this->_requestFields["Body"]);}
 
-const std::string& RequestParser::getCurrdir() const {return (this->_curr_dir);}
+const std::string& RequestParser::getCurrdir() {return (this->_curr_dir);}
 
 const std::string& RequestParser::getFileType() const {return (this->_fileType);}
+
+const std::string RequestParser::getMapValue(const std::string key)
+{
+  if (this->_requestFields.count(key) > 0)
+    return (this->_requestFields[key]);
+  return ("");
+}
+

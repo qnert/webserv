@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:34 by skunert           #+#    #+#             */
 /*   Updated: 2024/02/05 16:23:15 by skunert          ###   ########.fr       */
@@ -18,7 +18,7 @@
 #include <sys/socket.h>
 #include "Statuscodes.hpp"
 #include "MIME_type.hpp"
-#include "RequestParser.hpp"
+#include "Server.hpp"
 
 std::string  storeFileIntoString(RequestParser req, std::string path);
 

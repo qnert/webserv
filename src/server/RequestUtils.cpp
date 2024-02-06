@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/06 15:47:49 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/05 17:04:08 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,11 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include "../../includes/RequestUtils.hpp"
 
 std::string  storeFileIntoString(RequestParser req, std::string path)
 {
-  if (req.getUri() == "/")
+  if (req.getUri() == "/" && path != "responseFiles/error501.html")
     path = req.getCurrdir() + "responseFiles/index.html";
   else
     path = req.getCurrdir() + path;
@@ -92,7 +89,7 @@ std::string get_filename(std::string body){
 void  handle_name_input(int fd, RequestParser req){
   char *argv[5];
   std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
-  std::string file_fd = std::to_string(fd);
+  std::string file_fd = Server::ft_itos(fd);
   std::string first_name = get_first_name(req.getBody());
   std::string last_name = get_last_name(req.getBody());
 
@@ -104,7 +101,8 @@ void  handle_name_input(int fd, RequestParser req){
   execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
 }
 
-void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes& codes)
+{
   std::string filename = get_filename(req.getBody());
   if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
     std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
@@ -145,8 +143,9 @@ void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscode
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
   std::ostringstream header;
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
-  if (type != "No Content")
+  if (status != 204)
     header << "Content-Type: "<< data[type] << "\r\n";
+  header << "Connection: keep-alive" << "\r\n";
   header << "\r\n";
   return (header.str());
 }

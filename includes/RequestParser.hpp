@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
 /*   Updated: 2024/02/02 11:09:41 by skunert          ###   ########.fr       */
@@ -14,20 +14,17 @@
 
 #include <iostream>
 #include <sstream>
-#include <vector>
+#include <map>
 #include <string>
-#include "unistd.h"
+#include <unistd.h>
+#include <climits>
 
 class RequestParser
 {
 private:
-  std::vector<std::string> _requestLines;
-  std::string              _requestType;
-  std::string              _uri;
-  std::string              _host;
-  std::string              _body;
-  std::string              _curr_dir;
-  std::string              _fileType;
+  std::map<std::string, std::string> _requestFields;
+  std::string                        _curr_dir;
+  std::string                        _fileType;
 
 public:
   RequestParser();
@@ -36,10 +33,11 @@ public:
   void  parseRequestBuffer(const std::string& buffer);
   void  cleanUp();
 
-  const std::string& getRequestType() const;
-  const std::string& getUri() const;
-  const std::string& getHost() const;
-  const std::string& getBody() const;
-  const std::string& getCurrdir() const;
   const std::string& getFileType() const;
+  const std::string& getRequestType();
+  const std::string& getUri();
+  const std::string& getHost();
+  const std::string& getBody();
+  const std::string& getCurrdir();
+  const std::string getMapValue(const std::string key);
 };
