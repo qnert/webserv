@@ -3,19 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/01/30 11:04:09 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/05 17:04:08 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
 #include "../../includes/RequestUtils.hpp"
 
 std::string  storeFileIntoString(RequestParser req, std::string path)
 {
-  if (req.getUri() == "/")
+  if (req.getUri() == "/" && path != "responseFiles/error501.html")
     path = req.getCurrdir() + "responseFiles/index.html";
   else
     path = req.getCurrdir() + path;
@@ -64,7 +63,7 @@ std::string get_filename(std::string body){
 void  handle_name_input(int fd, RequestParser req){
   char *argv[5];
   std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
-  std::string file_fd = std::to_string(fd);
+  std::string file_fd = Server::ft_itos(fd);
   std::string first_name = get_first_name(req.getBody());
   std::string last_name = get_last_name(req.getBody());
 
@@ -79,7 +78,7 @@ void  handle_name_input(int fd, RequestParser req){
 void  handle_file_upload(int fd, RequestParser req){
   char *argv[5];
   std::string cgi_filename = "./cpp_uploadfile.cgi";
-  std::string file_fd = std::to_string(fd);
+  std::string file_fd = Server::ft_itos(fd);
   std::string filename = get_filename(req.getBody());
   std::string filecontent = get_filecontent(req. getBody());
   argv[0] = const_cast<char*>(cgi_filename.c_str());
@@ -100,7 +99,8 @@ void  handle_Request_post(int fd, RequestParser req){
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
   std::ostringstream header;
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
-  header << "Content-Type: "<< data[type] << "\r\n";
+  header << "Content-Type: " << data[type] << "\r\n";
+  header << "Connection: keep-alive" << "\r\n";
   header << "\r\n";
   return (header.str());
 }

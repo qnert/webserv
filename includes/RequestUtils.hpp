@@ -1,21 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   RequestUtils.h                                     :+:      :+:    :+:   */
+/*   RequestUtils.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:34 by skunert           #+#    #+#             */
-/*   Updated: 2024/01/30 11:02:46 by skunert          ###   ########.fr       */
+/*   Updated: 2024/01/30 13:15:32 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include <iostream>
-#include "Statuscodes.hpp"
 #include "MIME_type.hpp"
-#include "RequestParser.hpp"
+#include "Statuscodes.hpp"
+#include "Server.hpp"
 
 std::string  storeFileIntoString(RequestParser req, std::string path);
 
