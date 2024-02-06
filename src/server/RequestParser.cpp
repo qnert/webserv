@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 18:25:20 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/06 13:36:01 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,58 +19,63 @@ RequestParser::~RequestParser() {}
 void  RequestParser::parseRequestBuffer(const std::string& buffer)
 {
   static int i;
+
   if (i == 1){
-    this->_uri = "upload";
-    this->_body = buffer;
+    this->_requestFields["Uri"] = "upload";
+    this->_requestFields["Body"] = buffer;
     i = 0;
     return ;
   }
+
   std::istringstream bufferStream(buffer);
-  std::string token;
+  std::string line;
 
-  while (std::getline(bufferStream, token, '\n'))
-    this->_requestLines.push_back(token);
+  bufferStream >> this->_requestFields["Type"] \
+    >> this->_requestFields["Uri"] >> this->_requestFields["Version"];
+  while (std::getline(bufferStream, line, '\n'))
+  {
+    size_t pos = line.find(':');
+    if (pos != std::string::npos)
+    {
+      std::string key = line.substr(0, pos);
+      std::string value = line.substr(pos + 2);
+      value.erase(value.end() - 1);
+      this->_requestFields[key] = value;
+    }
+  }
 
-  std::istringstream typeAndUri(this->_requestLines[0]);
-  typeAndUri >> this->_requestType >> this->_uri;
-
-  std::istringstream lineStreamForHost(this->_requestLines[1]);
-  lineStreamForHost >> token >> this->_host;
-
-  this->_refreshed = false;
-  if (buffer.find("Cache-Control:") != std::string::npos)
-    this->_refreshed = true;
-  
   size_t it = buffer.find_last_of("\n\n");
   if (it == buffer.size())
-    this->_body = "";
+    this->_requestFields["Body"] = "";
   else
-    this->_body = buffer.substr(it + 1, buffer.size());
+    this->_requestFields["Body"] = buffer.substr(it + 1, buffer.size());
   char buff[PATH_MAX];
   if (getcwd(buff, sizeof(buff)) == NULL)
     throw std::runtime_error("Couldn't fine working directory!");
   this->_curr_dir = buff;
   this->_curr_dir.append("/");
-  if (this->_uri == "/responseFiles/cpp_uploadfile.cgi")
+  if (this->_requestFields["Uri"] == "/responseFiles/cpp_uploadfile.cgi")
     i = 1;
 }
 
 void  RequestParser::cleanUp()
 {
-  this->_requestLines.clear();
-  this->_requestType.clear();
-  this->_uri.clear();
-  this->_host.clear();
+  this->_requestFields.clear();
 }
 
-const std::string& RequestParser::getRequestType() const {return (this->_requestType);}
+const std::string& RequestParser::getRequestType() {return (this->_requestFields["Type"]);}
 
-const std::string& RequestParser::getUri() const {return (this->_uri);}
+const std::string& RequestParser::getUri() {return (this->_requestFields["Uri"]);}
 
-const std::string& RequestParser::getHost() const {return (this->_host);}
+const std::string& RequestParser::getHost() {return (this->_requestFields["Host"]);}
 
-const std::string& RequestParser::getBody() const {return (this->_body);}
+const std::string& RequestParser::getBody() {return (this->_requestFields["Body"]);}
 
-const std::string& RequestParser::getCurrdir() const {return (this->_curr_dir);}
+const std::string& RequestParser::getCurrdir() {return (this->_curr_dir);}
 
-bool RequestParser::getRefreshed() const {return (this->_refreshed);}
+const std::string RequestParser::getMapValue(const std::string key)
+{
+  if (this->_requestFields.count(key) > 0)
+    return (this->_requestFields[key]);
+  return ("");
+}
