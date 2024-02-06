@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 14:03:16 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/06 16:10:46 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ Server::~Server() {}
 // sends an answer to the client
 void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 {
+  static std::string tmp;
   const std::string& requestType = this->_requests.getRequestType();
 
   if (requestType == "GET")
@@ -70,6 +71,23 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
       std::string response = check_and_add_header(statusCode, requestType, data, codes) + msg;
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
+    else if (this->_requests.getUri().find("/?searchTerm=") != std::string::npos){
+      size_t start = this->_requests.getUri().find("/?searchTerm=") + 13;
+      size_t end = this->_requests.getUri().size();
+      std::string filename = this->_requests.getUri().substr(start, end - start);
+      if (tmp == filename)
+      {
+        msg = storeFileIntoString(this->_requests, "responseFiles/erased.html");
+        send(this->_clientPollfds[idx].fd, (check_and_add_header(200, "html", data, codes) + msg).c_str(),
+          (check_and_add_header(200, "html", data, codes) + msg).size(), 0);
+      }
+      else
+      {
+        msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
+        send(this->_clientPollfds[idx].fd, (check_and_add_header(404, "html", data, codes) + msg).c_str(),
+          (check_and_add_header(404, "html", data, codes) + msg).size(), 0);
+      }
+    }
     else
     {
       std::string errorMsg = storeFileIntoString(this->_requests, "responseFiles/error404.html");
@@ -81,15 +99,17 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
   {
     pid_t pid = fork();
     if (pid == 0)
-        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
-    waitpid(pid, NULL, 0);
+        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
+    waitpid(0, NULL, 0);
   }
-  else if (this->_requests.getUri() == "upload")
+  else if (this->_requests.getUri() == "upload"
+        || (this->_requests.getRequestType() == "POST" && this->_requests.getUri() == "/responseFiles/cpp_fileupload.cgi"))
   {
-    pid_t pid = fork();
-    if (pid == 0)
-      handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
-    waitpid(pid, NULL, 0);
+        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
+  }
+  else if (this->_requests.getRequestType() == "DELETE")
+  {
+    tmp = handle_file_erasing(this->_requests);
   }
   else
   {

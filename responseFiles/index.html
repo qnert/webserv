@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cool UI Example</title>
+    <title>Delete Request Example</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,9 +13,9 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-image: url("responseFiles/background.webp"); /* Replace 'path/to/your/image.jpg' with the actual path to your image file */
-            background-size: cover; /* Adjust as needed */
-            background-position: center; /* Adjust as needed */
+            background-image: url("responseFiles/background.webp");
+            background-size: cover;
+            background-position: center;
         }
         .cool-container {
             background-color: rgba(255, 255, 255, 0.8); /* Add some transparency to the container */
@@ -47,24 +47,54 @@
             background-color: #2980b9;
         }
     </style>
+    <script>
+      function sendDeleteRequest() {
+          var searchTerm = document.getElementById('searchTerm').value;
+          var url = 'responseFiles/Upload/' + encodeURIComponent(searchTerm);
+
+          var xhr = new XMLHttpRequest();
+          xhr.open('DELETE', url, true);
+
+          xhr.onreadystatechange = function() {
+              if (xhr.readyState == 4) {
+                  if (xhr.status == 200) {
+                      console.log(xhr.responseText);
+                      document.getElementById('resultContainer').innerHTML = xhr.responseText;
+                      return true;
+                  } else {
+                      console.error(xhr.statusText);
+                      return false;
+                  }
+              }
+          };
+
+          xhr.send();
+      }
+  </script>
 </head>
+<link rel="icon" type="image/x-icon" href="responseFiles/favicon.ico">
 <body>
     <div class="cool-container">
         <h1>Delfis hitman service!</h1>
         <form action = "responseFiles/first.cgi" method = "post">
-          First Name: <input type = "text" name = "first_name">  <br />
+            First Name: <input type = "text" name = "first_name">  <br />
 
-          Last Name: <input type = "text" name = "last_name" />
+            Last Name: <input type = "text" name = "last_name" />
+            <br>
+            <input type = "submit" value = "Submit" />
+          </form>
+            <br>
+          <form enctype = "multipart/form-data" action = "responseFiles/cpp_uploadfile.cgi"
+                 method = "post">
+                 <p>File: <input type = "file" name = "userfile" accept = "text/*"/></p>
+                 <p><input type = "submit" value = "Upload" /></p>
+          </form>
           <br>
-          <input type = "submit" value = "Submit" />
+        <form onsubmit="sendDeleteRequest();">
+            Search: <input type="text" id="searchTerm" name="searchTerm">
+            <input type="submit" value="Delete">
         </form>
-          <br>
-        <form enctype = "multipart/form-data" action = "responseFiles/cpp_uploadfile.cgi"
-               method = "post">
-               <p>File: <input type = "file" name = "userfile" /></p>
-               <p><input type = "submit" value = "Upload" /></p>
-        </form>
-        <img id="myImage" src="responseFiles/image.webp" alt="Default Image">
+        <!-- <img id="myImage" src="responseFiles/image.webp" alt="Default Image"> -->
     </div>
 </body>
 </html>
