@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 16:13:14 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/06 17:59:19 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
         || this->_requestFields["Type"] == "DELETE")
     this->_fileType = "html";
   else
-    this->_fileType = this->_uri.substr(this->_uri.find_last_of('.') + 1, this->_uri.size() - this->_uri.find_last_of('.'));
+    this->_fileType = this->_requestFields["Uri"].substr(this->_requestFields["Uri"].find_last_of('.') + 1, this->_requestFields["Uri"].size() - this->_requestFields["Uri"].find_last_of('.'));
   if (this->_requestFields["Uri"] == "/responseFiles/cpp_uploadfile.cgi")
     i = 1;
 }

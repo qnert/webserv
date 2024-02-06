@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 16:10:46 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/06 18:02:25 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,8 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
         send(this->_clientPollfds[idx].fd, (check_and_add_header(404, "html", data, codes) + msg).c_str(),
           (check_and_add_header(404, "html", data, codes) + msg).size(), 0);
       }
+      this->_clientPollfds[idx].events = POLLIN;
+      return ;
     }
     else
     {
