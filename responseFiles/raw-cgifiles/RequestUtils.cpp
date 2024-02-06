@@ -3,25 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/05 17:04:08 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/01/31 17:09:21 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <string>
-#include <unistd.h>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <sstream>
 #include "../../includes/RequestUtils.hpp"
 
 std::string  storeFileIntoString(RequestParser req, std::string path)
 {
-  if (req.getUri() == "/" && path != "responseFiles/error501.html")
+  if (req.getUri() == "/")
     path = req.getCurrdir() + "responseFiles/index.html";
   else
     path = req.getCurrdir() + path;
@@ -65,7 +59,6 @@ std::string get_filecontent(std::string body){
   }
   else{
     for (int i = 0; !trash.find("------WebKitFormBoundary"); i++)
-      (void) i;
       std::getline(iss, trash);
   }
 
@@ -89,7 +82,7 @@ std::string get_filename(std::string body){
 void  handle_name_input(int fd, RequestParser req){
   char *argv[5];
   std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
-  std::string file_fd = Server::ft_itos(fd);
+  std::string file_fd = std::to_string(fd);
   std::string first_name = get_first_name(req.getBody());
   std::string last_name = get_last_name(req.getBody());
 
@@ -101,51 +94,32 @@ void  handle_name_input(int fd, RequestParser req){
   execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
 }
 
-void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes& codes)
-{
+void  handle_file_upload(int fd, RequestParser req){
+  char *argv[5];
+  std::string cgi_filename = "./cpp_uploadfile.cgi";
+  std::string file_fd = std::to_string(fd);
   std::string filename = get_filename(req.getBody());
-  if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
-    std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
-    msg = check_and_add_header(400, "html", data, codes) + msg;
-    if (msg != "")
-      send(fd, msg.c_str(), msg.size(), 0);
-    return ;
-  }
   std::string filecontent = get_filecontent(req. getBody());
-  std::ofstream upload(("./responseFiles/Upload/" + filename).c_str(), std::ios::binary);
-  if (!upload.is_open())
-    return ;
-  upload.write(filecontent.c_str(), filecontent.size());
-  upload.close();
-  std::string msg = storeFileIntoString(req, "responseFiles/success.html");
-  msg = check_and_add_header(201, "html", data, codes) + msg;
-  if (msg != "")
-    send(fd, msg.c_str(), msg.size(), 0);
+  argv[0] = const_cast<char*>(cgi_filename.c_str());
+  argv[1] = const_cast<char*>(file_fd.c_str());
+  argv[2] = const_cast<char*>(filename.c_str());
+  argv[3] = const_cast<char*>(filecontent.c_str());
+  argv[4] = NULL;
+  std::cout << "execve\n";
+  execve("/Users/skunert/Documents/webserv/responseFiles/cpp_uploadfile.cgi", argv, NULL);
 }
 
-std::string handle_file_erasing(RequestParser req){
-  std::string msg;
-  std::string filepath = req.getCurrdir() + req.getUri();
-  if (access(filepath.c_str(), F_OK) != 0){
-    return ("");
-  }
-  std::remove(filepath.c_str());
-  return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
-}
-
-void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+void  handle_Request_post(int fd, RequestParser req){
   if (req.getUri() == "/responseFiles/first.cgi")
     handle_name_input(fd, req);
   else if (req.getUri() == "upload")
-    handle_file_upload(fd, req, data, codes);
+    handle_file_upload(fd, req);
 }
 
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
   std::ostringstream header;
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
-  if (status != 204)
-    header << "Content-Type: "<< data[type] << "\r\n";
-  header << "Connection: keep-alive" << "\r\n";
+  header << "Content-Type: "<< data[type] << "\r\n";
   header << "\r\n";
   return (header.str());
 }

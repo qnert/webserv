@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/29 16:01:58 by rnauke            #+#    #+#             */
-/*   Updated: 2024/01/31 15:08:25 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/06 18:28:54 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,13 @@
 class Config
 {
 private:
+	std::vector<std::map<std::string, std::string> > _configs;
 	std::vector<size_t> _port;
 	std::vector<std::string> _root_dir;
 	std::vector<std::string> _server_name;
 	std::map<std::string, std::string> _routes;
 public:
-	Config(std::string path);
+	Config(const std::string& path);
 	~Config();
 
 	class InvalidConfigurationException : public std::exception
@@ -45,9 +46,8 @@ public:
 	std::vector<std::string> getRoot();
 	std::string getIndex(std::string route);
 	std::map<std::string, std::string> getRoutes();
-	void checkConf(void);
 	void parseConf(std::string path);
-	void serverDirective(std::ifstream& input);
+	std::map<std::string,std::string> serverDirective(std::ifstream& input);
 	void locationDirective(std::ifstream& input);
 };
 

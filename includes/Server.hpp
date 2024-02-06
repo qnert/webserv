@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/01 16:56:13 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/06 18:29:05 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 
 #include "RequestParser.hpp"
 #include "RequestUtils.hpp"
-#include "MIME_type.hpp"
-#include "Statuscodes.hpp"
 #include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -32,7 +30,7 @@
 
 #define PORT 1234
 #define MAX_CLIENTS 200
-#define CLIENT_TIMEOUT 5
+#define CLIENT_TIMEOUT 1
 
 class Server
 {
@@ -47,7 +45,7 @@ private:
   RequestParser              _requests;
 
   void         sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx);
-  void         handleRequest(MIME_type& data, Statuscodes& codes, int i);
+  void         handleRequest(int i);
   void         checkRevents(int i);
   void         acceptConnections(void);
   void         cleanUpClientFds();

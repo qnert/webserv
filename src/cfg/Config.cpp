@@ -5,21 +5,22 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/29 16:11:27 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/01 18:20:17 by rnauke           ###   ########.fr       */
+/*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
+/*   Updated: 2024/02/06 18:29:17 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 #include "../../includes/Config.hpp"
 
-static int ft_stoi(const std::string& str)
-{
-	int num;
-	std::stringstream ss(str);
+// static int ft_stoi(const std::string& str)
+// {
+// 	int num;
+// 	std::stringstream ss(str);
 
-	ss >> num;
-	return num;
-}
+// 	ss >> num;
+// 	return num;
+// }
 
 // trim white space from beginning and end of a string
 std::string trim(const std::string& line)
@@ -27,7 +28,7 @@ std::string trim(const std::string& line)
     const char* WhiteSpace = " \t\v\r\n\f";
     size_t start = line.find_first_not_of(WhiteSpace);
     size_t end = line.find_last_not_of(WhiteSpace);
-    return start == end ? std::string() : line.substr(start, end - start + 1);
+    return start == end ? std::string("") : line.substr(start, end - start + 1);
 }
 
 // advances file descriptor until theres a opening bracket of a directive
@@ -68,25 +69,13 @@ int checkSemicolon(std::vector<std::string> validArgs, std::string line)
 	return 0;
 }
 
-const char *Config::InvalidConfigurationException::what() const throw()
-{
-	return "Config: Something is wrong";
-}
-
 // verifies the config and makes sure nothing is undefined
-void Config::checkConf(void)
+void checkConf(std::map<std::string, std::string> map)
 {
-	if (_port.empty())
-		_port.push_back(80);
-	if (_server_name.empty())
-		_server_name.push_back("");
-	if (_routes.empty())
-		_routes["/"] = "index.html";
-	std::cout << _root_dir.front() << std::endl;
-	std::cout << _port.front() << std::endl;
-	std::cout << _server_name.front() << std::endl;
-	std::cout << _routes.begin()->first << " " << _routes.begin()->second << std::endl;
-	std::cout << _root_dir.front() << std::endl;
+	std::cout << map.find("listen")->second << std::endl;
+	std::cout << map.find("server_name")->second << std::endl;
+	std::cout << map.find("root")->second << std::endl;
+	std::cout << map.find("index")->second << std::endl;
 }
 
 // handles parsing of the server directive
@@ -115,50 +104,48 @@ void Config::locationDirective(std::ifstream& input)
 			if ((delim = line.find(*i)) != std::string::npos)
 				break;
 		if (*i == "autoindex ")
-			std::cout << line.substr(delim) << std::endl;
+			std::cout << /*line.substr(delim)*/ "found something :)" << std::endl;
 		else if (*i == "allow_methods ")
-			std::cout << line.substr(delim) << std::endl;
+			std::cout << /*line.substr(delim)*/ "found something :)" << std::endl;
 		else if (*i == "root ")
-			std::cout << line.substr(delim) << std::endl;
+			std::cout << /*line.substr(delim)*/ "found something :)" << std::endl;
 		else if (*i == "index ")
-			std::cout << line.substr(delim) << std::endl;
+			std::cout << /*line.substr(delim)*/ "found something :)" << std::endl;
 	}
 }
 
 // handles parsing of the server directive
-void Config::serverDirective(std::ifstream& input)
+std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 {
 	std::string line;
 	std::string a[] = {"server_name ", "listen ", "location ", "root ", "index "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
+	std::map<std::string, std::string> map;
 
 	while (input.good())
 	{
 		// if eof is reached without finding closing bracket throw missing bracket in server directive 
-		std::getline(input, line, ';');
+		std::getline(input, line); // rewrite to only read until newline to deal with comments easier. check for semicolon at end of each line and remove any line with # in beginning
 		line = trim(line);
-		if (line.empty())
+		if (line.empty() || line.front() == '#')
 			continue;
 		for (i = params.begin(); i != params.end(); ++i)
+		{
 			if ((line.compare(0, i.base()->length(), *i)) == 0)
+			{
+				size_t delim = line.find(';');
+				if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
+					throw std::runtime_error("missing semicolon in server directive");
+				map[trim(*i)] = trim(line.substr(i.base()->length(), delim-i.base()->length()));
 				break;
-		if (checkSemicolon(params, line.substr(i.base()->length())))
-			throw std::runtime_error("missing semicolon in server directive");
-		if (*i == "server_name ")
-			_server_name.push_back(trim(line.substr(i.base()->length())));
-		else if (*i == "listen ")
-			_port.push_back(ft_stoi(trim(line.substr(i.base()->length()))));
-		else if (*i == "root ")
-			_root_dir.push_back(trim(line.substr(i.base()->length())));
-		else if (*i == "location ")
-			locationDirective(input);
-		else if (*i == "index ")
-			_routes["/"] = trim(line.substr(i.base()->length()));
-		else
-			throw std::runtime_error("invalid argument");
+			}
+			else if (next(i) == params.end())
+				throw std::runtime_error("invalid argument");
+		}
 	}
-	checkConf();
+	checkConf(map);
+	return map;
 }
 
 void Config::parseConf(std::string path)
@@ -174,14 +161,15 @@ void Config::parseConf(std::string path)
 			if (line.find("server") != std::string::npos)
 			{
 				if (line.find('{') == std::string::npos)
+				// fix opening bracket not being found if on same line as server directive start
 					findOpeningBracket(input);
-				serverDirective(input);
+				_configs.push_back(serverDirective(input));
 			}
 		}
 	}
 }
 
-Config::Config(std::string path)
+Config::Config(const std::string& path)
 {
 	try
 	{
@@ -189,7 +177,7 @@ Config::Config(std::string path)
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
+		std::cerr << e.what() << "exit here" << '\n';
 	}
 }
 
@@ -222,4 +210,3 @@ std::map<std::string, std::string> Config::getRoutes()
 {
 	return _routes;
 }
-

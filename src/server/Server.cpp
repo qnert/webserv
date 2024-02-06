@@ -5,10 +5,11 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/31 17:07:49 by rnauke           ###   ########.fr       */
+/*   Created: Invalid date        by                   #+#    #+#             */
+/*   Updated: 2024/02/06 18:29:29 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #include "../../includes/Server.hpp"
 
@@ -56,6 +57,7 @@ Server::~Server() {}
 // sends an answer to the client
 void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 {
+  static std::string tmp;
   const std::string& requestType = this->_requests.getRequestType();
 
   if (requestType == "GET")
@@ -65,46 +67,72 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 
     if (!msg.empty())
     {
-      int statusCode = this->_requests.getRefreshed() ? 304 : 200;
+      int statusCode = (this->_requests.getMapValue("Cache-Control") != "") ? 304 : 200;
+      // int statusCode = 200;
       std::string response = check_and_add_header(statusCode, requestType, data, codes) + msg;
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
+    else if (this->_requests.getUri().find("/?searchTerm=") != std::string::npos){
+      size_t start = this->_requests.getUri().find("/?searchTerm=") + 13;
+      size_t end = this->_requests.getUri().size();
+      std::string filename = this->_requests.getUri().substr(start, end - start);
+      if (tmp == filename)
+      {
+        msg = storeFileIntoString(this->_requests, "responseFiles/erased.html");
+        send(this->_clientPollfds[idx].fd, (check_and_add_header(200, "html", data, codes) + msg).c_str(),
+          (check_and_add_header(200, "html", data, codes) + msg).size(), 0);
+      }
+      else
+      {
+        msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
+        send(this->_clientPollfds[idx].fd, (check_and_add_header(404, "html", data, codes) + msg).c_str(),
+          (check_and_add_header(404, "html", data, codes) + msg).size(), 0);
+      }
+      this->_clientPollfds[idx].events = POLLIN;
+      return ;
+    }
     else
     {
-      std::string errorMsg = storeFileIntoString(this->_requests, "responseFiles/error.html");
+      std::string errorMsg = storeFileIntoString(this->_requests, "responseFiles/error404.html");
       std::string response = check_and_add_header(404, ".html", data, codes) + errorMsg;
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
   }
-  if (requestType == "POST" && this->_requests.getUri() == "/responseFiles/first.cgi")
-  {
-    int pid = fork();
-    if (pid == 0)
-        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
-    waitpid(0, NULL, 0);
-  }
-  else if (this->_requests.getUri() == "upload")
+  else if (requestType == "POST" && this->_requests.getUri() == "/responseFiles/first.cgi")
   {
     pid_t pid = fork();
     if (pid == 0)
-      handle_Request_post(this->_clientPollfds[idx].fd, this->_requests);
-    waitpid(pid, NULL, 0);
+        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
+    waitpid(0, NULL, 0);
   }
+  else if (this->_requests.getUri() == "upload"
+        || (this->_requests.getRequestType() == "POST" && this->_requests.getUri() == "/responseFiles/cpp_fileupload.cgi"))
+  {
+        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
+  }
+  else if (this->_requests.getRequestType() == "DELETE")
+  {
+    tmp = handle_file_erasing(this->_requests);
+  }
+  else
+  {
+    std::string msg = storeFileIntoString(this->_requests, "responseFiles/error501.html");
+    std::string response = check_and_add_header(501, requestType, data, codes) + msg;
+    send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+  }
+  this->_clientPollfds[idx].events = POLLIN;
 }
 
 // checks if readable data is available at the client socket
 void  Server::checkRevents(int i)
 {
-  if (this->_clientPollfds[i].revents != POLLIN)
+  if (this->_clientPollfds[i].revents & POLLHUP)
+    this->removeAndCompressFds(i);
+  else if (this->_clientPollfds[i].revents & POLLERR)
   {
-    if (this->_clientPollfds[i].revents & POLLHUP)
-      this->removeAndCompressFds(i);
-    else if (this->_clientPollfds[i].revents & POLLERR)
-    {
-      perror("POLLERR");
-      this->cleanUpClientFds();
-      throw(std::runtime_error(""));
-    }
+    perror("POLLERR");
+    this->cleanUpClientFds();
+    throw(std::runtime_error(""));
   }
 }
 
@@ -137,12 +165,12 @@ void  Server::acceptConnections(void)
 }
 
 // recieves, parses and handles client requests
-void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
+void  Server::handleRequest(int i)
 {
   while (true)
   {
     char buffer[10000];
-    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), 0);
+    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), O_NONBLOCK);
 
     if (bytesRead < 0) {
       break;
@@ -153,11 +181,10 @@ void  Server::handleRequest(MIME_type& data, Statuscodes& codes, int i)
       break;
     }
     buffer[bytesRead] = '\0';
+    this->_clientPollfds[i].events = POLLOUT;
     std::cout << buffer << std::endl;
     std::cout << "number of clients connected: " << this->_nfds << std::endl;
     this->_requests.parseRequestBuffer(buffer);
-    this->sendAnswer(data, codes, i);
-    this->_requests.cleanUp();
   }
 }
 
@@ -183,10 +210,18 @@ void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
 
       this->checkRevents(i);
 
-      if (this->_clientPollfds[i].fd == this->_serverSocket)
-        this->acceptConnections();
-      else
-        this->handleRequest(data, codes, i);
+      if (this->_clientPollfds[i].revents == POLLIN)
+      {
+        if (this->_clientPollfds[i].fd == this->_serverSocket)
+          this->acceptConnections();
+        else
+          this->handleRequest(i);
+      }
+      else if (this->_clientPollfds[i].revents == POLLOUT)
+      {
+        this->sendAnswer(data, codes, i);
+        this->_requests.cleanUp();
+      }
     } // * END OF CLIENT LOOP *
   } // * END OF SERVER *
   this->cleanUpClientFds();
