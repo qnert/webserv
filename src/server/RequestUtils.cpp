@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/06 13:24:08 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/06 15:47:49 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
   std::string filename = get_filename(req.getBody());
   if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
     std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
-    msg = check_and_add_header(201, "html", data, codes) + msg;
+    msg = check_and_add_header(400, "html", data, codes) + msg;
     if (msg != "")
       send(fd, msg.c_str(), msg.size(), 0);
     return ;

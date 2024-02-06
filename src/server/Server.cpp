@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/05 16:23:25 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/06 16:10:46 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,12 +74,14 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
       size_t start = this->_requests.getUri().find("/?searchTerm=") + 13;
       size_t end = this->_requests.getUri().size();
       std::string filename = this->_requests.getUri().substr(start, end - start);
-      if (tmp == filename){
+      if (tmp == filename)
+      {
         msg = storeFileIntoString(this->_requests, "responseFiles/erased.html");
         send(this->_clientPollfds[idx].fd, (check_and_add_header(200, "html", data, codes) + msg).c_str(),
           (check_and_add_header(200, "html", data, codes) + msg).size(), 0);
       }
-      else{
+      else
+      {
         msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
         send(this->_clientPollfds[idx].fd, (check_and_add_header(404, "html", data, codes) + msg).c_str(),
           (check_and_add_header(404, "html", data, codes) + msg).size(), 0);
