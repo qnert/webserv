@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 14:02:59 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/06 18:47:55 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,9 @@ private:
   RequestParser              _requests;
 
   void         sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx);
+  void         getMethod(MIME_type& data, Statuscodes& codes, size_t idx, std::string& tmp);
+  void         postMethod(MIME_type& data, Statuscodes& codes, size_t idx);
+  void         notImplemented(MIME_type& data, Statuscodes& codes, size_t idx);
   void         handleRequest(int i);
   void         checkRevents(int i);
   void         acceptConnections(void);
