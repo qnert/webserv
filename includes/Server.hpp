@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 18:29:05 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/06 18:32:55 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 #include <string>
 #include <ctime>
 
-#define PORT 1234
+#define PORT 8080
 #define MAX_CLIENTS 200
 #define CLIENT_TIMEOUT 1
 
