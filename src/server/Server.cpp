@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 18:02:25 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/06 18:57:09 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,68 +57,16 @@ Server::~Server() {}
 void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 {
   static std::string tmp;
-  const std::string& requestType = this->_requests.getRequestType();
+  const std::string requestType = this->_requests.getRequestType();
 
   if (requestType == "GET")
-  {
-    std::string uri = this->_requests.getUri();
-    std::string msg = storeFileIntoString(this->_requests, uri);
-
-    if (!msg.empty())
-    {
-      int statusCode = (this->_requests.getMapValue("Cache-Control") != "") ? 304 : 200;
-      // int statusCode = 200;
-      std::string response = check_and_add_header(statusCode, requestType, data, codes) + msg;
-      send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
-    }
-    else if (this->_requests.getUri().find("/?searchTerm=") != std::string::npos){
-      size_t start = this->_requests.getUri().find("/?searchTerm=") + 13;
-      size_t end = this->_requests.getUri().size();
-      std::string filename = this->_requests.getUri().substr(start, end - start);
-      if (tmp == filename)
-      {
-        msg = storeFileIntoString(this->_requests, "responseFiles/erased.html");
-        send(this->_clientPollfds[idx].fd, (check_and_add_header(200, "html", data, codes) + msg).c_str(),
-          (check_and_add_header(200, "html", data, codes) + msg).size(), 0);
-      }
-      else
-      {
-        msg = storeFileIntoString(this->_requests, "responseFiles/error.html");
-        send(this->_clientPollfds[idx].fd, (check_and_add_header(404, "html", data, codes) + msg).c_str(),
-          (check_and_add_header(404, "html", data, codes) + msg).size(), 0);
-      }
-      this->_clientPollfds[idx].events = POLLIN;
-      return ;
-    }
-    else
-    {
-      std::string errorMsg = storeFileIntoString(this->_requests, "responseFiles/error404.html");
-      std::string response = check_and_add_header(404, ".html", data, codes) + errorMsg;
-      send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
-    }
-  }
-  else if (requestType == "POST" && this->_requests.getUri() == "/responseFiles/first.cgi")
-  {
-    pid_t pid = fork();
-    if (pid == 0)
-        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
-    waitpid(0, NULL, 0);
-  }
-  else if (this->_requests.getUri() == "upload"
-        || (this->_requests.getRequestType() == "POST" && this->_requests.getUri() == "/responseFiles/cpp_fileupload.cgi"))
-  {
-        handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
-  }
-  else if (this->_requests.getRequestType() == "DELETE")
-  {
+    this->getMethod(data, codes, idx, tmp);
+  else if (requestType == "POST")
+    this->postMethod(data, codes, idx);
+  else if (requestType == "DELETE")
     tmp = handle_file_erasing(this->_requests);
-  }
   else
-  {
-    std::string msg = storeFileIntoString(this->_requests, "responseFiles/error501.html");
-    std::string response = check_and_add_header(501, requestType, data, codes) + msg;
-    send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
-  }
+    this->notImplemented(data, codes, idx);
   this->_clientPollfds[idx].events = POLLIN;
 }
 
