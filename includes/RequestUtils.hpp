@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:34 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/08 15:00:08 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 16:38:13 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void  handle_name_input(int fd, RequestParser req);
 
 void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes& codes);
 
-std::string  handle_file_erasing(RequestParser req);
+std::string  handle_file_erasing(int fd, RequestParser req, Statuscodes codes);
 
 void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes);
 
