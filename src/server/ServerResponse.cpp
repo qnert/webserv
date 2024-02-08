@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 18:59:17 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 14:15:04 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,17 +29,17 @@ void  Server::getMethod(MIME_type& data, Statuscodes& codes, size_t idx, std::st
     size_t start = uri.find("/?searchTerm=") + 13;
     size_t end = uri.size();
     std::string filename = uri.substr(start, end - start);
-
+    std::cout << tmp << " " << filename << std::endl;
     if (tmp == filename)
     {
-      std::string response = check_and_add_header(200, "html", data, codes) + msg;
       msg = storeFileIntoString(this->_requests, "responseFiles/erased.html");
+      std::string response = check_and_add_header(200, "html", data, codes) + msg;
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
     else
     {
-      std::string response = check_and_add_header(404, "html", data, codes) + msg;
       msg = storeFileIntoString(this->_requests, "responseFiles/error404.html");
+      std::string response = check_and_add_header(404, "html", data, codes) + msg;
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
   }
@@ -61,8 +61,9 @@ void  Server::postMethod(MIME_type& data, Statuscodes& codes, size_t idx)
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
     waitpid(0, NULL, 0);
   }
-  else if (uri == "upload" && uri == "/responseFiles/cpp_fileupload.cgi")
+  else if (uri == "upload" || uri == "/responseFiles/cpp_fileupload.cgi"){
     handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
+  }
 }
 
 void  Server::notImplemented(MIME_type& data, Statuscodes& codes, size_t idx)
