@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 16:37:28 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/08 17:43:56 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,15 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
   if (requestType == "GET")
     this->getMethod(data, codes, idx, tmp);
   else if (requestType == "POST" || this->_requests.getUri() == "upload"){
-    this->postMethod(data, codes, idx);
+    if (this->postMethod(data, codes, idx) != 0){
+      this->notImplemented(data, codes, idx);
+    }
   }
   else if (requestType == "DELETE")
     tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, codes);
-  else
+  else{
     this->notImplemented(data, codes, idx);
+  }
   this->_clientPollfds[idx].events = POLLIN;
 }
 

@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/08 16:40:47 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/08 17:42:48 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,12 @@ void  handle_name_input(int fd, RequestParser req){
 
 void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes& codes)
 {
+  if (req.getBody() == ""){
+    std::string msg;
+    msg = check_and_add_header(204, "No Content", Server::ft_itos(0), codes);
+    send(fd, msg.c_str(), msg.size(), 0);
+    return ;
+  }
   std::string filename = get_filename(req.getBody());
   if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
     std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
@@ -148,7 +154,7 @@ std::string handle_file_erasing(int fd, RequestParser req, Statuscodes codes){
 void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
   if (req.getUri() == "/responseFiles/first.cgi")
     handle_name_input(fd, req);
-  else if (req.getUri() == "upload"){
+  else if (req.getUri() == "upload" || req.getUri() == "/responseFiles/cpp_fileupload.cgi"){
     handle_file_upload(fd, req, data, codes);
   }
 }

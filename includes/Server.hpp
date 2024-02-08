@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 15:00:49 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 17:28:29 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ private:
 
   void         sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx);
   void         getMethod(MIME_type& data, Statuscodes& codes, size_t idx, std::string& tmp);
-  void         postMethod(MIME_type& data, Statuscodes& codes, size_t idx);
+  int          postMethod(MIME_type& data, Statuscodes& codes, size_t idx);
   void         notImplemented(MIME_type& data, Statuscodes& codes, size_t idx);
   void         handleRequest(int i);
   void         checkRevents(int i);
