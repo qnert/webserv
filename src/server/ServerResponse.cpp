@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 15:05:05 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 15:21:47 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@ void  Server::getMethod(MIME_type& data, Statuscodes& codes, size_t idx, std::st
   if (!msg.empty())
   {
     std::string length = Server::ft_itos(msg.size());
-    int statusCode = (this->_requests.getMapValue("Cache-Control") != "") ? 304 : 200;
-    std::string response = check_and_add_header(statusCode, data[requestType], length, codes) + msg;
+    std::string response = check_and_add_header(200, data[requestType], length, codes) + msg;
     send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
   }
   else if (uri.find("/?searchTerm=") != std::string::npos) // searching for file in url if it's already there
