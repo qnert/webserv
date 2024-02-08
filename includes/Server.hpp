@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 15:00:49 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 17:40:53 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 
 #define PORT 8080
 #define MAX_CLIENTS 200
-#define CLIENT_TIMEOUT 1
+#define CLIENT_TIMEOUT 5
 
 class Server
 {
@@ -48,6 +48,8 @@ private:
   void         getMethod(MIME_type& data, Statuscodes& codes, size_t idx, std::string& tmp);
   void         postMethod(MIME_type& data, Statuscodes& codes, size_t idx);
   void         notImplemented(MIME_type& data, Statuscodes& codes, size_t idx);
+  void         methodNotAllowed(MIME_type& data, Statuscodes& codes, size_t idx);
+
   void         handleRequest(int i);
   void         checkRevents(int i);
   void         acceptConnections(void);
