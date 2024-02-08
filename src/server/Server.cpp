@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 17:43:56 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/08 18:18:38 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
-Server::Server() : _reuse(1), _nfds(1), _currSize(0)
+Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes), _reuse(1), _nfds(1), _currSize(0)
 {
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
@@ -54,23 +54,22 @@ Server::Server() : _reuse(1), _nfds(1), _currSize(0)
 Server::~Server() {}
 
 // sends an answer to the client
-void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
+void  Server::sendAnswer(size_t idx)
 {
   static std::string tmp;
   const std::string requestType = this->_requests.getRequestType();
 
   if (requestType == "GET")
-    this->getMethod(data, codes, idx, tmp);
-  else if (requestType == "POST" || this->_requests.getUri() == "upload"){
-    if (this->postMethod(data, codes, idx) != 0){
+    this->getMethod(idx, tmp);
+  else if (requestType == "POST" || this->_requests.getUri() == "upload")
+  {
+    if (this->postMethod(data, codes, idx) != 0)
       this->notImplemented(data, codes, idx);
-    }
   }
   else if (requestType == "DELETE")
-    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, codes);
-  else{
+    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, this->_codes);
+  else
     this->notImplemented(data, codes, idx);
-  }
   this->_clientPollfds[idx].events = POLLIN;
 }
 
@@ -140,7 +139,7 @@ void  Server::handleRequest(int i)
 }
 
 // main server loop
-void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
+void  Server::serverLoop()
 {
   while (true)
   {
@@ -170,7 +169,7 @@ void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
       }
       else if (this->_clientPollfds[i].revents == POLLOUT)
       {
-        this->sendAnswer(data, codes, i);
+        this->sendAnswer(i);
         this->_requests.cleanUp();
       }
     } // * END OF CLIENT LOOP *

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/08 17:42:48 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/08 18:10:47 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "../../includes/RequestUtils.hpp"
 #include "../../includes/Server.hpp"
 
-std::string  storeFileIntoString(RequestParser req, std::string path)
+std::string  storeFileIntoString(RequestParser& req, std::string path)
 {
   if (req.getUri() == "/" && path != "responseFiles/error501.html")
     path = req.getCurrdir() + "responseFiles/index.html";
@@ -87,7 +87,7 @@ std::string get_filename(std::string body){
   return (filename);
 }
 
-void  handle_name_input(int fd, RequestParser req){
+void  handle_name_input(int fd, RequestParser& req){
   char *argv[5];
   std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
   std::string file_fd = Server::ft_itos(fd);
@@ -102,7 +102,7 @@ void  handle_name_input(int fd, RequestParser req){
   execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
 }
 
-void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes& codes)
+void  handle_file_upload(int fd, RequestParser& req, MIME_type& data, Statuscodes& codes)
 {
   if (req.getBody() == ""){
     std::string msg;
@@ -132,7 +132,7 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
     send(fd, msg.c_str(), msg.size(), 0);
 }
 
-std::string handle_file_erasing(int fd, RequestParser req, Statuscodes codes){
+std::string handle_file_erasing(int fd, RequestParser& req, Statuscodes& codes){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri();
   if (filepath.find("responseFiles/Upload") == std::string::npos){
@@ -151,7 +151,7 @@ std::string handle_file_erasing(int fd, RequestParser req, Statuscodes codes){
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
 
-void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
+void  handle_Request_post(int fd, RequestParser& req, MIME_type& data, Statuscodes& codes){
   if (req.getUri() == "/responseFiles/first.cgi")
     handle_name_input(fd, req);
   else if (req.getUri() == "upload" || req.getUri() == "/responseFiles/cpp_fileupload.cgi"){
@@ -159,7 +159,7 @@ void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscode
   }
 }
 
-std::string  check_and_add_header(int status, std::string const& type, std::string const& length, Statuscodes codes){
+std::string  check_and_add_header(int status, std::string const& type, std::string const& length, Statuscodes& codes){
   std::ostringstream header;
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
   if (status != 204)
