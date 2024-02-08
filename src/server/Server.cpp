@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 18:57:09 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 14:20:04 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,9 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
 
   if (requestType == "GET")
     this->getMethod(data, codes, idx, tmp);
-  else if (requestType == "POST")
+  else if (requestType == "POST" || this->_requests.getUri() == "upload"){
     this->postMethod(data, codes, idx);
+  }
   else if (requestType == "DELETE")
     tmp = handle_file_erasing(this->_requests);
   else
@@ -130,7 +131,7 @@ void  Server::handleRequest(int i)
     buffer[bytesRead] = '\0';
     this->_clientPollfds[i].events = POLLOUT;
     std::cout << buffer << std::endl;
-    std::cout << "number of clients connected: " << this->_nfds << std::endl;
+    // std::cout << "number of clients connected: " << this->_nfds << std::endl;
     this->_requests.parseRequestBuffer(buffer);
   }
 }
@@ -141,7 +142,7 @@ void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
   while (true)
   {
     std::cout << "Waiting for poll()..." << std::endl;
-    if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
+    if (poll(this->_clientPollfds, this->_nfds, 3000) < 0) {
       perror("poll");
       close(this->_serverSocket);
       throw(std::runtime_error(""));

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/05 17:04:08 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 14:01:29 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,8 +136,9 @@ std::string handle_file_erasing(RequestParser req){
 void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes){
   if (req.getUri() == "/responseFiles/first.cgi")
     handle_name_input(fd, req);
-  else if (req.getUri() == "upload")
+  else if (req.getUri() == "upload"){
     handle_file_upload(fd, req, data, codes);
+  }
 }
 
 std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
