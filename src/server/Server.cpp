@@ -61,13 +61,15 @@ void  Server::sendAnswer(size_t idx)
 
   if (requestType == "GET")
     this->getMethod(idx, tmp);
-  else if (requestType == "POST" || this->_requests.getUri() == "upload"){
-    this->postMethod(idx);
+  else if (requestType == "POST" || this->_requests.getUri() == "upload")
+  {
+    if (this->postMethod(data, codes, idx) != 0)
+      this->notImplemented(data, codes, idx);
   }
   else if (requestType == "DELETE")
     tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, this->_codes);
   else
-    this->notImplemented(idx);
+    this->notImplemented(data, codes, idx);
   this->_clientPollfds[idx].events = POLLIN;
 }
 

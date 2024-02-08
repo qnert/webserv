@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
 /*   Updated: 2024/02/08 18:25:09 by njantsch         ###   ########.fr       */
@@ -48,7 +48,7 @@ private:
 
   void                sendAnswer(size_t idx);
   void                getMethod(size_t idx, std::string& tmp);
-  void                postMethod(size_t idx);
+  int                 postMethod(size_t idx);
   void                notImplemented(size_t idx);
   void                methodNotAllowed(size_t idx);
 

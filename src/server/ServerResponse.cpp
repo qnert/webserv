@@ -53,7 +53,7 @@ void  Server::getMethod(size_t idx, std::string& tmp)
   }
 }
 
-void  Server::postMethod(size_t idx)
+int  Server::postMethod(size_t idx)
 {
   std::string uri = this->_requests.getUri();
   if (uri == "/responseFiles/first.cgi")
@@ -62,10 +62,13 @@ void  Server::postMethod(size_t idx)
     if (pid == 0)
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, this->_data, this->_codes);
     waitpid(0, NULL, 0);
+    return (0);
   }
   else if (uri == "upload" || uri == "/responseFiles/cpp_fileupload.cgi"){
     handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, this->_data, this->_codes);
+    return (0);
   }
+  return (1);
 }
 
 void  Server::notImplemented(size_t idx)
