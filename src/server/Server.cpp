@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 15:08:36 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 16:37:28 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
     this->postMethod(data, codes, idx);
   }
   else if (requestType == "DELETE")
-    tmp = handle_file_erasing(this->_requests);
+    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, codes);
   else
     this->notImplemented(data, codes, idx);
   this->_clientPollfds[idx].events = POLLIN;

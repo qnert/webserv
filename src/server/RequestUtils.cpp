@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/08 15:04:35 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 16:40:47 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <iostream>
 #include <sstream>
 #include "../../includes/RequestUtils.hpp"
+#include "../../includes/Server.hpp"
 
 std::string  storeFileIntoString(RequestParser req, std::string path)
 {
@@ -125,13 +126,22 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
     send(fd, msg.c_str(), msg.size(), 0);
 }
 
-std::string handle_file_erasing(RequestParser req){
+std::string handle_file_erasing(int fd, RequestParser req, Statuscodes codes){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri();
-  if (access(filepath.c_str(), F_OK) != 0){
+  if (filepath.find("responseFiles/Upload") == std::string::npos){
+    msg = check_and_add_header(403, "Forbidden", Server::ft_itos(0), codes);
+    send(fd, msg.c_str(), msg.size(), 0);
+    return ("");
+  }
+  else if (access(filepath.c_str(), F_OK) != 0){
+    msg = check_and_add_header(404, "Not Found", Server::ft_itos(0), codes);
+    send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
   std::remove(filepath.c_str());
+  msg = check_and_add_header(202, "Accepted", Server::ft_itos(0), codes);
+  send(fd, msg.c_str(), msg.size(), 0);
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
 
