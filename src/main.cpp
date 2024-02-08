@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 12:44:54 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/08 18:17:31 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@ int main(int argc, char** argv)
   {
     MIME_type     data_types;
     Statuscodes   statuscodes;
-    Server httpServer;
-	if (argc == 2)
-		Config cfg = Config(argv[1]);
-    httpServer.serverLoop(data_types, statuscodes);
+    Server httpServer(data_types, statuscodes);
+	  if (argc == 2)
+	    Config cfg = Config(argv[1]);
+    httpServer.serverLoop();
   }
   catch(const std::exception& e)
   {

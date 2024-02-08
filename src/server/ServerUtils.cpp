@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 14:57:33 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 18:06:52 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,3 +43,7 @@ std::string Server::ft_itos(size_t num)
   oss << num;
   return (oss.str());
 }
+
+MIME_type& Server::getMimeType(void) {return (this->_data);}
+
+Statuscodes& Server::getStatuscodes(void) {return (this->_codes);}
