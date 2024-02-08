@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 17:39:11 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 17:42:36 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void  Server::getMethod(MIME_type& data, Statuscodes& codes, size_t idx, std::st
   }
 }
 
-void  Server::postMethod(MIME_type& data, Statuscodes& codes, size_t idx)
+int  Server::postMethod(MIME_type& data, Statuscodes& codes, size_t idx)
 {
   std::string uri = this->_requests.getUri();
   if (uri == "/responseFiles/first.cgi")
@@ -62,10 +62,13 @@ void  Server::postMethod(MIME_type& data, Statuscodes& codes, size_t idx)
     if (pid == 0)
         handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
     waitpid(0, NULL, 0);
+    return (0);
   }
   else if (uri == "upload" || uri == "/responseFiles/cpp_fileupload.cgi"){
     handle_Request_post(this->_clientPollfds[idx].fd, this->_requests, data, codes);
+    return (0);
   }
+  return (1);
 }
 
 void  Server::notImplemented(MIME_type& data, Statuscodes& codes, size_t idx)
