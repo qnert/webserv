@@ -30,7 +30,7 @@
 
 #define PORT 8080
 #define MAX_CLIENTS 200
-#define CLIENT_TIMEOUT 1
+#define CLIENT_TIMEOUT 5
 
 class Server
 {
@@ -48,6 +48,8 @@ private:
   void         getMethod(MIME_type& data, Statuscodes& codes, size_t idx, std::string& tmp);
   int          postMethod(MIME_type& data, Statuscodes& codes, size_t idx);
   void         notImplemented(MIME_type& data, Statuscodes& codes, size_t idx);
+  void         methodNotAllowed(MIME_type& data, Statuscodes& codes, size_t idx);
+
   void         handleRequest(int i);
   void         checkRevents(int i);
   void         acceptConnections(void);

@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ServerResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
 /*   Updated: 2024/02/08 17:42:36 by skunert          ###   ########.fr       */
@@ -76,5 +76,13 @@ void  Server::notImplemented(MIME_type& data, Statuscodes& codes, size_t idx)
   std::string msg = storeFileIntoString(this->_requests, "responseFiles/error501.html");
   std::string length = Server::ft_itos(msg.size());
   std::string response = check_and_add_header(501, data[this->_requests.getRequestType()], length, codes) + msg;
+  send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+}
+
+void  Server::methodNotAllowed(MIME_type& data, Statuscodes& codes, size_t idx)
+{
+  std::string msg = storeFileIntoString(this->_requests, "responseFiles/error405.html");
+  std::string length = Server::ft_itos(msg.size());
+  std::string response = check_and_add_header(405, data[this->_requests.getRequestType()], length, codes) + msg;
   send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
 }
