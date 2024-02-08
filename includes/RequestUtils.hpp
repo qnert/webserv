@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:34 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/05 16:23:15 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/08 15:00:08 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,4 +38,4 @@ std::string  handle_file_erasing(RequestParser req);
 
 void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes);
 
-std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes);
+std::string  check_and_add_header(int status, std::string const& type, std::string const& length, Statuscodes codes);

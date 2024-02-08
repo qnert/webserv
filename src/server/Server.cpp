@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 14:20:04 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/08 15:08:36 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ void  Server::serverLoop(MIME_type& data, Statuscodes& codes)
   while (true)
   {
     std::cout << "Waiting for poll()..." << std::endl;
-    if (poll(this->_clientPollfds, this->_nfds, 3000) < 0) {
+    if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
       perror("poll");
       close(this->_serverSocket);
       throw(std::runtime_error(""));
