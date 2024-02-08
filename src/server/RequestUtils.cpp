@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/08 14:01:29 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/08 15:04:35 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,8 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
   std::string filename = get_filename(req.getBody());
   if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
     std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
-    msg = check_and_add_header(400, "html", data, codes) + msg;
+    std::string length = Server::ft_itos(msg.size());
+    msg = check_and_add_header(400, data["html"], length, codes) + msg;
     if (msg != "")
       send(fd, msg.c_str(), msg.size(), 0);
     return ;
@@ -118,7 +119,8 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
   upload.write(filecontent.c_str(), filecontent.size());
   upload.close();
   std::string msg = storeFileIntoString(req, "responseFiles/success.html");
-  msg = check_and_add_header(201, "html", data, codes) + msg;
+  std::string length = Server::ft_itos(msg.size());
+  msg = check_and_add_header(201, data["html"], length, codes) + msg;
   if (msg != "")
     send(fd, msg.c_str(), msg.size(), 0);
 }
@@ -141,11 +143,12 @@ void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscode
   }
 }
 
-std::string  check_and_add_header(int status, std::string const& type, MIME_type data, Statuscodes codes){
+std::string  check_and_add_header(int status, std::string const& type, std::string const& length, Statuscodes codes){
   std::ostringstream header;
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
   if (status != 204)
-    header << "Content-Type: "<< data[type] << "\r\n";
+    header << "Content-Type: " << type << "\r\n";
+  header << "Content-Length: " << length << "\r\n";
   header << "Connection: keep-alive" << "\r\n";
   header << "\r\n";
   return (header.str());

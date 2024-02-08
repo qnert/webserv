@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/01/29 15:49:04 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/08 14:57:33 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void  Server::checkClientTimeout(int i)
   }
 }
 
-std::string Server::ft_itos(int num)
+std::string Server::ft_itos(size_t num)
 {
   std::ostringstream oss;
   oss << num;
