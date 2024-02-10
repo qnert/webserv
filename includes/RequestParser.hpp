@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/10 18:23:26 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/10 19:37:02 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ private:
   std::map<std::string, std::string> _requestFields;
   std::string                        _curr_dir;
   std::string                        _fileType;
+  std::string                        _boundary;
   bool                               _status;
 
 public:
@@ -36,6 +37,7 @@ public:
   void  cleanUp();
 
   const std::string& getFileType() const;
+  const std::string& getBoundary() const;
   const std::string& getRequestType();
   const std::string& getUri();
   const std::string& getHost();

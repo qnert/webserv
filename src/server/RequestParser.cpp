@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/10 18:24:50 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/10 19:41:14 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,11 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
     this->_fileType = "html";
   else
     this->_fileType = this->_requestFields["Uri"].substr(this->_requestFields["Uri"].find_last_of('.') + 1, this->_requestFields["Uri"].size() - this->_requestFields["Uri"].find_last_of('.'));
+  size_t  bound_start = this->_requestFields["Content-Type"].find("boundary=");
+  if (bound_start == std::string::npos)
+    this->_boundary = "";
+  else
+    this->_boundary = this->_requestFields["Content-Type"].substr(bound_start + 9, this->_requestFields["Content-Type"].length() - bound_start + 9);
   if (this->_requestFields["Uri"] == "/responseFiles/cpp_uploadfile.cgi")
     this->_status = true;
 }
@@ -81,6 +86,8 @@ const std::string& RequestParser::getBody() {return (this->_requestFields["Body"
 const std::string& RequestParser::getCurrdir() {return (this->_curr_dir);}
 
 const std::string& RequestParser::getFileType() const {return (this->_fileType);}
+
+const std::string& RequestParser::getBoundary() const{return (this->_boundary);}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {

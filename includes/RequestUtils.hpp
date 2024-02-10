@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:34 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/10 18:25:44 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/10 19:39:59 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ std::string get_first_name(std::string body);
 
 std::string get_last_name(std::string body);
 
-std::string get_filecontent(std::string body);
+std::string get_filecontent(std::string boundary, std::string body);
 
 std::string get_filename(std::string body);
 
