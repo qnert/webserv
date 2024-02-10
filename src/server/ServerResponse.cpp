@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 18:14:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/10 17:16:15 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void  Server::getMethod(size_t idx, std::string& tmp)
   if (!msg.empty())
   {
     std::string length = Server::ft_itos(msg.size());
-    std::string response = check_and_add_header(200, this->_data[requestType], length, this->_codes) + msg;
+    std::string response = check_and_add_header(200, this->_data[requestType], length, this->_codes, this->_requests) + msg;
     send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
   }
   else if (uri.find("/?searchTerm=") != std::string::npos) // searching for file in url if it's already there
@@ -33,14 +33,14 @@ void  Server::getMethod(size_t idx, std::string& tmp)
     {
       msg = storeFileIntoString(this->_requests, "responseFiles/erased.html");
       std::string length = Server::ft_itos(msg.size());
-      std::string response = check_and_add_header(200, this->_data["html"], length, this->_codes) + msg;
+      std::string response = check_and_add_header(200, this->_data["html"], length, this->_codes, this->_requests) + msg;
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
     else
     {
       msg = storeFileIntoString(this->_requests, "responseFiles/error404.html");
       std::string length = Server::ft_itos(msg.size());
-      std::string response = check_and_add_header(404, this->_data["html"], length, this->_codes) + msg;
+      std::string response = check_and_add_header(404, this->_data["html"], length, this->_codes, this->_requests) + msg;
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
   }
@@ -48,7 +48,7 @@ void  Server::getMethod(size_t idx, std::string& tmp)
   {
     std::string errorMsg = storeFileIntoString(this->_requests, "responseFiles/error404.html");
     std::string length = Server::ft_itos(errorMsg.size());
-    std::string response = check_and_add_header(404, this->_data["html"], length, this->_codes) + errorMsg;
+    std::string response = check_and_add_header(404, this->_data["html"], length, this->_codes, this->_requests) + errorMsg;
     send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
   }
 }
@@ -76,7 +76,7 @@ void  Server::notImplemented(size_t idx)
   std::string msg = storeFileIntoString(this->_requests, "responseFiles/error501.html");
   std::string length = Server::ft_itos(msg.size());
   std::string contentType = this->_data[this->_requests.getRequestType()];
-  std::string response = check_and_add_header(501, contentType, length, this->_codes) + msg;
+  std::string response = check_and_add_header(501, contentType, length, this->_codes, this->_requests) + msg;
   send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
 }
 
@@ -85,6 +85,6 @@ void  Server::methodNotAllowed(size_t idx)
   std::string msg = storeFileIntoString(this->_requests, "responseFiles/error405.html");
   std::string length = Server::ft_itos(msg.size());
   std::string contentType = this->_data[this->_requests.getRequestType()];
-  std::string response = check_and_add_header(405, contentType, length, this->_codes) + msg;
+  std::string response = check_and_add_header(405, contentType, length, this->_codes, this->_requests) + msg;
   send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
 }

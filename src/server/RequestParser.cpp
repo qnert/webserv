@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 17:59:19 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/10 17:52:33 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
 
   bufferStream >> this->_requestFields["Type"] \
     >> this->_requestFields["Uri"] >> this->_requestFields["Version"];
-  while (std::getline(bufferStream, line, '\n'))
+
+  for (int j = 0; std::getline(bufferStream, line, '\n'); j++)
   {
     size_t pos = line.find(':');
     if (pos != std::string::npos)
@@ -42,6 +43,8 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
       value.erase(value.end() - 1);
       this->_requestFields[key] = value;
     }
+    else if (j != 0)
+      break ;
   }
 
   size_t it = buffer.find_last_of("\n\n");
