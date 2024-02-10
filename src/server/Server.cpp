@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 17:43:56 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/10 19:42:46 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ void  Server::sendAnswer(MIME_type& data, Statuscodes& codes, size_t idx)
     this->getMethod(data, codes, idx, tmp);
   else if (requestType == "POST" || this->_requests.getUri() == "upload"){
     if (this->postMethod(data, codes, idx) != 0){
-      this->notImplemented(data, codes, idx);
+      this->methodNotAllowed(data, codes, idx);
     }
   }
   else if (requestType == "DELETE")
