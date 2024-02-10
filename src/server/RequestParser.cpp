@@ -6,24 +6,21 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 17:59:19 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/10 18:24:50 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/RequestParser.hpp"
 
-RequestParser::RequestParser() {}
+RequestParser::RequestParser() : _status(false) {}
 
 RequestParser::~RequestParser() {}
 
 void  RequestParser::parseRequestBuffer(const std::string& buffer)
 {
-  static int i;
-
-  if (i == 1){
+  if (this->_status == true){
     this->_requestFields["Uri"] = "upload";
     this->_requestFields["Body"] = buffer;
-    i = 0;
     return ;
   }
 
@@ -60,7 +57,11 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
   else
     this->_fileType = this->_requestFields["Uri"].substr(this->_requestFields["Uri"].find_last_of('.') + 1, this->_requestFields["Uri"].size() - this->_requestFields["Uri"].find_last_of('.'));
   if (this->_requestFields["Uri"] == "/responseFiles/cpp_uploadfile.cgi")
-    i = 1;
+    this->_status = true;
+}
+
+void  RequestParser::reset_status(){
+  this->_status = false;
 }
 
 void  RequestParser::cleanUp()

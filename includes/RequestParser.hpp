@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/02 11:09:41 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/10 18:23:26 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,14 @@ private:
   std::map<std::string, std::string> _requestFields;
   std::string                        _curr_dir;
   std::string                        _fileType;
+  bool                               _status;
 
 public:
   RequestParser();
   ~RequestParser();
 
   void  parseRequestBuffer(const std::string& buffer);
+  void  reset_status();
   void  cleanUp();
 
   const std::string& getFileType() const;

@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:34 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/08 16:38:13 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/10 18:25:44 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,6 @@ void  handle_file_upload(int fd, RequestParser req, MIME_type& data, Statuscodes
 
 std::string  handle_file_erasing(int fd, RequestParser req, Statuscodes codes);
 
-void  handle_Request_post(int fd, RequestParser req, MIME_type& data, Statuscodes& codes);
+void  handle_Request_post(int fd, RequestParser& req, MIME_type& data, Statuscodes& codes);
 
 std::string  check_and_add_header(int status, std::string const& type, std::string const& length, Statuscodes codes);
