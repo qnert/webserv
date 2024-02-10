@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 18:38:30 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/10 18:08:58 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,23 +64,35 @@ void  Server::sendAnswer(size_t idx)
   else if (requestType == "POST" || this->_requests.getUri() == "upload")
   {
     if (this->postMethod(idx) != 0)
-      this->notImplemented(idx);
+      this->methodNotAllowed(idx);
   }
   else if (requestType == "DELETE")
     tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, this->_codes);
   else
     this->notImplemented(idx);
-  this->_clientPollfds[idx].events = POLLIN;
+
+  if (this->_requests.getMapValue("Connection") == "close") {
+    this->removeAndCompressFds(idx);
+    std::cout << "Connection closed on idx: " << idx << std::endl;
+  }
+  else
+    this->_clientPollfds[idx].events = POLLIN;
 }
 
 // checks if readable data is available at the client socket
 void  Server::checkRevents(int i)
 {
+  int error = 0;
+
   if (this->_clientPollfds[i].revents & POLLHUP)
     this->removeAndCompressFds(i);
   else if (this->_clientPollfds[i].revents & POLLERR)
+    error = 1;
+  else if (this->_clientPollfds[i].revents & POLLNVAL)
+    error = 1;
+  if (error == 1)
   {
-    perror("POLLERR");
+    perror("poll_revents");
     this->cleanUpClientFds();
     throw(std::runtime_error(""));
   }
@@ -90,28 +102,27 @@ void  Server::checkRevents(int i)
 void  Server::acceptConnections(void)
 {
   int newClientSocket;
-  do
-  {
-    if (this->_nfds == MAX_CLIENTS) {
-      std::cout << "Maximum amount of clients reached" << std::endl;
-      break ;
-    }
-    if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
-      break;
 
-    std::cout << "New client connected..." << std::endl;
+  if (this->_nfds == MAX_CLIENTS) {
+    std::cout << "Maximum amount of clients reached" << std::endl;
+    return ;
+  }
+  if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
+    return ;
 
-    if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
-      perror("fcntl client");
+  std::cout << "New client connected..." << std::endl;
 
-    struct pollfd clientFd;
-    clientFd.fd = newClientSocket;
-    clientFd.events = POLLIN;
-    clientFd.revents = 0;
-    this->_clientPollfds[this->_nfds] = clientFd;
-    this->_timestamp[this->_nfds] = std::time(NULL);
-    this->_nfds++;
-  } while (newClientSocket != -1);
+  if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+    perror("fcntl client");
+
+  struct pollfd clientFd;
+  clientFd.fd = newClientSocket;
+  clientFd.events = POLLIN;
+  clientFd.revents = 0;
+  this->_clientPollfds[this->_nfds] = clientFd;
+  this->_timestamp[this->_nfds] = std::time(NULL);
+  this->_nfds++;
+  std::cout << "number of clients connected now: " << this->_nfds << std::endl;
 }
 
 // recieves, parses and handles client requests
@@ -127,13 +138,12 @@ void  Server::handleRequest(int i)
     }
     if (bytesRead == 0) {
       std::cout << "Client has closed the connection" << std::endl;
-      close(this->_clientPollfds[i].fd);
+      this->removeAndCompressFds(i);
       break;
     }
     buffer[bytesRead] = '\0';
     this->_clientPollfds[i].events = POLLOUT;
-    std::cout << buffer << std::endl;
-    // std::cout << "number of clients connected: " << this->_nfds << std::endl;
+    // std::cout << buffer << std::endl;
     this->_requests.parseRequestBuffer(buffer);
   }
 }
@@ -143,7 +153,6 @@ void  Server::serverLoop()
 {
   while (true)
   {
-    std::cout << "Waiting for poll()..." << std::endl;
     if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
       perror("poll");
       close(this->_serverSocket);
