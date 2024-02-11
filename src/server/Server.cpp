@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/10 18:08:58 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/11 19:57:58 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void  Server::sendAnswer(size_t idx)
   else
     this->notImplemented(idx);
 
-  if (this->_requests.getMapValue("Connection") == "close") {
+  if (this->_requests.getMapValue("Connection") != "keep-alive") {
     this->removeAndCompressFds(idx);
     std::cout << "Connection closed on idx: " << idx << std::endl;
   }
@@ -120,7 +120,6 @@ void  Server::acceptConnections(void)
   clientFd.events = POLLIN;
   clientFd.revents = 0;
   this->_clientPollfds[this->_nfds] = clientFd;
-  this->_timestamp[this->_nfds] = std::time(NULL);
   this->_nfds++;
   std::cout << "number of clients connected now: " << this->_nfds << std::endl;
 }
@@ -136,15 +135,15 @@ void  Server::handleRequest(int i)
     if (bytesRead < 0) {
       break;
     }
-    if (bytesRead == 0) {
+    if (bytesRead == 0 && this->_requests.getPendingReceive() == false) {
       std::cout << "Client has closed the connection" << std::endl;
       this->removeAndCompressFds(i);
       break;
     }
     buffer[bytesRead] = '\0';
-    this->_clientPollfds[i].events = POLLOUT;
-    // std::cout << buffer << std::endl;
-    this->_requests.parseRequestBuffer(buffer);
+    this->_requests.parseRequestBuffer(buffer, bytesRead);
+    if (this->_requests.getPendingReceive() == false)
+      this->_clientPollfds[i].events = POLLOUT;
   }
 }
 
@@ -162,8 +161,6 @@ void  Server::serverLoop()
     this->_currSize = this->_nfds;
     for (size_t i = 0; i < this->_currSize; i++)
     {
-      this->checkClientTimeout(i);
-
       if (this->_clientPollfds[i].revents == 0)
         continue;
 

@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/10 17:14:44 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/11 18:30:52 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,14 +149,6 @@ std::string handle_file_erasing(int fd, RequestParser& req, Statuscodes& codes){
   msg = check_and_add_header(202, "Accepted", Server::ft_itos(0), codes, req);
   send(fd, msg.c_str(), msg.size(), 0);
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
-}
-
-void  handle_Request_post(int fd, RequestParser& req, MIME_type& data, Statuscodes& codes){
-  if (req.getUri() == "/responseFiles/first.cgi")
-    handle_name_input(fd, req);
-  else if (req.getUri() == "upload" || req.getUri() == "/responseFiles/cpp_fileupload.cgi"){
-    handle_file_upload(fd, req, data, codes);
-  }
 }
 
 std::string  check_and_add_header(int status, std::string const& type, std::string const& length, \
