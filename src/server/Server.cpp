@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/11 19:57:58 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:30:55 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ void  Server::handleRequest(int i)
   while (true)
   {
     char buffer[10000];
-    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer), O_NONBLOCK);
+    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer) - 1, O_NONBLOCK);
 
     if (bytesRead < 0) {
       break;

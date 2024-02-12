@@ -6,13 +6,13 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/11 20:31:06 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:33:04 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/RequestParser.hpp"
 
-RequestParser::RequestParser() : _status(false), _pendingReceive(false), _totalReadBytes(0) {}
+RequestParser::RequestParser() : _pendingReceive(false), _totalReadBytes(0) {}
 
 RequestParser::~RequestParser() {}
 
@@ -60,18 +60,11 @@ void  RequestParser::parseRequestBody(const std::string& buffer)
     std::string uri = this->_requestFields["Uri"];
     this->_fileType = uri.substr(uri.find_last_of('.') + 1, uri.size() - uri.find_last_of('.'));
   }
-  // if (this->_requestFields["Uri"] == "/responseFiles/cpp_uploadfile.cgi")
-  //   this->_status = true;
 }
 
 void  RequestParser::parseRequestBuffer(const std::string& buffer, ssize_t bytes)
 {
   this->_totalReadBytes += bytes;
-  // if (this->_status == true){
-  //   this->_requestFields["Uri"] = "upload";
-  //   this->_requestFields["Body"] = this->_buffer;
-  //   return ;
-  // }
   if (!this->_pendingReceive) {
     parseRequestHeader(buffer);
     this->_buffer = buffer;
@@ -87,10 +80,6 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer, ssize_t bytes
     return ;
   }
   this->_pendingReceive = true;
-}
-
-void  RequestParser::reset_status(){
-  this->_status = false;
 }
 
 void  RequestParser::cleanUp()

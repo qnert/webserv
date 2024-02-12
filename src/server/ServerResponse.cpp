@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/11 20:00:42 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:34:39 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,6 @@ int  Server::postMethod(size_t idx)
   }
   else if (uri == "upload" || uri == "/responseFiles/cpp_uploadfile.cgi"){
     handle_file_upload(this->_clientPollfds[idx].fd, this->_requests, this->_data, this->_codes);
-    this->_requests.reset_status();
     return (0);
   }
   return (1);

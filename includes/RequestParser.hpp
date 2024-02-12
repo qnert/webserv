@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/11 18:07:46 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:33:09 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ private:
   std::string                        _buffer;
   std::string                        _curr_dir;
   std::string                        _fileType;
-  bool                               _status;
   bool                               _pendingReceive;
   int                                _totalReadBytes;
 
@@ -40,7 +39,6 @@ public:
   ~RequestParser();
 
   void  parseRequestBuffer(const std::string& buffer, ssize_t bytes);
-  void  reset_status();
   void  cleanUp();
 
   bool               getPendingReceive() const;
