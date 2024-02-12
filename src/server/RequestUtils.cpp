@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/11 18:30:52 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:53:58 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ std::string get_last_name(std::string body){
   return (ret_str);
 }
 
-std::string get_filecontent(std::string body){
+std::string get_filecontent(std::string boundary, std::string body){
   std::stringstream iss(body);
   std::string line;
   std::string trash;
@@ -65,13 +65,13 @@ std::string get_filecontent(std::string body){
       std::getline(iss, trash);
   }
   else{
-    for (int i = 0; !trash.find("------WebKitFormBoundary"); i++)
+    for (int i = 0; !trash.find(boundary); i++)
       (void) i;
       std::getline(iss, trash);
   }
 
   while (std::getline(iss, line)) {
-    if (line.find("------WebKitFormBoundary") != std::string::npos)
+    if (line.find(boundary) != std::string::npos)
       break;
     else if (line.empty())
       fileContent << std::endl;
@@ -119,7 +119,7 @@ void  handle_file_upload(int fd, RequestParser& req, MIME_type& data, Statuscode
       send(fd, msg.c_str(), msg.size(), 0);
     return ;
   }
-  std::string filecontent = get_filecontent(req. getBody());
+  std::string filecontent = get_filecontent(req.getBoundary(), req.getBody());
   std::ofstream upload(("./responseFiles/Upload/" + filename).c_str(), std::ios::binary);
   if (!upload.is_open())
     return ;

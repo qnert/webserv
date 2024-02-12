@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/12 13:33:09 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:55:24 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ private:
   std::string                        _buffer;
   std::string                        _curr_dir;
   std::string                        _fileType;
+  std::string                        _boundary;
   bool                               _pendingReceive;
   int                                _totalReadBytes;
 
@@ -43,6 +44,7 @@ public:
 
   bool               getPendingReceive() const;
   const std::string& getFileType() const;
+  const std::string& getBoundary() const;
   const std::string& getRequestType();
   const std::string& getUri();
   const std::string& getHost();

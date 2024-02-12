@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/12 13:33:04 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:58:04 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,13 @@ void  RequestParser::parseRequestBody(const std::string& buffer)
     std::string uri = this->_requestFields["Uri"];
     this->_fileType = uri.substr(uri.find_last_of('.') + 1, uri.size() - uri.find_last_of('.'));
   }
+  std::string content_type = this->_requestFields["Content-Type"];
+  size_t  start_bound = content_type.find("boundary=");
+  if (start_bound == std::string::npos)
+    this->_boundary = "";
+  else
+    this->_boundary = content_type.substr(start_bound + 9, content_type.length() - start_bound + 9);
+
 }
 
 void  RequestParser::parseRequestBuffer(const std::string& buffer, ssize_t bytes)
@@ -101,6 +108,8 @@ const std::string& RequestParser::getBody() {return (this->_requestFields["Body"
 const std::string& RequestParser::getCurrdir() {return (this->_curr_dir);}
 
 const std::string& RequestParser::getFileType() const {return (this->_fileType);}
+
+const std::string& RequestParser::getBoundary() const{return (this->_boundary);}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {
