@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/12 18:24:51 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/13 18:05:27 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int   Server::getFreeSocket()
 {
-  for (int i = 1; i < MAX_CLIENTS - 1; i++)
+  for (int i = 1; i < MAX_CLIENTS; i++)
   {
     if (this->_clientPollfds[i].fd == -1)
       return (i);
@@ -23,7 +23,7 @@ int   Server::getFreeSocket()
 }
 void  Server::clientsInit()
 {
-  for (int i = 1; i < MAX_CLIENTS - 1; i++)
+  for (int i = 1; i < MAX_CLIENTS; i++)
   {
     this->_clientPollfds[i].fd = -1;
     this->_clientPollfds[i].events = POLLIN;

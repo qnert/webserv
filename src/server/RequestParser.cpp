@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/12 17:55:58 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/13 19:12:40 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,22 @@ void  RequestParser::parseRequestHeader(const std::string& buffer)
 {
   std::istringstream bufferStream(buffer);
   std::string line;
-
-  bufferStream >> this->_requestFields["Type"] \
-    >> this->_requestFields["Uri"] >> this->_requestFields["Version"];
+  size_t headerLength = 0;
 
   std::getline(bufferStream, line, '\n');
+
+  headerLength += line.size() + 1;
+  std::istringstream tmp(line);
+  tmp >> this->_requestFields["Type"] \
+    >> this->_requestFields["Uri"] >> this->_requestFields["Version"];
+
   while (std::getline(bufferStream, line, '\n'))
   {
-    if (line == "\r" && line.length() == 1)
+    if (line == "\r") {
+      headerLength += 2;
+      this->_totalReadBytes -= headerLength;
       break ;
+    }
     size_t pos = line.find(':');
     if (pos != std::string::npos)
     {
@@ -37,6 +44,7 @@ void  RequestParser::parseRequestHeader(const std::string& buffer)
       value.erase(value.end() - 1);
       this->_requestFields[key] = value;
     }
+    headerLength += line.size() + 1;
   }
 }
 
