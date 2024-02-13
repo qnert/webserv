@@ -6,13 +6,14 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/13 15:21:39 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/13 19:22:09 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Clients.hpp"
+#include "Config.hpp"
 #include "RequestUtils.hpp"
 #include <iostream>
 #include <unistd.h>
@@ -39,7 +40,7 @@ private:
   int                 _reuse;
   nfds_t              _nfds;
   size_t              _currSize;
-  int                 _serverSocket;
+  int                 _serverSockets[9];
   sockaddr_in         _serverAdress;
 
   void                sendAnswer(size_t idx);
@@ -52,11 +53,15 @@ private:
   void                clientsInit();
   void                handleRequest(int i);
   void                checkRevents(int i);
-  void                acceptConnections(void);
+//   void                acceptConnections(void);
   void                cleanUpClientFds();
   void                removeFd(int i);
+
+	void                acceptConnections(int fd);
+	void createServerSockets(std::vector<std::map<std::string, std::string> > configs);
+	bool isServerSocket(int fd);
 public:
-  Server(MIME_type& data, Statuscodes& codes);
+  Server(MIME_type& data, Statuscodes& codes, Config cfg);
   ~Server();
 
   void                serverLoop(void);

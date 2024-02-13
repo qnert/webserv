@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/07 17:00:40 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/13 18:15:50 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void checkConf(std::map<std::string, std::string> map)
 	std::cout << map.find("listen")->second << std::endl;
 	std::cout << map.find("server_name")->second << std::endl;
 	std::cout << map.find("root")->second << std::endl;
-	std::cout << map.find("index")->second << std::endl;
+	std::cout << map.find("index")->second << std::endl << std::endl;
 }
 
 // handles parsing of the location directive
@@ -85,7 +85,6 @@ void Config::locationDirective(std::ifstream& input, std::map<std::string,std::s
 	std::string a[] = {"autoindex ", "allow_methods ", "root ", "index "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
-	std::map<std::string, std::string> map;
 
 	while (input.good())
 	{
@@ -168,8 +167,13 @@ void Config::parseConf(std::string path)
 				throw std::runtime_error("argument found outside of server directive");
 		}
 	}
-	checkConf(_configs[0]);
-	// checkConf(_configs[1]);
+	for (std::vector<std::map<std::string, std::string> >::iterator i = _configs.begin(); i < _configs.end(); ++i)
+		checkConf(*i);
+}
+
+std::vector<std::map<std::string, std::string> > Config::getConfigs()
+{
+	return _configs;
 }
 
 Config::Config(const std::string& path)

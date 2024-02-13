@@ -6,52 +6,123 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2024/02/13 15:22:12 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/13 19:32:13 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-
 #include "../../includes/Server.hpp"
+
+static short ft_stosh(const std::string& str)
+{
+	short num;
+	std::stringstream ss(str);
+
+	ss >> num;
+	return num;
+}
+
+void closeSockets(int* arr, int len)
+{
+	int* og = arr;
+	while (arr < (og + len))
+	{
+		close(*arr);
+		arr++;
+	}
+}
+
+void Server::createServerSockets(std::vector<std::map<std::string, std::string> > configs)
+{
+	int reuse = 1;
+	int serverSockets[configs.size()];
+	typedef std::vector<std::map<std::string, std::string> >::iterator iter;
+	for (iter i = configs.begin(); i != configs.end(); ++i)
+	{
+		int newSock = socket(AF_INET, SOCK_STREAM, 0);
+		struct sockaddr_in newAddr;
+
+		if (0 > newSock)
+			throw std::runtime_error("failed on server socket creation");
+		if (0 > setsockopt(newSock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)))
+		{
+			close(newSock);
+			closeSockets(_serverSockets, std::distance(configs.begin(), i));
+			throw std::runtime_error("failed on setsockopt");
+		}
+		newAddr.sin_family = AF_INET;
+		newAddr.sin_addr.s_addr = INADDR_ANY;
+		newAddr.sin_port = htons(ft_stosh(i.base()->find("listen")->second));
+		if (0 > bind(newSock, reinterpret_cast<struct sockaddr*>(&newAddr), sizeof(newAddr)))
+		{
+			close(newSock);
+			closeSockets(_serverSockets, std::distance(configs.begin(), i));
+			throw std::runtime_error("failed on server socket bind");
+		}
+		if (0 > listen(newSock, SOMAXCONN))
+		{
+			close(newSock);
+			closeSockets(_serverSockets, std::distance(configs.begin(), i));
+			throw std::runtime_error("failed on server socket listen");
+		}
+		if (fcntl(newSock, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+		{
+			close(newSock);
+			closeSockets(_serverSockets, std::distance(configs.begin(), i));
+			throw std::runtime_error("failed on server socket fcntl");
+		}
+		_serverSockets[std::distance(configs.begin(), i)] = newSock;
+		struct pollfd serverPollfd;
+		serverPollfd.fd = newSock;
+		serverPollfd.events = POLLIN;
+		serverPollfd.revents = 0;
+		this->_clientPollfds[std::distance(configs.begin(), i)] = serverPollfd;
+	}
+	std::vector<int> ar(_serverSockets, _serverSockets + sizeof(serverSockets)/sizeof(int));
+	for (std::vector<int>::iterator i = ar.begin(); i < ar.end(); ++i)
+	{
+		std::cout << *i << std::endl;
+	}
+}
 
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
-Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes), _reuse(1), _nfds(1), _currSize(0)
+Server::Server(MIME_type& data, Statuscodes& codes, Config cfg) : _data(data), _codes(codes), _reuse(1), _nfds(1), _currSize(0)
 {
   clientsInit();
-  if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-    perror("socket");
-    throw(std::runtime_error(""));
-  }
+  createServerSockets(cfg.getConfigs());
+//   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+//     perror("socket");
+//     throw(std::runtime_error(""));
+//   }
 
-  setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse));
-  this->_serverAddress.sin_family = AF_INET;
-  this->_serverAddress.sin_addr.s_addr = INADDR_ANY;
-  this->_serverAddress.sin_port = htons(PORT);
+//   setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse));
+//   this->_serverAdress.sin_family = AF_INET;
+//   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
+//   this->_serverAdress.sin_port = htons(PORT);
 
-  // associates the server socket with the local address
-  // and port specified in the "serverAddress" structure
-  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAddress), sizeof(_serverAddress)) == -1) {
-    perror("bind");
-    close(this->_serverSocket);
-    throw(std::runtime_error("Error timeouted trying to bind socket"));
-  }
+//   // associates the server socket with the local address
+//   // and port specified in the "serverAddress" structure
+//   if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
+//     perror("bind");
+//     close(this->_serverSocket);
+//     throw(std::runtime_error("Error timeouted trying to bind socket"));
+//   }
 
-  // listens for incomming connection requests
-  if (listen(this->_serverSocket, SOMAXCONN) == -1) {
-    close(this->_serverSocket);
-    perror("listen");
-    throw(std::runtime_error("Error listening for connections"));
-  }
+//   // listens for incomming connection requests
+//   if (listen(this->_serverSocket, SOMAXCONN) == -1) {
+//     close(this->_serverSocket);
+//     perror("listen");
+//     throw(std::runtime_error("Error listening for connections"));
+//   }
 
-  if (fcntl(this->_serverSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
-    perror("fcntl server");
+//   if (fcntl(this->_serverSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+//     perror("fcntl server");
 
-  struct pollfd serverPollfd;
-  serverPollfd.fd = this->_serverSocket;
-  serverPollfd.events = POLLIN;
-  serverPollfd.revents = 0;
-  this->_clientPollfds[0] = serverPollfd;
+//   struct pollfd serverPollfd;
+//   serverPollfd.fd = this->_serverSocket;
+//   serverPollfd.events = POLLIN;
+//   serverPollfd.revents = 0;
+//   this->_clientPollfds[0] = serverPollfd;
 }
 
 Server::~Server() {}
@@ -92,17 +163,17 @@ void  Server::checkRevents(int i)
   else if (this->_clientPollfds[i].revents & POLLERR)
     error = 1;
   else if (this->_clientPollfds[i].revents & POLLNVAL)
-    error = 1;
+    ;// error = 1;
   if (error == 1)
   {
-    perror("poll_revents");
+    perror("poll_revents lol");
     this->cleanUpClientFds();
     throw(std::runtime_error(""));
   }
 }
 
 // accept every client in that wants to connect
-void  Server::acceptConnections(void)
+void  Server::acceptConnections(int serverfd)
 {
   int newClientSocket;
 
@@ -110,7 +181,7 @@ void  Server::acceptConnections(void)
     std::cout << "Maximum amount of clients reached" << std::endl;
     return ;
   }
-  if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
+  if ((newClientSocket = accept(serverfd, NULL, NULL)) == -1)
     return ;
 
   std::cout << "New client connected..." << std::endl;
@@ -151,6 +222,16 @@ void  Server::handleRequest(int i)
   }
 }
 
+bool Server::isServerSocket(int fd)
+{
+	for (size_t i = 0; i < 9; i++)
+	{
+		if (fd == this->_serverSockets[i])
+			return true;
+	}
+	return false;
+}
+
 // main server loop
 void  Server::serverLoop()
 {
@@ -158,7 +239,7 @@ void  Server::serverLoop()
   {
     if (poll(this->_clientPollfds, MAX_CLIENTS, 10000) < 0) {
       perror("poll");
-      close(this->_serverSocket);
+      closeSockets(this->_serverSockets, 9);
       throw(std::runtime_error(""));
     }
 
@@ -171,8 +252,8 @@ void  Server::serverLoop()
 
       if (this->_clientPollfds[i].revents == POLLIN)
       {
-        if (this->_clientPollfds[i].fd == this->_serverSocket)
-          this->acceptConnections();
+        if (isServerSocket(this->_clientPollfds[i].fd))
+          this->acceptConnections(this->_clientPollfds[i].fd);
         else
           this->handleRequest(i);
       }
