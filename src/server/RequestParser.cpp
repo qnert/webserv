@@ -3,37 +3,32 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/06 17:59:19 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/12 17:55:58 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/RequestParser.hpp"
 
-RequestParser::RequestParser() {}
+RequestParser::RequestParser() : _pendingReceive(false), _totalReadBytes(0) {}
 
 RequestParser::~RequestParser() {}
 
-void  RequestParser::parseRequestBuffer(const std::string& buffer)
+void  RequestParser::parseRequestHeader(const std::string& buffer)
 {
-  static int i;
-
-  if (i == 1){
-    this->_requestFields["Uri"] = "upload";
-    this->_requestFields["Body"] = buffer;
-    i = 0;
-    return ;
-  }
-
   std::istringstream bufferStream(buffer);
   std::string line;
 
   bufferStream >> this->_requestFields["Type"] \
     >> this->_requestFields["Uri"] >> this->_requestFields["Version"];
+
+  std::getline(bufferStream, line, '\n');
   while (std::getline(bufferStream, line, '\n'))
   {
+    if (line == "\r" && line.length() == 1)
+      break ;
     size_t pos = line.find(':');
     if (pos != std::string::npos)
     {
@@ -43,12 +38,16 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
       this->_requestFields[key] = value;
     }
   }
+}
 
-  size_t it = buffer.find_last_of("\n\n");
-  if (it == buffer.size())
+void  RequestParser::parseRequestBody(const std::string& buffer)
+{
+  size_t it = buffer.find("\r\n\r\n");
+  if (it == buffer.size()) {
     this->_requestFields["Body"] = "";
+  }
   else
-    this->_requestFields["Body"] = buffer.substr(it + 1, buffer.size());
+    this->_requestFields["Body"] = buffer.substr(it + 4);
   char buff[PATH_MAX];
   if (getcwd(buff, sizeof(buff)) == NULL)
     throw std::runtime_error("Couldn't fine working directory!");
@@ -57,10 +56,37 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer)
   if (this->_requestFields["Uri"] == "/" || this->_requestFields["Type"] == "POST"
         || this->_requestFields["Type"] == "DELETE")
     this->_fileType = "html";
+  else {
+    std::string uri = this->_requestFields["Uri"];
+    this->_fileType = uri.substr(uri.find_last_of('.') + 1, uri.size() - uri.find_last_of('.'));
+  }
+  std::string content_type = this->_requestFields["Content-Type"];
+  size_t  start_bound = content_type.find("boundary=");
+  if (start_bound == std::string::npos)
+    this->_boundary = "";
   else
-    this->_fileType = this->_requestFields["Uri"].substr(this->_requestFields["Uri"].find_last_of('.') + 1, this->_requestFields["Uri"].size() - this->_requestFields["Uri"].find_last_of('.'));
-  if (this->_requestFields["Uri"] == "/responseFiles/cpp_uploadfile.cgi")
-    i = 1;
+    this->_boundary = content_type.substr(start_bound + 9, content_type.length() - start_bound + 9);
+
+}
+
+void  RequestParser::parseRequestBuffer(const std::string& buffer, ssize_t bytes)
+{
+  this->_totalReadBytes += bytes;
+  if (!this->_pendingReceive) {
+    parseRequestHeader(buffer);
+    this->_buffer = buffer;
+  }
+  else
+    this->_buffer.append(buffer);
+  if (std::atoi(this->_requestFields["Content-Length"].c_str()) <= this->_totalReadBytes)
+  {
+    parseRequestBody(this->_buffer);
+    this->_totalReadBytes = 0;
+    this->_buffer.clear();
+    this->_pendingReceive = false;
+    return ;
+  }
+  this->_pendingReceive = true;
 }
 
 void  RequestParser::cleanUp()
@@ -68,6 +94,8 @@ void  RequestParser::cleanUp()
   this->_fileType.clear();
   this->_requestFields.clear();
 }
+
+bool  RequestParser::getPendingReceive() const {return (this->_pendingReceive);}
 
 const std::string& RequestParser::getRequestType() {return (this->_requestFields["Type"]);}
 
@@ -80,6 +108,8 @@ const std::string& RequestParser::getBody() {return (this->_requestFields["Body"
 const std::string& RequestParser::getCurrdir() {return (this->_curr_dir);}
 
 const std::string& RequestParser::getFileType() const {return (this->_fileType);}
+
+const std::string& RequestParser::getBoundary() const{return (this->_boundary);}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {

@@ -13,9 +13,44 @@ size_t  ft_strlen(const char* str){
   return (len);
 }
 
+std::string ft_itos(size_t num)
+{
+  std::ostringstream oss;
+  oss << num;
+  return (oss.str());
+}
+
+std::string  check_and_add_header(std::string const& length){
+  std::ostringstream header;
+  header << "HTTP/1.1 " << 201 << " Created"  << "\r\n";
+  header << "Content-Type: text/html\r\n";
+  header << "Content-Length: " << length << "\r\n";
+  header << "Connection: keep-alive" << "\r\n";
+  header << "\r\n";
+  return (header.str());
+}
+
+std::string  storeFileIntoString(std::string path)
+{
+  std::ifstream file(path, std::ios::binary);
+  if (!file.is_open())
+    return ("");
+  std::string fileContent;
+  std::ostringstream buffer;
+  buffer << file.rdbuf();
+  fileContent = buffer.str();
+  file.close();
+  return (fileContent);
+}
+
 std::string get_basic_html(std::string first_name, std::string last_name){
+    if (first_name.find('%') != std::string::npos || last_name.find('%') != std::string::npos){
+      std::string msg = storeFileIntoString("responseFiles/teapot.html");
+      msg = check_and_add_header(ft_itos(msg.size())) + msg;
+      return (msg);
+    }
     std::string str =
-    "HTTP/1.1 201 Created\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE html>\n"
+    "<!DOCTYPE html>\n"
     "<html lang=\"en\">\n"
     "<head>\n"
     "    <meta charset=\"UTF-8\">\n"
@@ -41,6 +76,7 @@ std::string get_basic_html(std::string first_name, std::string last_name){
     "        }\n"
     "    </style>\n"
     "</head>\n"
+    "<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\">\n"
     "<body>\n"
     "\n"
     "    <h1>You're next ";
@@ -53,6 +89,7 @@ std::string get_basic_html(std::string first_name, std::string last_name){
     "</body>\n"
     "</html>\n";
     std::string msg = str.append(str2);
+    msg = check_and_add_header(ft_itos(msg.size())) + msg;
     return (msg);
 }
 

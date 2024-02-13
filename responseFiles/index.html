@@ -76,7 +76,7 @@
 <body>
     <div class="cool-container">
         <h1>Delfis hitman service!</h1>
-        <form action = "responseFiles/first.cgi" method = "post">
+        <form action = "responseFiles/first.cgi" method = "post" accept-charset="UTF-8">
             First Name: <input type = "text" name = "first_name">  <br />
 
             Last Name: <input type = "text" name = "last_name" />
@@ -86,7 +86,7 @@
             <br>
           <form enctype = "multipart/form-data" action = "responseFiles/cpp_uploadfile.cgi"
                  method = "post">
-                 <p>File: <input type = "file" name = "userfile" accept = "text/*"/></p>
+                 <p>File: <input type = "file" name = "userfile"/></p>
                  <p><input type = "submit" value = "Upload" /></p>
           </form>
           <br>
