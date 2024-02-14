@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/12 17:58:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/13 18:59:07 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ private:
   std::string                        _fileType;
   std::string                        _boundary;
   bool                               _pendingReceive;
-  int                                _totalReadBytes;
+  ssize_t                            _totalReadBytes;
 
   void  parseRequestBody(const std::string& buffer);
   void  parseRequestHeader(const std::string& buffer);
