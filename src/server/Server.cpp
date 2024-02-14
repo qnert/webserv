@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/13 14:43:41 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/14 12:03:29 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 // be created, set to non-blocking, set to be reused and binded to the local address.
 Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes), _reuse(1), _nfds(1), _currSize(0)
 {
+  clientsInit();
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
     throw(std::runtime_error(""));
@@ -57,22 +58,22 @@ Server::~Server() {}
 void  Server::sendAnswer(size_t idx)
 {
   static std::string tmp;
-  const std::string requestType = this->_requests.getRequestType();
+  const std::string requestType = this->_clientDetails[idx].getRequestType();
 
   if (requestType == "GET")
     this->getMethod(idx, tmp);
-  else if (requestType == "POST" || this->_requests.getUri() == "upload")
+  else if (requestType == "POST" || this->_clientDetails[idx].getUri() == "upload")
   {
     if (this->postMethod(idx) != 0)
       this->methodNotAllowed(idx);
   }
   else if (requestType == "DELETE")
-    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_requests, this->_codes);
+    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes);
   else
     this->notImplemented(idx);
 
-  if (this->_requests.getMapValue("Connection") != "keep-alive") {
-    this->removeAndCompressFds(idx);
+  if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive") {
+    this->removeFd(idx);
     std::cout << "Connection closed on idx: " << idx << std::endl;
   }
   else
@@ -85,7 +86,7 @@ void  Server::checkRevents(int i)
   int error = 0;
 
   if (this->_clientPollfds[i].revents & POLLHUP)
-    this->removeAndCompressFds(i);
+    this->removeFd(i);
   else if (this->_clientPollfds[i].revents & POLLERR)
     error = 1;
   else if (this->_clientPollfds[i].revents & POLLNVAL)
@@ -119,7 +120,8 @@ void  Server::acceptConnections(void)
   clientFd.fd = newClientSocket;
   clientFd.events = POLLIN;
   clientFd.revents = 0;
-  this->_clientPollfds[this->_nfds] = clientFd;
+  int index = this->getFreeSocket();
+  this->_clientPollfds[index] = clientFd;
   this->_nfds++;
   std::cout << "number of clients connected now: " << this->_nfds << std::endl;
 }
@@ -135,14 +137,14 @@ void  Server::handleRequest(int i)
     if (bytesRead < 0) {
       break;
     }
-    if (bytesRead == 0 && this->_requests.getPendingReceive() == false) {
+    if (bytesRead == 0 && this->_clientDetails[i].getPendingReceive() == false) {
       std::cout << "Client has closed the connection" << std::endl;
-      this->removeAndCompressFds(i);
+      this->removeFd(i);
       break;
     }
     buffer[bytesRead] = '\0';
-    this->_requests.parseRequestBuffer(buffer, bytesRead);
-    if (this->_requests.getPendingReceive() == false)
+    this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
+    if (this->_clientDetails[i].getPendingReceive() == false)
       this->_clientPollfds[i].events = POLLOUT;
   }
 }
@@ -152,14 +154,13 @@ void  Server::serverLoop()
 {
   while (true)
   {
-    if (poll(this->_clientPollfds, this->_nfds, 10000) < 0) {
+    if (poll(this->_clientPollfds, MAX_CLIENTS, 10000) < 0) {
       perror("poll");
       close(this->_serverSocket);
       throw(std::runtime_error(""));
     }
 
-    this->_currSize = this->_nfds;
-    for (size_t i = 0; i < this->_currSize; i++)
+    for (size_t i = 0; i < MAX_CLIENTS; i++)
     {
       if (this->_clientPollfds[i].revents == 0)
         continue;
@@ -176,7 +177,7 @@ void  Server::serverLoop()
       else if (this->_clientPollfds[i].revents == POLLOUT)
       {
         this->sendAnswer(i);
-        this->_requests.cleanUp();
+        this->_clientDetails[i].cleanUp();
       }
     } // * END OF CLIENT LOOP *
   } // * END OF SERVER *
