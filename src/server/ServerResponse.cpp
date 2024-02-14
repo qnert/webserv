@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/14 16:06:01 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/14 17:42:10 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,9 @@ void  Server::getMethod(size_t idx, std::string& tmp)
 {
   std::string uri = this->_clientDetails[idx].getUri();
   std::string msg = storeFileIntoString(this->_clientDetails[idx], uri);
-  const std::string requestType = this->_clientDetails[idx].getRequestType();
 
   if (!msg.empty())
-  {
-    std::string length = Server::ft_itos(msg.size());
-    std::string response = check_and_add_header(200, this->_data[requestType], length, this->_codes, this->_clientDetails[idx]) + msg;
-    send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
-  }
+    this->handleGetDefault(msg, idx);
   else if (uri.find("/?searchTerm=") != std::string::npos) // searching for file in url if it's already there
   {
     size_t start = uri.find("/?searchTerm=") + 13;
@@ -81,6 +76,27 @@ void  Server::methodNotAllowed(size_t idx)
   std::string contentType = this->_data[this->_clientDetails[idx].getRequestType()];
   std::string response = check_and_add_header(405, contentType, length, this->_codes, this->_clientDetails[idx]) + msg;
   send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+}
+
+void  Server::handleGetDefault(std::string& msg, size_t idx)
+{
+  std::string response;
+  const std::string requestType = this->_clientDetails[idx].getRequestType();
+
+  if (this->_clientDetails[idx].getPendingResponse() == false) {
+    std::string length = Server::ft_itos(msg.size());
+    response = check_and_add_header(200, this->_data[requestType], length, this->_codes, this->_clientDetails[idx]);
+    this->_clientDetails[idx].storeHeaderSize(response.size());
+    response += msg;
+    this->_clientDetails[idx].storeBufferSize(response.size());
+  }
+  else {
+    size_t totalBytesSend = this->_clientDetails[idx].getTotalBytesSend();
+    size_t headerSize = this->_clientDetails[idx].getHeaderSize();
+    response = msg.substr(totalBytesSend - headerSize);
+  }
+  size_t bytesSend = send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+  this->_clientDetails[idx].checkPendingResponse(bytesSend);
 }
 
 void  Server::NotFound(size_t idx)
