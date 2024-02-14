@@ -76,7 +76,20 @@
 <body>
     <div class="cool-container">
         <h1>Delfis hitman service!</h1>
-        <form action = "responseFiles/first.cgi" method = "post" accept-charset="UTF-8">
+        <form action = "responseFiles/cgi-bin/print_env.pl" method = "post" accept-charset="UTF-8">
+          User Input: <input type = "text" name = "user_input">  <br />
+          <input type = "submit" value = "Submit" />
+        </form>
+          <br>
+        <form action = "responseFiles/cgi-bin/authenticate.py" method = "post" accept-charset="UTF-8">
+          User Name: <input type = "text" name = "user_name">  <br />
+
+          Password: <input type="password" name = "password">
+          <br>
+          <input type = "submit" value = "Submit" />
+        </form>
+          <br>
+        <form action = "responseFiles/cgi-bin/first.cgi" method = "post" accept-charset="UTF-8">
             First Name: <input type = "text" name = "first_name">  <br />
 
             Last Name: <input type = "text" name = "last_name" />
@@ -84,9 +97,9 @@
             <input type = "submit" value = "Submit" />
           </form>
             <br>
-          <form enctype = "multipart/form-data" action = "responseFiles/cpp_uploadfile.cgi"
+          <form enctype = "multipart/form-data" action = "responseFiles/cgi-bin/cpp_uploadfile.cgi"
                  method = "post">
-                 <p>File: <input type = "file" name = "userfile"/></p>
+                 <p>File: <input type = "file" name = "userfile" accept="text/*"/></p>
                  <p><input type = "submit" value = "Upload" /></p>
           </form>
           <br>

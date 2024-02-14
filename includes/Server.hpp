@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
 /*   Updated: 2024/02/14 17:42:02 by njantsch         ###   ########.fr       */
@@ -14,6 +14,7 @@
 
 #include "Clients.hpp"
 #include "RequestUtils.hpp"
+#include "CGI.hpp"
 #include <iostream>
 #include <unistd.h>
 #include <poll.h>
@@ -48,6 +49,7 @@ private:
   void                notImplemented(size_t idx);
   void                methodNotAllowed(size_t idx);
   void                handleGetDefault(std::string& msg, size_t idx);
+  void                NotFound(size_t idx);
 
   int                 getFreeSocket();
   void                clientsInit();
