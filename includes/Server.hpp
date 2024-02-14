@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/12 18:33:56 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/14 12:05:10 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "Clients.hpp"
 #include "RequestUtils.hpp"
+#include "CGI.hpp"
 #include <iostream>
 #include <unistd.h>
 #include <poll.h>

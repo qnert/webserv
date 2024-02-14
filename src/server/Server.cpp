@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/13 19:14:28 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/14 12:03:29 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,12 +91,12 @@ void  Server::checkRevents(int i)
     error = 1;
   else if (this->_clientPollfds[i].revents & POLLNVAL)
     error = 1;
-  if (error == 1)
-  {
-    perror("poll_revents");
-    this->cleanUpClientFds();
-    throw(std::runtime_error(""));
-  }
+  // if (error == 1)
+  // {
+  //   perror("poll_revents");
+  //   this->cleanUpClientFds();
+  //   throw(std::runtime_error(""));
+  // }
 }
 
 // accept every client in that wants to connect
