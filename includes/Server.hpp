@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/14 12:05:10 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/14 16:05:11 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ private:
   int                 postMethod(size_t idx);
   void                notImplemented(size_t idx);
   void                methodNotAllowed(size_t idx);
+  void                NotFound(size_t idx);
 
   int                 getFreeSocket();
   void                clientsInit();

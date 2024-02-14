@@ -18,18 +18,17 @@ def main():
     user_name = parsed_query.get("user_name", [""])[0]
     password = parsed_query.get("password", [""])[0]
 
-    # Print HTML content
-    print("Content-type: text/html\r\n\r\n")
-    print("<html>")
-    print('<head><title>User Authentication</title></head>')
-    print("<body>")
-    print("<h1>User Authentication</h1>")
+    #create content
+    str = '<html>\n<head><title>User Authentication</title></head>\n<body>\n<h1>User Authentication</h1>\n'
     if user_name and password:
-        print("<p>Welcome, {}! Your password is: {}</p>".format(user_name, password))
+      str += "<p>Welcome, {}! Your password is: {}</p>".format(user_name, password)
     else:
-        print("<p>No user name or password provided.</p>")
-    print("</body>")
-    print("</html>")
+      str += "<p>No user name or password provided.</p>"
+    str += "</body>\n</html>\n"
+    # Print HTML content
+    print("Content-type: text/html")
+    print("Content-length: {}\r\n\r\n".format(len(str)))
+    print(str)
 
 if __name__ == "__main__":
     main()

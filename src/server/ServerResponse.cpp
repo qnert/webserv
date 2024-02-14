@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/14 12:04:58 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/14 16:06:01 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,20 +37,10 @@ void  Server::getMethod(size_t idx, std::string& tmp)
       send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
     }
     else
-    {
-      msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error404.html");
-      std::string length = Server::ft_itos(msg.size());
-      std::string response = check_and_add_header(404, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
-      send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
-    }
+      this->NotFound(idx);
   }
   else
-  {
-    std::string errorMsg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error404.html");
-    std::string length = Server::ft_itos(errorMsg.size());
-    std::string response = check_and_add_header(404, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + errorMsg;
-    send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
-  }
+    this->NotFound(idx);
 }
 
 int  Server::postMethod(size_t idx)
@@ -90,5 +80,14 @@ void  Server::methodNotAllowed(size_t idx)
   std::string length = Server::ft_itos(msg.size());
   std::string contentType = this->_data[this->_clientDetails[idx].getRequestType()];
   std::string response = check_and_add_header(405, contentType, length, this->_codes, this->_clientDetails[idx]) + msg;
+  send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+}
+
+void  Server::NotFound(size_t idx)
+{
+  std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error404.html");
+  std::string length = Server::ft_itos(msg.size());
+  std::string contentType = this->_data[this->_clientDetails[idx].getRequestType()];
+  std::string response = check_and_add_header(404, contentType, length, this->_codes, this->_clientDetails[idx]) + msg;
   send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
 }
