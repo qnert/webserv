@@ -8,6 +8,11 @@ my $request_method = $ENV{'REQUEST_METHOD'} || "";
 my $content_length = $ENV{'CONTENT_LENGTH'} || "";
 my $query_string   = $ENV{'QUERY_STRING'}   || "";
 
+if ($query_string eq "user_input=rick+roll"){
+  my $ret = system("/usr/bin/env python3 ./responseFiles/cgi-bin/rick_roll.py");
+  exit 42;
+}
+
 # Print environment
 sub print_environment {
     my $output = "Environment:\n";

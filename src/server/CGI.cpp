@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/14 13:28:55 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/14 16:16:14 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,14 @@ void  CGI::send_error_405(void){
   return ;
 }
 
+void  CGI::send_error_500(){
+   std::string header = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/html\r\n\r\n";
+  std::string content = storeFileIntoString_cgi("./responseFiles/error500.html");
+  std::string response = header + content;
+  send(this->_client_fd, response.c_str(), response.size(), 0);
+  return ;
+}
+
 CGI::CGI(int fd, std::string exec_name, std::string body) : _client_fd(fd), _exec_name(exec_name), _body(body){
   this->_exec_type = get_exec_type(this->_exec_name);
   this->_exec_path = check_exec_type(this->_exec_type);
@@ -71,7 +79,6 @@ CGI::CGI(int fd, std::string exec_name, std::string body) : _client_fd(fd), _exe
     return ;
   }
   this->_exec_name = this->_exec_name.substr(1, this->_exec_name.size());
-  std::cout << this->_exec_path << " " << this->_exec_name << std::endl;
   if (this->_exec_type == ".pl" || this->_exec_type == ".py" || this->_exec_type == ".sh")
     exec_cgi_default();
 }
@@ -95,7 +102,8 @@ void  CGI::exec_cgi_default(){
     char *envp[4] = {const_cast<char*>("REQUEST_METHOD=POST"), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()), NULL};
     dup2(this->_client_fd, STDOUT_FILENO);
     execve(argv[0], argv, envp);
-    exit(0);
+    this->send_error_500();
+    std::exit(0);
   }
 }
 
