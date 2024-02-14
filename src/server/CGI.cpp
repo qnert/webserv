@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/13 12:40:27 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/14 13:28:55 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ static std::string check_exec_type(std::string const& exec_type){
   else if (exec_type == ".pl"){
     return ("/usr/bin/perl");
   }
+  else if (exec_type == ".sh")
+    return ("/bin/sh");
   return ("");
 }
 
@@ -70,7 +72,7 @@ CGI::CGI(int fd, std::string exec_name, std::string body) : _client_fd(fd), _exe
   }
   this->_exec_name = this->_exec_name.substr(1, this->_exec_name.size());
   std::cout << this->_exec_path << " " << this->_exec_name << std::endl;
-  if (this->_exec_type == ".pl" || this->_exec_type == ".py")
+  if (this->_exec_type == ".pl" || this->_exec_type == ".py" || this->_exec_type == ".sh")
     exec_cgi_default();
 }
 
