@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/12 18:33:56 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/14 17:42:02 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ private:
   int                 postMethod(size_t idx);
   void                notImplemented(size_t idx);
   void                methodNotAllowed(size_t idx);
+  void                handleGetDefault(std::string& msg, size_t idx);
 
   int                 getFreeSocket();
   void                clientsInit();

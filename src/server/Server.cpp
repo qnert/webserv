@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/13 19:14:28 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/14 15:07:11 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,11 @@ void  Server::sendAnswer(size_t idx)
     this->removeFd(idx);
     std::cout << "Connection closed on idx: " << idx << std::endl;
   }
-  else
+  else if (this->_clientDetails[idx].getPendingResponse() == false) {
+    this->_clientDetails[idx].cleanUp();
+    this->_clientDetails[idx].cleanUpResponse();
     this->_clientPollfds[idx].events = POLLIN;
+  }
 }
 
 // checks if readable data is available at the client socket
@@ -177,7 +180,6 @@ void  Server::serverLoop()
       else if (this->_clientPollfds[i].revents == POLLOUT)
       {
         this->sendAnswer(i);
-        this->_clientDetails[i].cleanUp();
       }
     } // * END OF CLIENT LOOP *
   } // * END OF SERVER *
