@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/15 13:17:46 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/15 14:29:03 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,6 @@ void  CGI::exec_cgi_default(){
     std::string body = "QUERY_STRING=" + this->_body;
     std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
     std::string path_info = "PATH_INFO=" + this->_path_info;
-    std::cout << length.c_str() << " " << length.size() << std::endl;
     char *envp[6] = {const_cast<char*>("REQUEST_METHOD=POST"), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
       const_cast<char*>(script_name.c_str()), const_cast<char*>(path_info.c_str()), NULL};
     dup2(this->_client_fd, STDOUT_FILENO);

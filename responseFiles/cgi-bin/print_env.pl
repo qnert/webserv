@@ -12,8 +12,14 @@ my $path_info = $ENV{'PATH_INFO'} || "";
 
 
 if ($query_string eq "user_input=rick+roll"){
-  my $ret = system("/usr/bin/env python3 ./responseFiles/cgi-bin/rick_roll.py");
-  exit 42;
+  my $html_content = "<html>\n<head>\n<title>Perl CGI Example</title>\n<meta http-equiv=\"refresh\" content=\"0; URL=https://www.youtube.com/watch?v=dQw4w9WgXcQ\">\n</head>\n<body>\n<p><a href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\">Click here</a>!</p></body>\n</body>\n</html>";
+  my $content_length = length($html_content);
+
+  print "Content-Type: text/html\r\n";
+  print "Content-Length: $content_length\r\n\r\n";
+
+  print $html_content;
+  exit (42);
 }
 
 # Print environment

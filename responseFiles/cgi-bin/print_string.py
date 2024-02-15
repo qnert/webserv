@@ -2,5 +2,5 @@
 
 string = "42 inside of you"
 print('Content-Type: text/plain')
-print('Content-Length: ', len(string) + 1,'\n\n')
+print('Content-Length: ', len(string) + 1,'\n')
 print(string)
