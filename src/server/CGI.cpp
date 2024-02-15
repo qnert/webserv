@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/15 16:03:38 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/15 16:11:21 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ CGI::CGI(int fd, std::string exec_name, std::string body) : _client_fd(fd), _exe
   get_path_info(this->_exec_name, this->_path_info);
   this->_exec_type = get_exec_type(this->_exec_name);
   this->_exec_path = check_exec_type(this->_exec_type);
-  std::cout << this->_exec_name << " " << this->_path_info << " " << this->_exec_type << " " << this->_exec_path << std::endl;
+  // std::cout << this->_exec_name << " " << this->_path_info << " " << this->_exec_type << " " << this->_exec_path << std::endl;
   if (this->_exec_path == "" || this->_exec_name.find("responseFiles/cgi-bin/") == std::string::npos){
     this->send_error_405();
     return ;
@@ -118,7 +118,6 @@ void  CGI::exec_cgi_default(){
     std::string body = "QUERY_STRING=" + this->_body;
     std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
     std::string path_info = "PATH_INFO=" + this->_path_info;
-    std::cout << path_info << std::endl;
     char *envp[6] = {const_cast<char*>("REQUEST_METHOD=POST"), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
       const_cast<char*>(script_name.c_str()), const_cast<char*>(path_info.c_str()), NULL};
     dup2(this->_client_fd, STDOUT_FILENO);
