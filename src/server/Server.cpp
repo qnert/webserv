@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/15 14:27:50 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/16 11:18:16 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,12 @@ Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes)
     throw(std::runtime_error(""));
   }
 
-  setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse));
+  if (setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse)) == -1) {
+    perror("setsockopt");
+    close(this->_serverSocket);
+    throw(std::runtime_error(""));
+  }
+
   this->_serverAdress.sin_family = AF_INET;
   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
   this->_serverAdress.sin_port = htons(PORT);
@@ -73,8 +78,9 @@ void  Server::sendAnswer(size_t idx)
     this->notImplemented(idx);
 
   if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive") {
+    this->_clientDetails[idx].cleanUp();
+    this->_clientDetails[idx].cleanUpResponse();
     this->removeFd(idx);
-    std::cout << "Connection closed on idx: " << idx << std::endl;
   }
   else if (this->_clientDetails[idx].getPendingResponse() == false) {
     this->_clientDetails[idx].cleanUp();
@@ -114,19 +120,13 @@ void  Server::acceptConnections(void)
   if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
     return ;
 
-  std::cout << "New client connected..." << std::endl;
-
   if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
     perror("fcntl client");
 
-  struct pollfd clientFd;
-  clientFd.fd = newClientSocket;
-  clientFd.events = POLLIN;
-  clientFd.revents = 0;
   int index = this->getFreeSocket();
-  this->_clientPollfds[index] = clientFd;
+  this->_clientPollfds[index].fd = newClientSocket;
   this->_nfds++;
-  std::cout << "number of clients connected now: " << this->_nfds << std::endl;
+  std::cout << "New client connected at index: " << index << std::endl;
 }
 
 // recieves, parses and handles client requests

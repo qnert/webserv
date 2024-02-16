@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/15 12:21:16 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/16 11:26:13 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,15 @@ void  Server::clientsInit()
 
 void  Server::cleanUpClientFds()
 {
-  for (size_t i = 0; i < this->_nfds; i++)
-    close(this->_clientPollfds[i].fd);
+  for (size_t i = 0; i < MAX_CLIENTS; i++) {
+    if (this->_clientPollfds[i].fd != -1)
+      close(this->_clientPollfds[i].fd);
+  }
 }
 
 void  Server::removeFd(int i)
 {
+  std::cout << "Connection closed on idx: " << i << std::endl;
   close(this->_clientPollfds[i].fd);
   this->_clientPollfds[i].fd = -1;
   this->_clientPollfds[i].events = POLLIN;
