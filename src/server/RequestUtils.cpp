@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/14 16:14:01 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/16 12:06:53 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,8 @@ std::string get_filecontent(std::string boundary, std::string body){
 }
 
 std::string get_filename(std::string body){
+  if (body.find("filename=") == std::string::npos)
+    return ("");
   std::string filename = body.substr(body.find("filename=") + 10);
   filename = filename.substr(0, filename.find('\n') - 2);
   return (filename);
@@ -111,8 +113,8 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
     return ;
   }
   std::string filename = get_filename(req.getBody());
-  if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
-    std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
+  if (req.getBoundary().size() == 0 || access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
+    std::string msg = storeFileIntoString(req, "responseFiles/error400.html");
     std::string length = Server::ft_itos(msg.size());
     msg = check_and_add_header(400, data["html"], length, codes, req) + msg;
     if (msg != "")
@@ -134,7 +136,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
 
 std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   std::string msg;
-  std::string filepath = req.getCurrdir() + req.getUri();
+  std::string filepath = req.getCurrdir() + req.getUri().substr(1, req.getUri().size());
   if (filepath.find("responseFiles/Upload") == std::string::npos){
     msg = check_and_add_header(403, "Forbidden", Server::ft_itos(0), codes, req);
     send(fd, msg.c_str(), msg.size(), 0);
@@ -146,6 +148,7 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
     return ("");
   }
   std::remove(filepath.c_str());
+  std::cout << "removed\n";
   msg = check_and_add_header(202, "Accepted", Server::ft_itos(0), codes, req);
   send(fd, msg.c_str(), msg.size(), 0);
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
