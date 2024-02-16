@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
 /*   Updated: 2024/02/16 12:05:02 by njantsch         ###   ########.fr       */
@@ -74,7 +74,6 @@ void  RequestParser::parseRequestBody(const std::string& buffer)
     this->_boundary = "";
   else
     this->_boundary = content_type.substr(start_bound + 9, content_type.length() - start_bound + 9);
-
 }
 
 void  RequestParser::parseRequestBuffer(const std::string& buffer, ssize_t bytes)
