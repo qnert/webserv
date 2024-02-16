@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2024/02/13 19:32:13 by rnauke           ###   ########.fr       */
+/*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
+/*   Updated: 2024/02/16 04:18:56 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ void Server::createServerSockets(std::vector<std::map<std::string, std::string> 
 
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
-Server::Server(MIME_type& data, Statuscodes& codes, Config cfg) : _data(data), _codes(codes), _reuse(1), _nfds(1), _currSize(0)
+Server::Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Client* cd, Config cfg) : _data(data), _codes(codes), _reuse(1), _nfds(1), _currSize(0), _clientPollfds(pfds), _clientDetails(cd)
 {
   clientsInit();
   createServerSockets(cfg.getConfigs());
@@ -95,10 +95,10 @@ Server::Server(MIME_type& data, Statuscodes& codes, Config cfg) : _data(data), _
 //     throw(std::runtime_error(""));
 //   }
 
-//   setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse));
-//   this->_serverAdress.sin_family = AF_INET;
-//   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
-//   this->_serverAdress.sin_port = htons(PORT);
+  setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse));
+  this->_serverAdress.sin_family = AF_INET;
+  this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
+  this->_serverAdress.sin_port = htons();
 
 //   // associates the server socket with the local address
 //   // and port specified in the "serverAddress" structure

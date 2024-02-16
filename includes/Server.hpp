@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/13 19:22:09 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/16 04:18:41 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@
 class Server
 {
 private:
-  Clients             _clientDetails[MAX_CLIENTS];
-  struct pollfd       _clientPollfds[MAX_CLIENTS];
+  Clients*             _clientDetails;
+  struct pollfd*       _clientPollfds;
   MIME_type           _data;
   Statuscodes         _codes;
   int                 _reuse;
@@ -61,7 +61,7 @@ private:
 	void createServerSockets(std::vector<std::map<std::string, std::string> > configs);
 	bool isServerSocket(int fd);
 public:
-  Server(MIME_type& data, Statuscodes& codes, Config cfg);
+  Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Client* cd, Config cfg);
   ~Server();
 
   void                serverLoop(void);
