@@ -30,6 +30,7 @@ oga|audio/ogg
 ogv|video/ogg
 ogx|application/ogg
 pdf|application/pdf
+plain|text/plain
 ppt|application/vnd.ms-powerpoint
 png|image/png
 rar|application/x-rar-compressed

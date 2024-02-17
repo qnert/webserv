@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/16 12:06:53 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/17 17:18:26 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,20 +106,19 @@ void  handle_name_input(int fd, Clients& req){
 
 void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& codes)
 {
-  if (req.getBody() == ""){
-    std::string msg;
-    msg = check_and_add_header(204, "No Content", Server::ft_itos(0), codes, req);
-    send(fd, msg.c_str(), msg.size(), 0);
-    return ;
-  }
   std::string filename = get_filename(req.getBody());
-  if (req.getBoundary().size() == 0 || access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
+  if (req.getBody() == "" || req.getBoundary().size() == 0){
     std::string msg = storeFileIntoString(req, "responseFiles/error400.html");
     std::string length = Server::ft_itos(msg.size());
     msg = check_and_add_header(400, data["html"], length, codes, req) + msg;
-    if (msg != "")
-      send(fd, msg.c_str(), msg.size(), 0);
+    send(fd, msg.c_str(), msg.size(), 0);
     return ;
+  }
+  else if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
+    std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
+    std::string length = Server::ft_itos(msg.size());
+    msg = check_and_add_header(200, data["html"], length, codes, req) + msg;
+    send(fd, msg.c_str(), msg.size(), 0);
   }
   std::string filecontent = get_filecontent(req.getBoundary(), req.getBody());
   std::ofstream upload(("./responseFiles/Upload/" + filename).c_str(), std::ios::binary);
@@ -134,16 +133,18 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
     send(fd, msg.c_str(), msg.size(), 0);
 }
 
-std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
+std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes, MIME_type& data){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri().substr(1, req.getUri().size());
   if (filepath.find("responseFiles/Upload") == std::string::npos){
-    msg = check_and_add_header(403, "Forbidden", Server::ft_itos(0), codes, req);
+    msg = check_and_add_header(403, data["plain"], "22", codes, req) + "403 forbidden deletion";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
   else if (access(filepath.c_str(), F_OK) != 0){
-    msg = check_and_add_header(404, "Not Found", Server::ft_itos(0), codes, req);
+    std::string msg = storeFileIntoString(req, "responseFiles/error404.html");
+    std::string length = Server::ft_itos(msg.size());
+    msg = check_and_add_header(404, data["html"], length, codes, req) + msg;
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
@@ -159,7 +160,7 @@ std::string  check_and_add_header(int status, std::string const& type, std::stri
 {
   std::ostringstream header;
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
-  if (status != 204)
+  if (status != 204 && status != 202)
     header << "Content-Type: " << type << "\r\n";
   header << "Content-Length: " << length << "\r\n";
   if (req.getMapValue("Connection") == "close")

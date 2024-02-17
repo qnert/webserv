@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/16 11:18:16 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/17 13:41:56 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,8 @@ void  Server::sendAnswer(size_t idx)
       this->methodNotAllowed(idx);
   }
   else if (requestType == "DELETE")
-    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes);
+    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx],
+                              this->_codes, this->_data);
   else
     this->notImplemented(idx);
 

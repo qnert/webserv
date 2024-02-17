@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/16 11:43:32 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/17 13:07:05 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

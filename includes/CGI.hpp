@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 16:59:31 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/15 11:07:10 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/17 12:56:04 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class CGI{
 
   public:
     void    exec_cgi_default();
+    void    send_error_404();
     void    send_error_405();
     void    send_error_500();
 
