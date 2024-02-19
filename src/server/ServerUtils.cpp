@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerUtils.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/13 19:23:26 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/18 03:07:40 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int   Server::getFreeSocket()
 {
-  for (int i = 1; i < MAX_CLIENTS - 1; i++)
+  for (int i = 1; i < MAX_CLIENTS; i++)
   {
     if (this->_clientPollfds[i].fd == -1)
       return (i);
@@ -23,7 +23,7 @@ int   Server::getFreeSocket()
 }
 void  Server::clientsInit()
 {
-  for (int i = 1; i < MAX_CLIENTS - 1; i++)
+  for (int i = 1; i < MAX_CLIENTS; i++)
   {
     this->_clientPollfds[i].fd = -1;
     this->_clientPollfds[i].events = POLLIN;

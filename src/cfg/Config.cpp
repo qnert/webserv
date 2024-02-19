@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/16 04:19:04 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/19 03:43:32 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,32 +193,3 @@ Config::~Config()
 	// std::cout << "Config destructed" << std::endl;
 }
 
-std::vector<std::map<std::string, std::string> > Config::getConfigs()
-{
-	return _configs;
-}
-
-std::vector<size_t> Config::getPort()
-{
-	return _port;
-}
-
-std::vector<std::string> Config::getName()
-{
-	return _server_name;
-}
-
-std::vector<std::string> Config::getRoot()
-{
-	return _root_dir;
-}
-
-std::string Config::getIndex(std::string route)
-{
-	return _routes[route];
-}
-
-std::map<std::string, std::string> Config::getRoutes()
-{
-	return _routes;
-}

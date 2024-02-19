@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/16 04:18:41 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/19 03:41:34 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,17 +33,19 @@
 class Server
 {
 private:
-  Clients*             _clientDetails;
-  struct pollfd*       _clientPollfds;
   MIME_type           _data;
   Statuscodes         _codes;
+  struct pollfd*       _clientPollfds;
+  Clients*             _clientDetails;
   int                 _reuse;
   nfds_t              _nfds;
   size_t              _currSize;
-  int                 _serverSockets[9];
+  int                 _serverSocket;
   sockaddr_in         _serverAdress;
+  
+  std::string _servername;
+  std::string _port;
 
-  void                sendAnswer(size_t idx);
   void                getMethod(size_t idx, std::string& tmp);
   int                 postMethod(size_t idx);
   void                notImplemented(size_t idx);
@@ -57,15 +59,20 @@ private:
   void                cleanUpClientFds();
   void                removeFd(int i);
 
-	void                acceptConnections(int fd);
 	void createServerSockets(std::vector<std::map<std::string, std::string> > configs);
 	bool isServerSocket(int fd);
 public:
-  Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Client* cd, Config cfg);
+  Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients* cd, std::map<std::string, std::string> cfg);
   ~Server();
 
   void                serverLoop(void);
   static std::string  ft_itos(size_t num);
   Statuscodes&        getStatuscodes(void);
   MIME_type&          getMimeType(void);
+
+	int getFd();
+	void                acceptConnections();
+  	void                sendAnswer(size_t idx);
+	std::string getServername();
+	std::string getPort();
 };
