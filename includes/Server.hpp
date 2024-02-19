@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/19 03:41:34 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/19 20:09:10 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ private:
   
   std::string _servername;
   std::string _port;
+  std::string _root;
 
   void                getMethod(size_t idx, std::string& tmp);
   int                 postMethod(size_t idx);
@@ -53,19 +54,19 @@ private:
 
   int                 getFreeSocket();
   void                clientsInit();
-  void                handleRequest(int i);
-  void                checkRevents(int i);
+//   void                handleRequest(int i);
+//   void                checkRevents(int i);
 //   void                acceptConnections(void);
   void                cleanUpClientFds();
   void                removeFd(int i);
 
-	void createServerSockets(std::vector<std::map<std::string, std::string> > configs);
-	bool isServerSocket(int fd);
+	// void createServerSockets(std::vector<std::map<std::string, std::string> > configs);
+	// bool isServerSocket(int fd);
 public:
   Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients* cd, std::map<std::string, std::string> cfg);
   ~Server();
 
-  void                serverLoop(void);
+//   void                serverLoop(void);
   static std::string  ft_itos(size_t num);
   Statuscodes&        getStatuscodes(void);
   MIME_type&          getMimeType(void);
@@ -75,4 +76,5 @@ public:
   	void                sendAnswer(size_t idx);
 	std::string getServername();
 	std::string getPort();
+	std::string getRoot();
 };
