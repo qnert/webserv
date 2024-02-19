@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/16 11:43:35 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/19 14:37:34 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 #include <unistd.h>
 
 #define PORT 8080
-#define MAX_CLIENTS 200
+#define MAX_CLIENTS 1024
 
 class Server
 {
@@ -50,11 +50,12 @@ private:
   void                methodNotAllowed(size_t idx);
   void                handleGetDefault(std::string& msg, size_t idx);
   void                NotFound(size_t idx);
+  void                versionNotSupported(size_t idx);
 
   int                 getFreeSocket();
   void                clientsInit();
   void                handleRequest(int i);
-  void                checkRevents(int i);
+  bool                checkRevents(int i);
   void                acceptConnections(void);
   void                cleanUpClientFds();
   void                removeFd(int i);

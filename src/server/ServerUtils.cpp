@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerUtils.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/16 11:26:13 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/19 13:13:44 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@ int   Server::getFreeSocket()
 {
   for (int i = 1; i < MAX_CLIENTS; i++)
   {
-    if (this->_clientPollfds[i].fd == -1)
+    if (this->_clientPollfds[i].fd == -1
+        && this->_clientDetails[i].getFdStatus() == UNUSED)
       return (i);
   }
   return (-1);
@@ -34,7 +35,7 @@ void  Server::clientsInit()
 void  Server::cleanUpClientFds()
 {
   for (size_t i = 0; i < MAX_CLIENTS; i++) {
-    if (this->_clientPollfds[i].fd != -1)
+    if (this->_clientDetails[i].getFdStatus() != UNUSED)
       close(this->_clientPollfds[i].fd);
   }
 }
@@ -42,7 +43,13 @@ void  Server::cleanUpClientFds()
 void  Server::removeFd(int i)
 {
   std::cout << "Connection closed on idx: " << i << std::endl;
-  close(this->_clientPollfds[i].fd);
+  std::cout << "--------------------------" << std::endl;
+  if (close(this->_clientPollfds[i].fd) == -1)
+    perror("removeFd: close");
+  this->_clientDetails[i].cleanUp();
+  this->_clientDetails[i].cleanUpResponse();
+  this->_clientDetails[i].setFdStatus(UNUSED);
+  this->_clientDetails[i].setConStatus(KEEPALIVE);
   this->_clientPollfds[i].fd = -1;
   this->_clientPollfds[i].events = POLLIN;
   this->_clientPollfds[i].revents = 0;

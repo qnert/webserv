@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/17 13:41:56 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/19 14:41:42 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes)
   }
 
   // listens for incomming connection requests
-  if (listen(this->_serverSocket, SOMAXCONN) == -1) {
+  if (listen(this->_serverSocket, 200) == -1) {
     close(this->_serverSocket);
     perror("listen");
     throw(std::runtime_error("Error listening for connections"));
@@ -55,6 +55,7 @@ Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes)
   serverPollfd.events = POLLIN;
   serverPollfd.revents = 0;
   this->_clientPollfds[0] = serverPollfd;
+  this->_clientDetails[0].setFdStatus(USED);
 }
 
 Server::~Server() {}
@@ -65,9 +66,11 @@ void  Server::sendAnswer(size_t idx)
   static std::string tmp;
   const std::string requestType = this->_clientDetails[idx].getRequestType();
 
-  if (requestType == "GET")
+  if (this->_clientDetails[idx].getMapValue("Version") != "HTTP/1.1")
+    this->versionNotSupported(idx);
+  else if (requestType == "GET")
     this->getMethod(idx, tmp);
-  else if (requestType == "POST" || this->_clientDetails[idx].getUri() == "upload")
+  else if (requestType == "POST")
   {
     if (this->postMethod(idx) != 0)
       this->methodNotAllowed(idx);
@@ -78,9 +81,9 @@ void  Server::sendAnswer(size_t idx)
   else
     this->notImplemented(idx);
 
-  if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive") {
-    this->_clientDetails[idx].cleanUp();
-    this->_clientDetails[idx].cleanUpResponse();
+  if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive"
+      || this->_clientDetails[idx].getConStatus() == CLOSE) {
+    std::cout << "answer sent at idx: " << idx << " set back to POLLIN" << std::endl;
     this->removeFd(idx);
   }
   else if (this->_clientDetails[idx].getPendingResponse() == false) {
@@ -91,22 +94,22 @@ void  Server::sendAnswer(size_t idx)
 }
 
 // checks if readable data is available at the client socket
-void  Server::checkRevents(int i)
+bool  Server::checkRevents(int i)
 {
   int error = 0;
 
   if (this->_clientPollfds[i].revents & POLLHUP)
-    this->removeFd(i);
+    error = 1;
   else if (this->_clientPollfds[i].revents & POLLERR)
     error = 1;
   else if (this->_clientPollfds[i].revents & POLLNVAL)
     error = 1;
   if (error == 1)
   {
-    perror("poll_revents");
-    this->cleanUpClientFds();
-    throw(std::runtime_error(""));
+    this->removeFd(i);
+    return (true);
   }
+  return (false);
 }
 
 // accept every client in that wants to connect
@@ -118,7 +121,11 @@ void  Server::acceptConnections(void)
     std::cout << "Maximum amount of clients reached" << std::endl;
     return ;
   }
-  if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
+
+  socklen_t serverAdressLen = sizeof(this->_serverAdress);
+  if ((newClientSocket = accept(this->_serverSocket,
+                                reinterpret_cast<struct sockaddr*>(&this->_serverAdress),
+                                &serverAdressLen)) == -1)
     return ;
 
   if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
@@ -126,6 +133,7 @@ void  Server::acceptConnections(void)
 
   int index = this->getFreeSocket();
   this->_clientPollfds[index].fd = newClientSocket;
+  this->_clientDetails[index].setFdStatus(USED);
   this->_nfds++;
   std::cout << "New client connected at index: " << index << std::endl;
 }
@@ -133,24 +141,23 @@ void  Server::acceptConnections(void)
 // recieves, parses and handles client requests
 void  Server::handleRequest(int i)
 {
-  while (true)
-  {
-    char buffer[10000];
-    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer) - 1, O_NONBLOCK);
+  char buffer[10000];
+  ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer) - 1, O_NONBLOCK);
 
-    if (bytesRead < 0) {
-      break;
-    }
-    if (bytesRead == 0 && this->_clientDetails[i].getPendingReceive() == false) {
-      std::cout << "Client has closed the connection" << std::endl;
-      this->removeFd(i);
-      break;
-    }
-    buffer[bytesRead] = '\0';
-    this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
-    if (this->_clientDetails[i].getPendingReceive() == false)
-      this->_clientPollfds[i].events = POLLOUT;
+  if (bytesRead < 0) {
+    perror("recv");
+    this->removeFd(i);
+    return;
   }
+  if (bytesRead == 0 && this->_clientDetails[i].getPendingReceive() == false) {
+    std::cout << "Client has closed the connection" << std::endl;
+    this->removeFd(i);
+    return;
+  }
+  buffer[bytesRead] = '\0';
+  this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
+  if (this->_clientDetails[i].getPendingReceive() == false)
+    this->_clientPollfds[i].events = POLLOUT;
 }
 
 // main server loop
@@ -166,10 +173,9 @@ void  Server::serverLoop()
 
     for (size_t i = 0; i < MAX_CLIENTS; i++)
     {
-      if (this->_clientPollfds[i].revents == 0)
+      if (this->_clientPollfds[i].revents == 0
+          || this->checkRevents(i) == true)
         continue;
-
-      this->checkRevents(i);
 
       if (this->_clientPollfds[i].revents == POLLIN)
       {

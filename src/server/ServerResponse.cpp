@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/17 13:07:05 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/19 12:38:20 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ void  Server::getMethod(size_t idx, std::string& tmp)
       msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/erased.html");
       std::string length = Server::ft_itos(msg.size());
       std::string response = check_and_add_header(200, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
-      send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+      if (send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0) < 0)
+        this->_clientDetails[idx].setConStatus(CLOSE);
     }
     else
       this->NotFound(idx);
@@ -64,18 +65,18 @@ void  Server::notImplemented(size_t idx)
 {
   std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error501.html");
   std::string length = Server::ft_itos(msg.size());
-  std::string contentType = this->_data[this->_clientDetails[idx].getRequestType()];
-  std::string response = check_and_add_header(501, contentType, length, this->_codes, this->_clientDetails[idx]) + msg;
-  send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+  std::string response = check_and_add_header(501, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
+  if (send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0) < 0)
+    this->_clientDetails[idx].setConStatus(CLOSE);
 }
 
 void  Server::methodNotAllowed(size_t idx)
 {
   std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error405.html");
   std::string length = Server::ft_itos(msg.size());
-  std::string contentType = this->_data[this->_clientDetails[idx].getRequestType()];
-  std::string response = check_and_add_header(405, contentType, length, this->_codes, this->_clientDetails[idx]) + msg;
-  send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+  std::string response = check_and_add_header(405, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
+  if (send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0) < 0)
+    this->_clientDetails[idx].setConStatus(CLOSE);
 }
 
 void  Server::handleGetDefault(std::string& msg, size_t idx)
@@ -95,7 +96,11 @@ void  Server::handleGetDefault(std::string& msg, size_t idx)
     size_t headerSize = this->_clientDetails[idx].getHeaderSize();
     response = msg.substr(totalBytesSend - headerSize);
   }
-  size_t bytesSend = send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+  ssize_t bytesSend = send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+  if (bytesSend == -1) {
+    this->_clientDetails[idx].setConStatus(CLOSE);
+    return;
+  }
   this->_clientDetails[idx].checkPendingResponse(bytesSend);
 }
 
@@ -103,7 +108,16 @@ void  Server::NotFound(size_t idx)
 {
   std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error404.html");
   std::string length = Server::ft_itos(msg.size());
-  std::string contentType = this->_data[this->_clientDetails[idx].getRequestType()];
-  std::string response = check_and_add_header(404, contentType, length, this->_codes, this->_clientDetails[idx]) + msg;
-  send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0);
+  std::string response = check_and_add_header(404, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
+  if (send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0) < 0)
+    this->_clientDetails[idx].setConStatus(CLOSE);
+}
+
+void  Server::versionNotSupported(size_t idx)
+{
+  std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error505.html");
+  std::string length = Server::ft_itos(msg.size());
+  std::string response = check_and_add_header(505, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
+  if (send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0) < 0)
+    this->_clientDetails[idx].setConStatus(CLOSE);
 }

@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/17 17:18:26 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/18 19:46:51 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,14 +111,17 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
     std::string msg = storeFileIntoString(req, "responseFiles/error400.html");
     std::string length = Server::ft_itos(msg.size());
     msg = check_and_add_header(400, data["html"], length, codes, req) + msg;
-    send(fd, msg.c_str(), msg.size(), 0);
+    if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+      req.setConStatus(CLOSE);
     return ;
   }
   else if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
     std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
     std::string length = Server::ft_itos(msg.size());
     msg = check_and_add_header(200, data["html"], length, codes, req) + msg;
-    send(fd, msg.c_str(), msg.size(), 0);
+    if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+      req.setConStatus(CLOSE);
+    return ;
   }
   std::string filecontent = get_filecontent(req.getBoundary(), req.getBody());
   std::ofstream upload(("./responseFiles/Upload/" + filename).c_str(), std::ios::binary);
@@ -129,8 +132,8 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
   std::string msg = storeFileIntoString(req, "responseFiles/success.html");
   std::string length = Server::ft_itos(msg.size());
   msg = check_and_add_header(201, data["html"], length, codes, req) + msg;
-  if (msg != "")
-    send(fd, msg.c_str(), msg.size(), 0);
+  if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+    req.setConStatus(CLOSE);
 }
 
 std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes, MIME_type& data){
@@ -138,20 +141,23 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes, MIME_t
   std::string filepath = req.getCurrdir() + req.getUri().substr(1, req.getUri().size());
   if (filepath.find("responseFiles/Upload") == std::string::npos){
     msg = check_and_add_header(403, data["plain"], "22", codes, req) + "403 forbidden deletion";
-    send(fd, msg.c_str(), msg.size(), 0);
+    if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+      req.setConStatus(CLOSE);
     return ("");
   }
   else if (access(filepath.c_str(), F_OK) != 0){
     std::string msg = storeFileIntoString(req, "responseFiles/error404.html");
     std::string length = Server::ft_itos(msg.size());
     msg = check_and_add_header(404, data["html"], length, codes, req) + msg;
-    send(fd, msg.c_str(), msg.size(), 0);
+    if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+      req.setConStatus(CLOSE);
     return ("");
   }
   std::remove(filepath.c_str());
   std::cout << "removed\n";
   msg = check_and_add_header(202, "Accepted", Server::ft_itos(0), codes, req);
-  send(fd, msg.c_str(), msg.size(), 0);
+  if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+    req.setConStatus(CLOSE);
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
 
