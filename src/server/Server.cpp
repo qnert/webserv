@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/19 17:42:04 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/19 19:09:39 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,6 +167,7 @@ void  Server::handleRequest(int i)
 }
 
 // main server loop
+// if tested with siege, set delay to 0.1 or more
 void  Server::serverLoop()
 {
   while (true)
