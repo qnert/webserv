@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/16 12:06:53 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/19 19:30:36 by simonkunert      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,12 @@
 
 std::string  storeFileIntoString(Clients& req, std::string path)
 {
-  if (req.getUri() == "/" && path != "responseFiles/error501.html")
+  if (req.getUri() == "/" && path != "responseFiles/error501.html"
+      && req.getMapValue("Cookie") != "user=admin")
     path = req.getCurrdir() + "responseFiles/index.html";
+  else if (req.getUri() == "/" && path != "responseFiles/error501.html"
+          && req.getMapValue("Cookie") == "user=admin")
+    path = req.getCurrdir() + "responseFiles/admin_index.html";
   else
     path = req.getCurrdir() + path;
   std::ifstream file(path, std::ios::binary);
