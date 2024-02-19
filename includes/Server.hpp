@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/19 14:37:34 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/19 17:14:19 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 #include <unistd.h>
 
 #define PORT 8080
-#define MAX_CLIENTS 1024
+#define MAX_CLIENTS 200
 
 class Server
 {

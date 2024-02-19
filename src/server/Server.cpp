@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/19 14:41:42 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/19 17:42:04 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,8 @@ bool  Server::checkRevents(int i)
     error = 1;
   else if (this->_clientPollfds[i].revents & POLLNVAL)
     error = 1;
+  else if (this->_clientPollfds[i].revents & POLLPRI)
+    error = 1;
   if (error == 1)
   {
     this->removeFd(i);
@@ -123,10 +125,14 @@ void  Server::acceptConnections(void)
   }
 
   socklen_t serverAdressLen = sizeof(this->_serverAdress);
-  if ((newClientSocket = accept(this->_serverSocket,
+  newClientSocket = accept(this->_serverSocket,
                                 reinterpret_cast<struct sockaddr*>(&this->_serverAdress),
-                                &serverAdressLen)) == -1)
+                                &serverAdressLen);
+  if (newClientSocket == -1)
+  {
+    perror("accept");
     return ;
+  }
 
   if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
     perror("fcntl client");
@@ -165,7 +171,7 @@ void  Server::serverLoop()
 {
   while (true)
   {
-    if (poll(this->_clientPollfds, MAX_CLIENTS, 10000) < 0) {
+    if ((poll(this->_clientPollfds, MAX_CLIENTS, 10000)) < 0) {
       perror("poll");
       close(this->_serverSocket);
       throw(std::runtime_error(""));

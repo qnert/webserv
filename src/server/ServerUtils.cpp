@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/19 13:13:44 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/19 15:41:18 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,6 @@ void  Server::cleanUpClientFds()
 
 void  Server::removeFd(int i)
 {
-  std::cout << "Connection closed on idx: " << i << std::endl;
-  std::cout << "--------------------------" << std::endl;
   if (close(this->_clientPollfds[i].fd) == -1)
     perror("removeFd: close");
   this->_clientDetails[i].cleanUp();
@@ -54,6 +52,8 @@ void  Server::removeFd(int i)
   this->_clientPollfds[i].events = POLLIN;
   this->_clientPollfds[i].revents = 0;
   this->_nfds--;
+  std::cout << "Connection closed on idx: " << i << std::endl;
+  std::cout << "--------------------------" << std::endl;
 }
 
 std::string Server::ft_itos(size_t num)
