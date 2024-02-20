@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:18:08 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 19:06:39 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ bool  ServerManager::checkRevents(size_t index)
     error = 1;
   if (error == 1)
   {
-    Server::removeFd(index);
+    this->_currentServer.removeFd(index);
     return (true);
   }
   return (false);
@@ -50,31 +50,30 @@ bool  ServerManager::checkRevents(size_t index)
 
 void ServerManager::handleRequest(size_t i)
 {
-  while (true)
-  {
-    char buffer[10000];
-    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer) - 1, O_NONBLOCK);
+  char buffer[10000];
+  ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer) - 1, O_NONBLOCK);
 
-    if (bytesRead < 0) {
-      break;
-    }
-    if (bytesRead == 0 && this->_clientDetails[i].getPendingReceive() == false) {
-      std::cout << "Client has closed the connection" << std::endl;
-      Server::removeFd(i);
-      break;
-    }
-    buffer[bytesRead] = '\0';
-    this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
-    if (this->_clientDetails[i].getPendingReceive() == false)
-      this->_clientPollfds[i].events = POLLOUT;
+  if (bytesRead < 0) {
+    perror("recv");
+    this->_currentServer.removeFd(i);
+    return;
   }
+  if (bytesRead == 0 && this->_clientDetails[i].getPendingReceive() == false) {
+    std::cout << "Client has closed the connection" << std::endl;
+    this->_currentServer.removeFd(i);
+    return;
+  }
+  buffer[bytesRead] = '\0';
+  this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
+  if (this->_clientDetails[i].getPendingReceive() == false)
+    this->_clientPollfds[i].events = POLLOUT;
 }
 
 void ServerManager::serverLoop()
 {
 	while (true)
 	{
-		if (poll(this->_clientPollfds, MAX_CLIENTS, -1) < 0)
+		if (poll(this->_clientPollfds, MAX_CLIENTS, 5000) < 0)
 		{
 			perror("poll");
 			// there needs to be a function that closes all open fds in case of a crash
@@ -93,8 +92,6 @@ void ServerManager::serverLoop()
 				else
 				{
 					this->handleRequest(i);
-					// put handlerequest in main and figure out which server it belongs to by comparing "Host:"
-					// then just return the server it belongs to and send answer or cgi or anything :)
 					matchRequestToServer(i);
 				}
 			}

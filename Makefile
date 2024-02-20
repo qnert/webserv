@@ -1,5 +1,5 @@
 C++ = c++
-CFLAGS = -Wall -Werror -Wextra -std=c++98 -g #-fsanitize=address
+CFLAGS = -Wall -Werror -Wextra -std=c++98 -g -fsanitize=address
 NAME = webserv
 
 GREEN=\033[32m
@@ -21,7 +21,7 @@ all: $(NAME)
 
 $(NAME) : $(OBJECTS)
 	@echo "$(GREEN)Linking...$(RESET)"
-	@$(C++) $(OBJECTS) -o $(NAME) #-fsanitize=address -static-libsan
+	@$(C++) $(OBJECTS) -o $(NAME) -fsanitize=address -static-libsan
 
 clean:
 	@rm -f $(OBJECTS)

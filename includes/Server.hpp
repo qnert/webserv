@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:01:56 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 16:33:52 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ public:
   ~Server();
 
 //   void                serverLoop(void);
-  static void         removeFd(int i);
+  void                removeFd(int i);
   static std::string  ft_itos(size_t num);
   Statuscodes&        getStatuscodes(void);
   MIME_type&          getMimeType(void);

@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/18 19:46:51 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 16:55:29 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes, MIME_t
       req.setConStatus(CLOSE);
     return ("");
   }
-  else if (access(filepath.c_str(), F_OK) != 0){
+  else if (access(filepath.c_str(), F_OK) != 0 || req.getUri() == "/responseFiles/Upload/"){
     std::string msg = storeFileIntoString(req, "responseFiles/error404.html");
     std::string length = Server::ft_itos(msg.size());
     msg = check_and_add_header(404, data["html"], length, codes, req) + msg;

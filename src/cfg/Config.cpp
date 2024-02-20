@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/19 03:43:32 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/20 18:57:21 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,11 +167,11 @@ void Config::parseConf(std::string path)
 				throw std::runtime_error("argument found outside of server directive");
 		}
 	}
-	for (std::vector<std::map<std::string, std::string> >::iterator i = _configs.begin(); i < _configs.end(); ++i)
+	for (t_confVector::iterator i = _configs.begin(); i < _configs.end(); ++i)
 		checkConf(*i);
 }
 
-std::vector<std::map<std::string, std::string> > Config::getConfigs()
+t_confVector Config::getConfigs()
 {
 	return _configs;
 }
