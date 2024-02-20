@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/19 19:30:36 by simonkunert      ###   ########.fr       */
+/*   Updated: 2024/02/20 14:48:34 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,18 +142,17 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri().substr(1, req.getUri().size());
   if (filepath.find("responseFiles/Upload") == std::string::npos){
-    msg = check_and_add_header(403, "Forbidden", Server::ft_itos(0), codes, req);
+    msg = check_and_add_header(403, "plain", Server::ft_itos(15), codes, req) + "\t403 Forbidden\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
   else if (access(filepath.c_str(), F_OK) != 0){
-    msg = check_and_add_header(404, "Not Found", Server::ft_itos(0), codes, req);
+    msg = check_and_add_header(404, "plain", Server::ft_itos(15), codes, req) + "\t404 Not Found\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
   std::remove(filepath.c_str());
-  std::cout << "removed\n";
-  msg = check_and_add_header(202, "Accepted", Server::ft_itos(0), codes, req);
+  msg = check_and_add_header(202, "plain", Server::ft_itos(14), codes, req) + "\t202 Accepted\n";
   send(fd, msg.c_str(), msg.size(), 0);
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
