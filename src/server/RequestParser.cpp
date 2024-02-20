@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/16 12:05:02 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/18 15:22:30 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,8 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer, ssize_t bytes
 
 void  RequestParser::cleanUp()
 {
+  this->_curr_dir.clear();
+  this->_boundary.clear();
   this->_fileType.clear();
   this->_requestFields.clear();
 }

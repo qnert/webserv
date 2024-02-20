@@ -3,26 +3,37 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/16 11:18:16 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 16:32:04 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
 
+static short ft_stosh(const std::string& str)
+{
+	short num;
+	std::stringstream ss(str);
+
+	ss >> num;
+	return num;
+}
+
+Server::Server() {}
+
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
-Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes), _reuse(1), _nfds(1), _currSize(0)
+Server::Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients* cd, std::map<std::string, std::string> cfg) : _data(data), _codes(codes), _clientPollfds(pfds), _clientDetails(cd), _nfds(1)
 {
-  clientsInit();
+	int reuse = 1;
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
     throw(std::runtime_error(""));
   }
 
-  if (setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse)) == -1) {
+  if (setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
     perror("setsockopt");
     close(this->_serverSocket);
     throw(std::runtime_error(""));
@@ -30,18 +41,25 @@ Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes)
 
   this->_serverAdress.sin_family = AF_INET;
   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
-  this->_serverAdress.sin_port = htons(PORT);
+  this->_serverAdress.sin_port = htons(ft_stosh(cfg.find("listen")->second));
+
+  std::cout << "server port: " << ft_stosh(cfg.find("listen")->second) << std::endl;
+  this->_port = cfg.find("listen")->second;
+  this->_servername = cfg.find("server_name")->second;
+  this->_defaultserver = (_port.find("default_server") != std::string::npos) ? true : false;
+//   this->_root = cfg.find("root")->second;
 
   // associates the server socket with the local address
   // and port specified in the "serverAddress" structure
-  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
+  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1)
+  {
     perror("bind");
     close(this->_serverSocket);
     throw(std::runtime_error("Error timeouted trying to bind socket"));
   }
 
   // listens for incomming connection requests
-  if (listen(this->_serverSocket, SOMAXCONN) == -1) {
+  if (listen(this->_serverSocket, 200) == -1) {
     close(this->_serverSocket);
     perror("listen");
     throw(std::runtime_error("Error listening for connections"));
@@ -54,7 +72,9 @@ Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes)
   serverPollfd.fd = this->_serverSocket;
   serverPollfd.events = POLLIN;
   serverPollfd.revents = 0;
-  this->_clientPollfds[0] = serverPollfd;
+  int index = getFreeSocket();
+  this->_clientPollfds[index] = serverPollfd;
+  this->_clientDetails[index].setFdStatus(USED);
 }
 
 Server::~Server() {}
@@ -65,9 +85,11 @@ void  Server::sendAnswer(size_t idx)
   static std::string tmp;
   const std::string requestType = this->_clientDetails[idx].getRequestType();
 
-  if (requestType == "GET")
+  if (this->_clientDetails[idx].getMapValue("Version") != "HTTP/1.1")
+    this->versionNotSupported(idx);
+  else if (requestType == "GET")
     this->getMethod(idx, tmp);
-  else if (requestType == "POST" || this->_clientDetails[idx].getUri() == "upload")
+  else if (requestType == "POST")
   {
     if (this->postMethod(idx) != 0)
       this->methodNotAllowed(idx);
@@ -77,9 +99,9 @@ void  Server::sendAnswer(size_t idx)
   else
     this->notImplemented(idx);
 
-  if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive") {
-    this->_clientDetails[idx].cleanUp();
-    this->_clientDetails[idx].cleanUpResponse();
+  if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive"
+      || this->_clientDetails[idx].getConStatus() == CLOSE) {
+    std::cout << "answer sent at idx: " << idx << " set back to POLLIN" << std::endl;
     this->removeFd(idx);
   }
   else if (this->_clientDetails[idx].getPendingResponse() == false) {
@@ -89,27 +111,8 @@ void  Server::sendAnswer(size_t idx)
   }
 }
 
-// checks if readable data is available at the client socket
-void  Server::checkRevents(int i)
-{
-  int error = 0;
-
-  if (this->_clientPollfds[i].revents & POLLHUP)
-    this->removeFd(i);
-  else if (this->_clientPollfds[i].revents & POLLERR)
-    error = 1;
-  else if (this->_clientPollfds[i].revents & POLLNVAL)
-    error = 1;
-  if (error == 1)
-  {
-    perror("poll_revents");
-    this->cleanUpClientFds();
-    throw(std::runtime_error(""));
-  }
-}
-
 // accept every client in that wants to connect
-void  Server::acceptConnections(void)
+void  Server::acceptConnections()
 {
   int newClientSocket;
 
@@ -117,71 +120,47 @@ void  Server::acceptConnections(void)
     std::cout << "Maximum amount of clients reached" << std::endl;
     return ;
   }
-  if ((newClientSocket = accept(this->_serverSocket, NULL, NULL)) == -1)
+
+  socklen_t serverAdressLen = sizeof(this->_serverAdress);
+  newClientSocket = accept(this->_serverSocket,
+                                reinterpret_cast<struct sockaddr*>(&this->_serverAdress),
+                                &serverAdressLen);
+  if (newClientSocket == -1)
+  {
+    perror("accept");
     return ;
+  }
 
   if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
     perror("fcntl client");
 
   int index = this->getFreeSocket();
   this->_clientPollfds[index].fd = newClientSocket;
+  this->_clientDetails[index].setFdStatus(USED);
   this->_nfds++;
   std::cout << "New client connected at index: " << index << std::endl;
 }
 
-// recieves, parses and handles client requests
-void  Server::handleRequest(int i)
+int Server::getFd()
 {
-  while (true)
-  {
-    char buffer[10000];
-    ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer) - 1, O_NONBLOCK);
-
-    if (bytesRead < 0) {
-      break;
-    }
-    if (bytesRead == 0 && this->_clientDetails[i].getPendingReceive() == false) {
-      std::cout << "Client has closed the connection" << std::endl;
-      this->removeFd(i);
-      break;
-    }
-    buffer[bytesRead] = '\0';
-    this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
-    if (this->_clientDetails[i].getPendingReceive() == false)
-      this->_clientPollfds[i].events = POLLOUT;
-  }
+	return _serverSocket;
 }
 
-// main server loop
-void  Server::serverLoop()
+std::string Server::getServername()
 {
-  while (true)
-  {
-    if (poll(this->_clientPollfds, MAX_CLIENTS, 10000) < 0) {
-      perror("poll");
-      close(this->_serverSocket);
-      throw(std::runtime_error(""));
-    }
+	return _servername;
+}
 
-    for (size_t i = 0; i < MAX_CLIENTS; i++)
-    {
-      if (this->_clientPollfds[i].revents == 0)
-        continue;
+std::string Server::getPort()
+{
+	return _port;
+}
+std::string Server::getRoot()
+{
+	return _root;
+}
 
-      this->checkRevents(i);
-
-      if (this->_clientPollfds[i].revents == POLLIN)
-      {
-        if (this->_clientPollfds[i].fd == this->_serverSocket)
-          this->acceptConnections();
-        else
-          this->handleRequest(i);
-      }
-      else if (this->_clientPollfds[i].revents == POLLOUT)
-      {
-        this->sendAnswer(i);
-      }
-    } // * END OF CLIENT LOOP *
-  } // * END OF SERVER *
-  this->cleanUpClientFds();
+bool Server::isDefaultServer()
+{
+  return _defaultserver;
 }

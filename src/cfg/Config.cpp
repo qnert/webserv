@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/06 18:20:37 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/19 03:43:32 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,23 +28,23 @@ std::string trim(const std::string& line)
     const char* WhiteSpace = " \t\v\r\n\f";
     size_t start = line.find_first_not_of(WhiteSpace);
     size_t end = line.find_last_not_of(WhiteSpace);
-    return start == end ? std::string("") : line.substr(start, end - start + 1);
+    return start == end ? line : line.substr(start, end - start + 1);
 }
 
 // advances file descriptor until theres a opening bracket of a directive
-void findOpeningBracket(std::ifstream& input)
+void findOpeningBracket(std::ifstream& input, std::string& line)
 {
-	std::string line;
-
 	while (input.good())
 	{
 		std::getline(input, line);
-		size_t found = line.find_first_not_of(" \t\v\r\n\f");
-		if (found != std::string::npos && line.at(found) == '{')
+		line = trim(line);
+		if (line.empty() || line.front() == '#')
+			continue;
+		if (line.find('{') != std::string::npos)
 		{
 			return;
 		}
-		else if (input.eof())
+		else
 			throw std::runtime_error("missing opening bracket");
 	}
 }
@@ -75,17 +75,13 @@ void checkConf(std::map<std::string, std::string> map)
 	std::cout << map.find("listen")->second << std::endl;
 	std::cout << map.find("server_name")->second << std::endl;
 	std::cout << map.find("root")->second << std::endl;
-	std::cout << map.find("index")->second << std::endl;
+	std::cout << map.find("index")->second << std::endl << std::endl;
 }
 
-// handles parsing of the server directive
-void Config::locationDirective(std::ifstream& input)
+// handles parsing of the location directive
+void Config::locationDirective(std::ifstream& input, std::map<std::string,std::string> map)
 {
-	// go until find valid argument for server directive
-	// if anything goes wrong throw (missing semicolon/closing bracket/invalid argument)
-	// basically just copy serverDirective() and change array of valid args
 	std::string line;
-	size_t delim;
 	std::string a[] = {"autoindex ", "allow_methods ", "root ", "index "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
@@ -94,23 +90,23 @@ void Config::locationDirective(std::ifstream& input)
 	{
 		std::getline(input, line);
 		line = trim(line);
-		if (line.empty())
+		if (line.empty() || line.front() == '#')
 			continue;
-		if (line.find('\n') != std::string::npos)
-			throw std::runtime_error("missing semicolon in location directive");
-		if (input.eof() && line.length() == 0)
-			throw std::runtime_error("missing closing bracket in location directive");
 		for (i = params.begin(); i != params.end(); ++i)
-			if ((delim = line.find(*i)) != std::string::npos)
+		{
+			if ((line.compare(0, i.base()->length(), *i)) == 0 || line.find('}') != std::string::npos)
+			{
+				size_t delim = line.find(';');
+				if (line.find('}') < delim)
+					return;
+				if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
+					throw std::runtime_error("missing semicolon in location directive");
+				map[trim(*i)] = trim(line.substr(i.base()->length(), delim-i.base()->length()));
 				break;
-		if (*i == "autoindex ")
-			std::cout << /*line.substr(delim)*/ "found something :)" << std::endl;
-		else if (*i == "allow_methods ")
-			std::cout << /*line.substr(delim)*/ "found something :)" << std::endl;
-		else if (*i == "root ")
-			std::cout << /*line.substr(delim)*/ "found something :)" << std::endl;
-		else if (*i == "index ")
-			std::cout << /*line.substr(delim)*/ "found something :)" << std::endl;
+			}
+			else if (next(i) == params.end())
+				throw std::runtime_error("invalid argument in location directive");
+		}
 	}
 }
 
@@ -125,26 +121,26 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 
 	while (input.good())
 	{
-		// if eof is reached without finding closing bracket throw missing bracket in server directive 
-		std::getline(input, line); // rewrite to only read until newline to deal with comments easier. check for semicolon at end of each line and remove any line with # in beginning
+		std::getline(input, line);
 		line = trim(line);
 		if (line.empty() || line.front() == '#')
 			continue;
 		for (i = params.begin(); i != params.end(); ++i)
 		{
-			if ((line.compare(0, i.base()->length(), *i)) == 0)
+			if ((line.compare(0, i.base()->length(), *i)) == 0 || line.find('}') != std::string::npos)
 			{
 				size_t delim = line.find(';');
+				if (line.find('}') < delim)
+					return map;
 				if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in server directive");
 				map[trim(*i)] = trim(line.substr(i.base()->length(), delim-i.base()->length()));
 				break;
 			}
 			else if (next(i) == params.end())
-				throw std::runtime_error("invalid argument");
+				throw std::runtime_error("invalid argument server directive");
 		}
 	}
-	checkConf(map);
 	return map;
 }
 
@@ -158,15 +154,26 @@ void Config::parseConf(std::string path)
 		while (input.good())
 		{
 			std::getline(input, line);
+			line = trim(line);
+			if (line.empty() || line.front() == '#')
+				continue;
 			if (line.find("server") != std::string::npos)
 			{
 				if (line.find('{') == std::string::npos)
-				// fix opening bracket not being found if on same line as server directive start
-					findOpeningBracket(input);
+					findOpeningBracket(input, line);
 				_configs.push_back(serverDirective(input));
 			}
+			else
+				throw std::runtime_error("argument found outside of server directive");
 		}
 	}
+	for (std::vector<std::map<std::string, std::string> >::iterator i = _configs.begin(); i < _configs.end(); ++i)
+		checkConf(*i);
+}
+
+std::vector<std::map<std::string, std::string> > Config::getConfigs()
+{
+	return _configs;
 }
 
 Config::Config(const std::string& path)
@@ -177,7 +184,7 @@ Config::Config(const std::string& path)
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << e.what() << "exit here" << '\n';
+		std::cerr << e.what() << '\n';
 	}
 }
 
@@ -186,27 +193,3 @@ Config::~Config()
 	// std::cout << "Config destructed" << std::endl;
 }
 
-std::vector<size_t> Config::getPort()
-{
-	return _port;
-}
-
-std::vector<std::string> Config::getName()
-{
-	return _server_name;
-}
-
-std::vector<std::string> Config::getRoot()
-{
-	return _root_dir;
-}
-
-std::string Config::getIndex(std::string route)
-{
-	return _routes[route];
-}
-
-std::map<std::string, std::string> Config::getRoutes()
-{
-	return _routes;
-}
