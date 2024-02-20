@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/19 19:06:11 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 15:07:59 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,22 +14,13 @@
 
 int   Server::getFreeSocket()
 {
-  for (int i = 1; i < MAX_CLIENTS; i++)
+  for (int i = 0; i < MAX_CLIENTS; i++)
   {
     if (this->_clientPollfds[i].fd == -1
         && this->_clientDetails[i].getFdStatus() == UNUSED)
       return (i);
-  }
+	}
   return (-1);
-}
-void  Server::clientsInit()
-{
-  for (int i = 1; i < MAX_CLIENTS; i++)
-  {
-    this->_clientPollfds[i].fd = -1;
-    this->_clientPollfds[i].events = POLLIN;
-    this->_clientPollfds[i].revents = 0;
-  }
 }
 
 void  Server::cleanUpClientFds()

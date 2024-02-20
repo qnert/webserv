@@ -6,23 +6,34 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/19 19:09:39 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 16:07:46 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
 
+static short ft_stosh(const std::string& str)
+{
+	short num;
+	std::stringstream ss(str);
+
+	ss >> num;
+	return num;
+}
+
+Server::Server() {}
+
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
-Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes), _reuse(1), _nfds(1), _currSize(0)
+Server::Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients* cd, std::map<std::string, std::string> cfg) : _data(data), _codes(codes), _clientPollfds(pfds), _clientDetails(cd), _nfds(1)
 {
-  clientsInit();
+	int reuse = 1;
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
     throw(std::runtime_error(""));
   }
 
-  if (setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &this->_reuse, sizeof(this->_reuse)) == -1) {
+  if (setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
     perror("setsockopt");
     close(this->_serverSocket);
     throw(std::runtime_error(""));
@@ -30,11 +41,18 @@ Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes)
 
   this->_serverAdress.sin_family = AF_INET;
   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
-  this->_serverAdress.sin_port = htons(PORT);
+  this->_serverAdress.sin_port = htons(ft_stosh(cfg.find("listen")->second));
+
+  std::cout << "server port: " << ft_stosh(cfg.find("listen")->second) << std::endl;
+  this->_port = cfg.find("listen")->second;
+  this->_servername = cfg.find("server_name")->second;
+  this->_defaultserver = (_port.find("default_server") != std::string::npos) ? true : false;
+//   this->_root = cfg.find("root")->second;
 
   // associates the server socket with the local address
   // and port specified in the "serverAddress" structure
-  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1) {
+  if (bind(this->_serverSocket, reinterpret_cast<struct sockaddr*>(&_serverAdress), sizeof(_serverAdress)) == -1)
+  {
     perror("bind");
     close(this->_serverSocket);
     throw(std::runtime_error("Error timeouted trying to bind socket"));
@@ -54,8 +72,9 @@ Server::Server(MIME_type& data, Statuscodes& codes) : _data(data), _codes(codes)
   serverPollfd.fd = this->_serverSocket;
   serverPollfd.events = POLLIN;
   serverPollfd.revents = 0;
-  this->_clientPollfds[0] = serverPollfd;
-  this->_clientDetails[0].setFdStatus(USED);
+  int index = getFreeSocket();
+  this->_clientPollfds[index] = serverPollfd;
+  this->_clientDetails[index].setFdStatus(USED);
 }
 
 Server::~Server() {}
@@ -93,29 +112,8 @@ void  Server::sendAnswer(size_t idx)
   }
 }
 
-// checks if readable data is available at the client socket
-bool  Server::checkRevents(int i)
-{
-  int error = 0;
-
-  if (this->_clientPollfds[i].revents & POLLHUP)
-    error = 1;
-  else if (this->_clientPollfds[i].revents & POLLERR)
-    error = 1;
-  else if (this->_clientPollfds[i].revents & POLLNVAL)
-    error = 1;
-  else if (this->_clientPollfds[i].revents & POLLPRI)
-    error = 1;
-  if (error == 1)
-  {
-    this->removeFd(i);
-    return (true);
-  }
-  return (false);
-}
-
 // accept every client in that wants to connect
-void  Server::acceptConnections(void)
+void  Server::acceptConnections()
 {
   int newClientSocket;
 
@@ -144,58 +142,26 @@ void  Server::acceptConnections(void)
   std::cout << "New client connected at index: " << index << std::endl;
 }
 
-// recieves, parses and handles client requests
-void  Server::handleRequest(int i)
+int Server::getFd()
 {
-  char buffer[10000];
-  ssize_t bytesRead = recv(this->_clientPollfds[i].fd, buffer, sizeof(buffer) - 1, O_NONBLOCK);
-
-  if (bytesRead < 0) {
-    perror("recv");
-    this->removeFd(i);
-    return;
-  }
-  if (bytesRead == 0 && this->_clientDetails[i].getPendingReceive() == false) {
-    std::cout << "Client has closed the connection" << std::endl;
-    this->removeFd(i);
-    return;
-  }
-  buffer[bytesRead] = '\0';
-  this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
-  if (this->_clientDetails[i].getPendingReceive() == false)
-    this->_clientPollfds[i].events = POLLOUT;
+	return _serverSocket;
 }
 
-// main server loop
-// if tested with siege, set delay to 0.1 or more
-void  Server::serverLoop()
+std::string Server::getServername()
 {
-  while (true)
-  {
-    if ((poll(this->_clientPollfds, MAX_CLIENTS, 10000)) < 0) {
-      perror("poll");
-      close(this->_serverSocket);
-      throw(std::runtime_error(""));
-    }
+	return _servername;
+}
 
-    for (size_t i = 0; i < MAX_CLIENTS; i++)
-    {
-      if (this->_clientPollfds[i].revents == 0
-          || this->checkRevents(i) == true)
-        continue;
+std::string Server::getPort()
+{
+	return _port;
+}
+std::string Server::getRoot()
+{
+	return _root;
+}
 
-      if (this->_clientPollfds[i].revents == POLLIN)
-      {
-        if (this->_clientPollfds[i].fd == this->_serverSocket)
-          this->acceptConnections();
-        else
-          this->handleRequest(i);
-      }
-      else if (this->_clientPollfds[i].revents == POLLOUT)
-      {
-        this->sendAnswer(i);
-      }
-    } // * END OF CLIENT LOOP *
-  } // * END OF SERVER *
-  this->cleanUpClientFds();
+bool Server::isDefaultServer()
+{
+  return _defaultserver;
 }
