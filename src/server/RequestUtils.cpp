@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/20 16:31:42 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/20 17:29:46 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
-  else if (access(filepath.c_str(), F_OK) != 0){
+  else if (access(filepath.c_str(), F_OK) != 0 || req.getUri() == "/responseFiles/Upload/"){
     msg = check_and_add_header(404, "plain", Server::ft_itos(15), codes, req) + "\t404 Not Found\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
