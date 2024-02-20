@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/20 18:57:21 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 19:41:35 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,19 +161,24 @@ void Config::parseConf(std::string path)
 			{
 				if (line.find('{') == std::string::npos)
 					findOpeningBracket(input, line);
-				_configs.push_back(serverDirective(input));
+				_config.push_back(serverDirective(input));
 			}
 			else
 				throw std::runtime_error("argument found outside of server directive");
 		}
 	}
-	for (t_confVector::iterator i = _configs.begin(); i < _configs.end(); ++i)
+	for (t_confVector::iterator i = _config.begin(); i < _config.end(); ++i)
 		checkConf(*i);
 }
 
-t_confVector Config::getConfigs()
+t_confVector Config::getLocations()
 {
-	return _configs;
+	return _locations;
+}
+
+std::map<std::string, std::string> Config::getConfig()
+{
+	return _config;
 }
 
 Config::Config(const std::string& path)

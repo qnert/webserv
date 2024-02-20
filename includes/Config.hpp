@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/29 16:01:58 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/20 18:54:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 19:41:17 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,18 +26,14 @@ typedef std::vector<std::map<std::string, std::string> > t_confVector;
 class Config
 {
 private:
-	std::vector<std::map<std::string, std::string> > _configs;
+	std::map<std::string, std::string> _config;
+	std::vector<std::map<std::string, std::string> > _locations;
 public:
 	Config(const std::string& path);
 	~Config();
 
-	class InvalidConfigurationException : public std::exception
-	{
-		public:
-			virtual const char *what() const throw();
-	};
-
-	t_confVector getConfigs();
+	std::map<std::string, std::string> getConfig();
+	t_confVector getLocations();
 	void parseConf(std::string path);
 	std::map<std::string,std::string> serverDirective(std::ifstream& input);
 	void locationDirective(std::ifstream& input, std::map<std::string, std::string> map);
