@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/21 14:07:54 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/21 17:31:23 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,12 +167,9 @@ void  list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir){
 
   directories << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Directory Listing</title>\n<body>\n<body>\n";
   directories << "<h1>Directory Listing: " << uri << "</h1>\n<body>\n</html>\n";
-  size_t  start = uri.find_first_of('/');
-  if (uri.find_first_of('/', start + 1) != std::string::npos)
-    uri = uri.substr(start + 1, uri.length());
   while ((dent = readdir(dir)) != NULL){
     if (std::string(dent->d_name) != "." && std::string(dent->d_name)  != "..")
-      directories << "<a href=\"" << (uri + dent->d_name) << "\">" << dent->d_name << "</a>" << "<br>";
+      directories << "<a href=\"" << "/" + (uri + dent->d_name) << "\">" << dent->d_name << "</a>" << "<br>";
   }
 
 
