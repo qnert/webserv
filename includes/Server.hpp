@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:31:19 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/21 10:58:57 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <cstdio>
+#include <dirent.h>
 #include <unistd.h>
 
 #define MAX_CLIENTS 200

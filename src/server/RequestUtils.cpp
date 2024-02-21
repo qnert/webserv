@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/20 17:29:46 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/21 11:10:33 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,6 +157,19 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   msg = check_and_add_header(202, "plain", Server::ft_itos(14), codes, req) + "\t202 Accepted\n";
   send(fd, msg.c_str(), msg.size(), 0);
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
+}
+
+void  list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir){
+  struct  dirent*     dent;
+  std::string         dir_str;
+  std::ostringstream  directories;
+
+  while ((dent = readdir(dir)) != NULL)
+    directories << dent->d_name << "\n";
+
+  dir_str = directories.str();
+  std::string msg = check_and_add_header(200, "plain", Server::ft_itos(dir_str.length()), codes, req) + dir_str;
+  send(fd, msg.c_str(), msg.size(), 0);
 }
 
 std::string  check_and_add_header(int status, std::string const& type, std::string const& length, \
