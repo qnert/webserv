@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/29 16:01:58 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/20 19:41:17 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/21 04:32:17 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,5 +36,5 @@ public:
 	t_confVector getLocations();
 	void parseConf(std::string path);
 	std::map<std::string,std::string> serverDirective(std::ifstream& input);
-	void locationDirective(std::ifstream& input, std::map<std::string, std::string> map);
+	std::map<std::string,std::string> locationDirective(std::ifstream& input, std::string& line);
 };

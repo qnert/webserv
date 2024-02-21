@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/20 19:41:35 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/21 04:38:13 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,26 +49,6 @@ void findOpeningBracket(std::ifstream& input, std::string& line)
 	}
 }
 
-// check if argument line ends with a semicolon
-int checkSemicolon(std::vector<std::string> validArgs, std::string line)
-{
-	std::vector<std::string>::iterator i;
-	for (i = validArgs.begin(); i != validArgs.end(); ++i)
-		if ((line.find(*i)) != std::string::npos)
-			break;
-	if (*i == "server_name ")
-		return 1;
-	else if (*i == "listen ")
-		return 1;
-	else if (*i == "root ")
-		return 1;
-	else if (*i == "location ")
-		return 1;
-	else if (*i == "index ")
-		return 1;
-	return 0;
-}
-
 // verifies the config and makes sure nothing is undefined
 void checkConf(std::map<std::string, std::string> map)
 {
@@ -79,12 +59,12 @@ void checkConf(std::map<std::string, std::string> map)
 }
 
 // handles parsing of the location directive
-void Config::locationDirective(std::ifstream& input, std::map<std::string,std::string> map)
+std::map<std::string,std::string> Config::locationDirective(std::ifstream& input, std::string& line)
 {
-	std::string line;
 	std::string a[] = {"autoindex ", "allow_methods ", "root ", "index "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
+	std::map<std::string,std::string> map;
 
 	while (input.good())
 	{
@@ -98,7 +78,7 @@ void Config::locationDirective(std::ifstream& input, std::map<std::string,std::s
 			{
 				size_t delim = line.find(';');
 				if (line.find('}') < delim)
-					return;
+					return map;
 				if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in location directive");
 				map[trim(*i)] = trim(line.substr(i.base()->length(), delim-i.base()->length()));
@@ -108,6 +88,7 @@ void Config::locationDirective(std::ifstream& input, std::map<std::string,std::s
 				throw std::runtime_error("invalid argument in location directive");
 		}
 	}
+	throw std::runtime_error("missing closing bracket in location directive");
 }
 
 // handles parsing of the server directive
@@ -132,7 +113,12 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 				size_t delim = line.find(';');
 				if (line.find('}') < delim)
 					return map;
-				if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
+				if (trim(line.substr(0, line.find(' '))) == "location")
+				{
+					_locations.push_back(locationDirective(input, line));
+					break;
+				}
+				else if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in server directive");
 				map[trim(*i)] = trim(line.substr(i.base()->length(), delim-i.base()->length()));
 				break;
@@ -161,14 +147,13 @@ void Config::parseConf(std::string path)
 			{
 				if (line.find('{') == std::string::npos)
 					findOpeningBracket(input, line);
-				_config.push_back(serverDirective(input));
+				_config = serverDirective(input);
 			}
 			else
 				throw std::runtime_error("argument found outside of server directive");
 		}
 	}
-	for (t_confVector::iterator i = _config.begin(); i < _config.end(); ++i)
-		checkConf(*i);
+	checkConf(_config);
 }
 
 t_confVector Config::getLocations()

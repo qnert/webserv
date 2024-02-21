@@ -1,5 +1,5 @@
 C++ = c++
-CFLAGS = -Wall -Werror -Wextra -std=c++98 -g -fsanitize=address
+CFLAGS = -Wall -Werror -Wextra -std=c++98 -g # -fsanitize=address
 NAME = webserv
 
 GREEN=\033[32m
@@ -9,7 +9,7 @@ SOURCES = ./src/main.cpp ./src/server/Server.cpp  ./src/server/ServerUtils.cpp \
 					./src/server/RequestParser.cpp ./src/data_classes/MIME_type.cpp \
 					./src/data_classes/Statuscodes.cpp ./src/server/RequestUtils.cpp ./src/cfg/Config.cpp \
 					./src/server/ServerResponse.cpp ./src/server/Clients.cpp ./src/server/CGI.cpp \
-					./src/server/ServerManager.cpp ./src/server/ManagerUtils.cpp
+					# ./src/server/ServerManager.cpp ./src/server/ManagerUtils.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
