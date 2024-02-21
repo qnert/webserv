@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:33:52 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/21 14:38:59 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <cstdio>
+#include <dirent.h>
 #include <unistd.h>
 
 #define MAX_CLIENTS 200

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:07:46 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/20 16:32:04 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,8 +95,7 @@ void  Server::sendAnswer(size_t idx)
       this->methodNotAllowed(idx);
   }
   else if (requestType == "DELETE")
-    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx],
-                              this->_codes, this->_data);
+    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes);
   else
     this->notImplemented(idx);
 

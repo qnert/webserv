@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerResponse.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/19 12:38:20 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/21 11:16:36 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 
 void  Server::getMethod(size_t idx, std::string& tmp)
 {
+  DIR*  check;
   std::string uri = this->_clientDetails[idx].getUri();
+  check = opendir((uri.substr(1, uri.length())).c_str());
   std::string msg = storeFileIntoString(this->_clientDetails[idx], uri);
 
   if (!msg.empty())
@@ -35,6 +37,8 @@ void  Server::getMethod(size_t idx, std::string& tmp)
     else
       this->NotFound(idx);
   }
+  else if (check != NULL)
+    list_directories(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes, check);
   else
     this->NotFound(idx);
 }

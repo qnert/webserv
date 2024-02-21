@@ -4,7 +4,6 @@ ascii_art="kkkkkkkk                                  tttt\nk::::::k             
 
 
 print("\r\nContent-type: text/plain")
-print("Set-Cookie: secret=kot; Max-Age=3630")
 print("Content-length: {}\r\n\r\n".format(len(ascii_art)))
 print(ascii_art)
 
