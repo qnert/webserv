@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/21 11:10:33 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/21 11:18:41 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,6 +170,7 @@ void  list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir){
   dir_str = directories.str();
   std::string msg = check_and_add_header(200, "plain", Server::ft_itos(dir_str.length()), codes, req) + dir_str;
   send(fd, msg.c_str(), msg.size(), 0);
+  closedir(dir);
 }
 
 std::string  check_and_add_header(int status, std::string const& type, std::string const& length, \
