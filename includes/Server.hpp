@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:33:52 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/21 18:53:35 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,11 @@ private:
   std::string         _servername;
   std::string         _port;
   std::string         _root;
-  bool                _defaultserver;
+  std::string         _index;
+  size_t              _maxClientBody;
+  std::vector<std::map<std::string, std::string> > _locations;
+
+  std::map<std::string, std::string> _error_pages; // key = Error code ("404"->"./path/to/file")
 
   void                getMethod(size_t idx, std::string& tmp);
   int                 postMethod(size_t idx);
@@ -65,7 +69,7 @@ private:
 	// bool isServerSocket(int fd);
 public:
   Server();
-  Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients* cd, std::map<std::string, std::string> cfg);
+  Server(struct pollfd* pfds, Clients* cd, Config& cfg);
   ~Server();
 
 //   void                serverLoop(void);

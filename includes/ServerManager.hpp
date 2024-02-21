@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:25:10 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/21 15:54:46 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ private:
   void     clientsInit();
   void     cleanUpClientFds();
 public:
-  ServerManager(Config config);
+  ServerManager(std::string path);
   ~ServerManager();
 
   void  serverLoop();

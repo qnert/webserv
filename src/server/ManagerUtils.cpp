@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ManagerUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 14:36:32 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:10:32 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/21 18:38:44 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,11 +54,8 @@ void ServerManager::matchRequestToServer(size_t index)
 				this->_currentServer = *i;
 		}
 		else if ((*i).getServername() == hostname.substr(0, hostname.find(':')) && (*i).getPort() == hostname.substr(hostname.find(':')+1))
-				this->_currentServer = *i;
-    else
-    {
-      if ((*i).getPort() == hostname.substr(hostname.find(':')+1) && (*i).isDefaultServer())
-        this->_currentServer = *i;
-    }
+			this->_currentServer = *i;
+		else
+			this->_currentServer = *i;
 	}
 }
