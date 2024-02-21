@@ -3,14 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/18 15:22:30 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/21 17:18:07 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/RequestParser.hpp"
+
+std::string trimTrailingSlashes(const std::string& str) {
+  if (str.find_last_not_of('/') == std::string::npos)
+    return ("/");
+  size_t end = str.find_last_not_of('/');
+  return (end == std::string::npos) ? "" : str.substr(0, end + 1);
+}
 
 RequestParser::RequestParser() : _pendingReceive(false), _totalReadBytes(0) {}
 
@@ -46,6 +53,7 @@ void  RequestParser::parseRequestHeader(const std::string& buffer)
     }
     headerLength += line.size() + 1;
   }
+  this->_requestFields["Uri"] = trimTrailingSlashes(this->_requestFields["Uri"]);
 }
 
 void  RequestParser::parseRequestBody(const std::string& buffer)
