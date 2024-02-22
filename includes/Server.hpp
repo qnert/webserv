@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/21 14:38:59 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/22 19:19:12 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@
 
 #define MAX_CLIENTS 200
 
+typedef std::map<std::string, std::string> t_strmap;
+
 class Server
 {
 private:
@@ -46,7 +48,12 @@ private:
   std::string         _servername;
   std::string         _port;
   std::string         _root;
-  bool                _defaultserver;
+  std::string         _index;
+  size_t              _maxClientBody;
+
+  std::vector<t_strmap> _locations;
+  t_strmap              _currLocation;
+  t_strmap              _error_pages; // key = Error code ("404"->"./path/to/file")
 
   void                getMethod(size_t idx, std::string& tmp);
   int                 postMethod(size_t idx);
@@ -57,16 +64,12 @@ private:
   void                versionNotSupported(size_t idx);
 
   int                 getFreeSocket();
-//   void                handleRequest(int i);
-//   void                checkRevents(int i);
-//   void                acceptConnections(void);
   void                cleanUpClientFds();
-
-	// void createServerSockets(std::vector<std::map<std::string, std::string> > configs);
-	// bool isServerSocket(int fd);
+  bool                checkLocationPrelims(std::string method, size_t idx);
+  bool                checkReferer(size_t index);
 public:
   Server();
-  Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients* cd, std::map<std::string, std::string> cfg);
+  Server(struct pollfd* pfds, Clients* cd, Config& cfg);
   ~Server();
 
 //   void                serverLoop(void);
@@ -82,4 +85,5 @@ public:
 	std::string         getPort();
 	std::string         getRoot();
   bool                isDefaultServer();
+  void                getCurrLocation(size_t index);
 };

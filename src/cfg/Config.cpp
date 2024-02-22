@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42heilbronn.de>     +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/21 04:38:13 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/22 18:20:18 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,21 @@
 // 	return num;
 // }
 
+// bool Config::locationExists(const std::string& uri)
+// {
+// 	for (std::vector<std::map<std::string, std::string> >::iterator i = _locations.begin(); i != _locations.end(); ++i)
+// 	{
+
+// 	}
+// }
+
+void addToMap(std::map<std::string, std::string>& map, const std::string& key, const std::string& value)
+{
+	if (map.find(key) != map.end())
+		throw std::runtime_error("duplicate parameter");
+	map.insert(std::make_pair(key, value));
+}
+
 // trim white space from beginning and end of a string
 std::string trim(const std::string& line)
 {
@@ -32,7 +47,7 @@ std::string trim(const std::string& line)
 }
 
 // advances file descriptor until theres a opening bracket of a directive
-void findOpeningBracket(std::ifstream& input, std::string& line)
+void Config::findOpeningBracket(std::ifstream& input, std::string& line)
 {
 	while (input.good())
 	{
@@ -42,6 +57,8 @@ void findOpeningBracket(std::ifstream& input, std::string& line)
 			continue;
 		if (line.find('{') != std::string::npos)
 		{
+			if (!trim(line.substr(0, line.find('{'))).empty()) // maybe false if there is "server" right before the opening bracket
+				throw std::runtime_error("invalid config throw");
 			return;
 		}
 		else
@@ -50,8 +67,35 @@ void findOpeningBracket(std::ifstream& input, std::string& line)
 }
 
 // verifies the config and makes sure nothing is undefined
+void checkLocation(std::map<std::string, std::string> map)
+{
+	if (map.find("autoindex") == map.end())
+		map.insert(std::make_pair("listen", "80"));
+	if (map.find("server_name") == map.end())
+		map.insert(std::make_pair("server_name", ""));
+	if (map.find("root") == map.end())
+		map.insert(std::make_pair("root", "./responseFiles"));
+	if (map.find("index") == map.end())
+		map.insert(std::make_pair("index", "index.html"));
+
+	std::cout << map.find("listen")->second << std::endl;
+	std::cout << map.find("server_name")->second << std::endl;
+	std::cout << map.find("root")->second << std::endl;
+	std::cout << map.find("index")->second << std::endl << std::endl;
+}
+
+// verifies the config and makes sure nothing is undefined
 void checkConf(std::map<std::string, std::string> map)
 {
+	if (map.find("listen") == map.end())
+		map.insert(std::make_pair("listen", "80"));
+	if (map.find("server_name") == map.end())
+		map.insert(std::make_pair("server_name", ""));
+	if (map.find("root") == map.end())
+		map.insert(std::make_pair("root", "./responseFiles"));
+	if (map.find("index") == map.end())
+		map.insert(std::make_pair("index", "index.html"));
+
 	std::cout << map.find("listen")->second << std::endl;
 	std::cout << map.find("server_name")->second << std::endl;
 	std::cout << map.find("root")->second << std::endl;
@@ -61,11 +105,19 @@ void checkConf(std::map<std::string, std::string> map)
 // handles parsing of the location directive
 std::map<std::string,std::string> Config::locationDirective(std::ifstream& input, std::string& line)
 {
-	std::string a[] = {"autoindex ", "allow_methods ", "root ", "index "};
+	std::string a[] = {"autoindex ", "deny_methods ", "root ", "index ", "enable_cgi ", "redirect ", "max_client_body "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
 	std::map<std::string,std::string> map;
+  std::istringstream sline(line);
 
+// figure out how to handle opening bracket on same line or different line
+	std::string key = "location ";
+  std::string token;
+  sline >> token >> token;
+	addToMap(map, "uri", token);
+	if (line.find('{') == std::string::npos)
+		findOpeningBracket(input, line);
 	while (input.good())
 	{
 		std::getline(input, line);
@@ -81,7 +133,7 @@ std::map<std::string,std::string> Config::locationDirective(std::ifstream& input
 					return map;
 				if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in location directive");
-				map[trim(*i)] = trim(line.substr(i.base()->length(), delim-i.base()->length()));
+				addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
 			}
 			else if (next(i) == params.end())
@@ -95,7 +147,7 @@ std::map<std::string,std::string> Config::locationDirective(std::ifstream& input
 std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 {
 	std::string line;
-	std::string a[] = {"server_name ", "listen ", "location ", "root ", "index "};
+	std::string a[] = {"server_name ", "listen ", "location ", "root ", "index ", "max_client_body ", "error_page "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
 	std::map<std::string, std::string> map;
@@ -115,12 +167,14 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 					return map;
 				if (trim(line.substr(0, line.find(' '))) == "location")
 				{
+					// if (locationExists())
+					// 	continue;
 					_locations.push_back(locationDirective(input, line));
 					break;
 				}
 				else if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in server directive");
-				map[trim(*i)] = trim(line.substr(i.base()->length(), delim-i.base()->length()));
+				addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
 			}
 			else if (next(i) == params.end())
@@ -130,11 +184,18 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 	return map;
 }
 
-void Config::parseConf(std::string path)
+t_confVector& Config::getLocations()
 {
-	std::ifstream input(path, std::ifstream::in);
-	std::string line;
+	return _locations;
+}
 
+std::map<std::string, std::string>& Config::getConfig()
+{
+	return _config;
+}
+
+bool Config::findNextServerDirective(std::ifstream& input, std::string& line)
+{
 	if (input.is_open() && input.good())
 	{
 		while (input.good())
@@ -143,34 +204,31 @@ void Config::parseConf(std::string path)
 			line = trim(line);
 			if (line.empty() || line.front() == '#')
 				continue;
-			if (line.find("server") != std::string::npos)
+			if (((line.find('{') == std::string::npos) && line == "server"))
 			{
-				if (line.find('{') == std::string::npos)
-					findOpeningBracket(input, line);
-				_config = serverDirective(input);
+				findOpeningBracket(input, line);
+				return true;
 			}
-			else
-				throw std::runtime_error("argument found outside of server directive");
+			if ((line.find('{') != std::string::npos) && trim(line.substr(0, line.length()-1)) == "server")
+				return true;
+			// else
+			// 	throw std::runtime_error("argument found outside of server directive");
 		}
 	}
-	checkConf(_config);
+	return false;
 }
 
-t_confVector Config::getLocations()
+Config::Config(std::ifstream& input)
 {
-	return _locations;
-}
+	std::string line;
 
-std::map<std::string, std::string> Config::getConfig()
-{
-	return _config;
-}
-
-Config::Config(const std::string& path)
-{
 	try
 	{
-		parseConf(path);
+		if (findNextServerDirective(input, line))
+		{
+			_config = serverDirective(input);
+			checkConf(_config);
+		}
 	}
 	catch(const std::exception& e)
 	{

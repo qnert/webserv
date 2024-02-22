@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/21 14:39:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/22 19:30:22 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,50 @@ std::string Server::ft_itos(size_t num)
   std::ostringstream oss;
   oss << num;
   return (oss.str());
+}
+
+bool  Server::checkLocationPrelims(std::string method, size_t idx)
+{
+  std::string referer;
+  if (!(referer = checkReferer(idx)).empty())
+
+  if (!this->_currLocation.empty())
+  {
+    if (this->_currLocation["deny_methods"].find(method) != std::string::npos
+        || checkReferer(idx) == true)
+      return (true);
+  }
+  return (false);
+}
+
+void  Server::getCurrLocation(size_t index)
+{
+  std::vector<t_strmap>::iterator it;
+  for (it = this->_locations.begin(); it != this->_locations.end(); ++it)
+  {
+    if (this->_clientDetails[index].getUri() == it->find("uri")->second) {
+      this->_currLocation = *it;
+      break ;
+    }
+  }
+}
+
+std::string  Server::checkReferer(size_t index)
+{
+  std::vector<t_strmap>::iterator it;
+  std::string referer = this->_clientDetails[index].getMapValue("Referer");
+  if (!referer.empty()) {
+    size_t pos = referer.find_last_of("/");
+    std::string refererUri = referer.substr(pos);
+    std::cout << "referer: " << refererUri << std::endl;
+    for (it = this->_locations.begin(); it != this->_locations.end(); ++it)
+    {
+      if (refererUri == it->find("uri")->second)
+      it->find("uri")->second
+        return (true);
+    }
+  }
+  return (false);
 }
 
 MIME_type& Server::getMimeType(void) {return (this->_data);}

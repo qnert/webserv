@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:32:04 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/22 18:44:59 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,23 @@ static short ft_stosh(const std::string& str)
 	return num;
 }
 
+static size_t ft_stosize(const std::string& str)
+{
+	size_t num;
+	std::stringstream ss(str);
+
+	ss >> num;
+	return num;
+}
+
 Server::Server() {}
 
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
-Server::Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients* cd, std::map<std::string, std::string> cfg) : _data(data), _codes(codes), _clientPollfds(pfds), _clientDetails(cd), _nfds(1)
+Server::Server(struct pollfd* pfds, Clients* cd, Config& cfg) : _clientPollfds(pfds), _clientDetails(cd), _nfds(1)
 {
 	int reuse = 1;
+  std::map<std::string, std::string> config = cfg.getConfig();
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
     throw(std::runtime_error(""));
@@ -41,13 +51,14 @@ Server::Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients
 
   this->_serverAdress.sin_family = AF_INET;
   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
-  this->_serverAdress.sin_port = htons(ft_stosh(cfg.find("listen")->second));
+  this->_serverAdress.sin_port = htons(ft_stosh(config.find("listen")->second));
 
-  std::cout << "server port: " << ft_stosh(cfg.find("listen")->second) << std::endl;
-  this->_port = cfg.find("listen")->second;
-  this->_servername = cfg.find("server_name")->second;
-  this->_defaultserver = (_port.find("default_server") != std::string::npos) ? true : false;
-//   this->_root = cfg.find("root")->second;
+  std::cout << "server port: " << ft_stosh(config.find("listen")->second) << std::endl;
+  this->_port = config.find("listen")->second;
+  this->_servername = config.find("server_name")->second;
+  this->_root = config.find("root")->second;
+  this->_maxClientBody = ft_stosize(config.find("max_client_body")->second);
+  this->_locations = cfg.getLocations();
 
   // associates the server socket with the local address
   // and port specified in the "serverAddress" structure
@@ -84,20 +95,30 @@ void  Server::sendAnswer(size_t idx)
 {
   static std::string tmp;
   const std::string requestType = this->_clientDetails[idx].getRequestType();
-
-  if (this->_clientDetails[idx].getMapValue("Version") != "HTTP/1.1")
-    this->versionNotSupported(idx);
-  else if (requestType == "GET")
-    this->getMethod(idx, tmp);
-  else if (requestType == "POST")
-  {
-    if (this->postMethod(idx) != 0)
+  // for (std::vector<std::map<std::string, std::string> >::iterator i = this->_locations.begin(); i != _locations.end(); ++i)
+	// for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
+	// 	std::cout << "location: " << j->first << "->" << j->second << std::endl;
+	// std::cout << std::endl;
+  this->getCurrLocation(idx);
+	if (this->_clientDetails[idx].getConStatus() != CLOSE)
+	{
+		if (this->_clientDetails[idx].getMapValue("Version") != "HTTP/1.1")
+			this->versionNotSupported(idx);
+		else if (requestType == "GET" && checkLocationPrelims("GET", idx) == false)
+			this->getMethod(idx, tmp);
+		else if (requestType == "POST" && checkLocationPrelims("POST", idx) == false)
+		{
+			if (this->postMethod(idx) != 0)
+			this->methodNotAllowed(idx);
+		}
+		else if (requestType == "DELETE" && checkLocationPrelims("DELETE",idx) == false)
+			tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes);
+		else if (requestType != "GET" && requestType != "POST" && requestType != "DELETE")
+			this->notImplemented(idx);
+    else {
       this->methodNotAllowed(idx);
-  }
-  else if (requestType == "DELETE")
-    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes);
-  else
-    this->notImplemented(idx);
+    }
+	}
 
   if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive"
       || this->_clientDetails[idx].getConStatus() == CLOSE) {
@@ -160,7 +181,3 @@ std::string Server::getRoot()
 	return _root;
 }
 
-bool Server::isDefaultServer()
-{
-  return _defaultserver;
-}
