@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/21 18:53:43 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/22 15:56:51 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,21 +95,27 @@ void  Server::sendAnswer(size_t idx)
 {
   static std::string tmp;
   const std::string requestType = this->_clientDetails[idx].getRequestType();
-
-  if (this->_clientDetails[idx].getMapValue("Version") != "HTTP/1.1")
-    this->versionNotSupported(idx);
-  else if (requestType == "GET")
-    this->getMethod(idx, tmp);
-  else if (requestType == "POST")
-  {
-    if (this->postMethod(idx) != 0)
-      this->methodNotAllowed(idx);
-  }
-  else if (requestType == "DELETE")
-    tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx],
-                              this->_codes, this->_data);
-  else
-    this->notImplemented(idx);
+  for (std::vector<std::map<std::string, std::string> >::iterator i = this->_locations.begin(); i != _locations.end(); ++i)
+	for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
+		std::cout << "location: " << j->first << "->" << j->second << std::endl;
+	std::cout << std::endl;
+	if (this->_clientDetails[idx].getConStatus() != CLOSE)
+	{
+		if (this->_clientDetails[idx].getMapValue("Version") != "HTTP/1.1")
+			this->versionNotSupported(idx);
+		else if (requestType == "GET")
+			this->getMethod(idx, tmp);
+		else if (requestType == "POST")
+		{
+			if (this->postMethod(idx) != 0)
+			this->methodNotAllowed(idx);
+		}
+		else if (requestType == "DELETE")
+			tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx],
+									this->_codes, this->_data);
+		else
+			this->notImplemented(idx);
+	}
 
   if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive"
       || this->_clientDetails[idx].getConStatus() == CLOSE) {

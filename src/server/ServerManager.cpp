@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/21 20:00:51 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/22 15:50:46 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,10 +121,12 @@ void ServerManager::serverLoop()
 				{
 					this->handleRequest(i);
 					matchRequestToServer(i);
+					std::cout << "selected " << _currentServer.getServername() << std::endl;
 				}
 			}
 			else if (this->_clientPollfds[i].revents == POLLOUT)
 			{
+				std::cout << "sending answer from " << _currentServer.getServername() << std::endl;
 				this->_currentServer.sendAnswer(i);
 			}
 		} // * END OF CLIENT LOOP *

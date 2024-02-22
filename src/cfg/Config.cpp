@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/21 19:53:41 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/22 17:17:03 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,16 +105,20 @@ void checkConf(std::map<std::string, std::string> map)
 // handles parsing of the location directive
 std::map<std::string,std::string> Config::locationDirective(std::ifstream& input, std::string& line)
 {
-	std::string a[] = {"autoindex ", "allow_methods ", "root ", "index ", "enable_cgi ", "redirect "};
+	std::string a[] = {"autoindex ", "deny_methods ", "root ", "index ", "enable_cgi ", "redirect ", "max_client_body "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
 	std::map<std::string,std::string> map;
 
 // figure out how to handle opening bracket on same line or different line
 	std::string key = "location ";
-	addToMap(map, "uri", trim(line.substr(key.length(), line.length() - key.length())));
-	if (line.find('{') == std::string::npos)
+	if (line.find('{') != std::string::npos)
+		addToMap(map, "uri", trim(line.substr(key.length(), line.length() - key.length() - 1)));
+	else
+	{
+		addToMap(map, "uri", trim(line.substr(key.length(), line.length() - key.length())));
 		findOpeningBracket(input, line);
+	}
 	while (input.good())
 	{
 		std::getline(input, line);
