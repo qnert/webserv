@@ -6,29 +6,12 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/22 17:17:03 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/22 18:21:38 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "../../includes/Config.hpp"
-
-// static int ft_stoi(const std::string& str)
-// {
-// 	int num;
-// 	std::stringstream ss(str);
-
-// 	ss >> num;
-// 	return num;
-// }
-
-// bool Config::locationExists(const std::string& uri)
-// {
-// 	for (std::vector<std::map<std::string, std::string> >::iterator i = _locations.begin(); i != _locations.end(); ++i)
-// 	{
-		
-// 	}
-// }
 
 void addToMap(std::map<std::string, std::string>& map, const std::string& key, const std::string& value)
 {
@@ -37,13 +20,13 @@ void addToMap(std::map<std::string, std::string>& map, const std::string& key, c
 	map.insert(std::make_pair(key, value));
 }
 
-// trim white space from beginning and end of a string
 std::string trim(const std::string& line)
 {
-    const char* WhiteSpace = " \t\v\r\n\f";
-    size_t start = line.find_first_not_of(WhiteSpace);
-    size_t end = line.find_last_not_of(WhiteSpace);
-    return start == end ? line : line.substr(start, end - start + 1);
+	std::string::const_iterator start = std::find_if_not(line.begin(), line.end(), isspace);
+	std::string::const_iterator end = std::find_if_not(line.rbegin(), line.rend(), isspace).base();
+	if (start >= end)
+		return std::string();
+	return std::string(start, end);
 }
 
 // advances file descriptor until theres a opening bracket of a directive
@@ -241,4 +224,3 @@ Config::~Config()
 {
 	// std::cout << "Config destructed" << std::endl;
 }
-

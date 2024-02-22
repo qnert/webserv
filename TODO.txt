@@ -1,0 +1,13 @@
+config parsing:
+- initialize omitted parameters
+- In the configuration, try to setup the same port multiple times. It should not work.
+- Launch multiple servers at the same time with different configurations but with common ports. Does it work? If it does, ask why the server should work if one of the configurations isn't functional. Keep going.
+
+
+server:
+- custom error pages
+- limit client body
+- support multiple server names
+- Setup routes in a server to different directories
+- Setup a default file to search for if you ask for a directory
+- Setup a list of methods accepted for a certain route (e.g., try to delete something with and without permission)
