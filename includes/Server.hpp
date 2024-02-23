@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 12:29:02 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 16:35:28 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "Config.hpp"
 #include "RequestUtils.hpp"
 #include "CGI.hpp"
+#include "Utils.hpp"
 #include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -55,16 +56,26 @@ private:
   t_strmap              _currLocation;
   t_strmap              _error_pages; // key = Error code ("404"->"./path/to/file")
 
+  // ResponseMethods
   void                getMethod(size_t idx, std::string& tmp);
   int                 postMethod(size_t idx);
+  void                handleGetDefault(std::string& msg, size_t idx);
+
+  // ProcessResponse
+  void                chooseMethod(size_t idx);
+
+  // ErrorResponses
   void                notImplemented(size_t idx);
   void                methodNotAllowed(size_t idx);
-  void                handleGetDefault(std::string& msg, size_t idx);
   void                NotFound(size_t idx);
   void                versionNotSupported(size_t idx);
+  void                payloadTooLarge(size_t idx);
 
   int                 getFreeSocket();
   void                cleanUpClientFds();
+
+  // Location
+  void                initConfVars(Config& cfg);
   bool                checkLocationPrelims(std::string method, size_t idx);
   bool                checkReferer(std::string method, size_t index);
 public:
@@ -72,18 +83,19 @@ public:
   Server(struct pollfd* pfds, Clients* cd, Config& cfg);
   ~Server();
 
-//   void                serverLoop(void);
   void                removeFd(int i);
-  static std::string  ft_itos(size_t num);
   Statuscodes&        getStatuscodes(void);
   MIME_type&          getMimeType(void);
 
+  // ProcessResponse
+  void                sendAnswer(size_t idx);
+
 	int                 getFd();
 	void                acceptConnections();
-  void                sendAnswer(size_t idx);
 	std::string         getServername();
 	std::string         getPort();
 	std::string         getRoot();
-  bool                isDefaultServer();
+
+  // Location
   void                getCurrLocation(size_t index);
 };

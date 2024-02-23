@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 15:19:30 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 12:56:37 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 15:44:46 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,5 @@ void  Clients::cleanUpResponse()
   this->_pendingResponse = false;
   this->_totalBufferSize = 0;
   this->_totalBytesSend = 0;
+  this->_error = false;
 }

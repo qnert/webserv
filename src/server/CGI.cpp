@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/20 17:01:53 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/23 15:54:54 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ void  get_path_info(std::string&  exec_name, std::string& path_info){
 void  CGI::send_error_404(void){
   std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
   std::string content = storeFileIntoString_cgi("./responseFiles/error404.html");
-  header = header + "Content-Length: " + Server::ft_itos(content.length()) + "\r\n\r\n";
+  header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   send(this->_client_fd, response.c_str(), response.size(), 0);
   return ;
@@ -88,7 +88,7 @@ void  CGI::send_error_404(void){
 void  CGI::send_error_405(void){
   std::string header = "HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/html\r\n";
   std::string content = storeFileIntoString_cgi("./responseFiles/error405.html");
-  header = header + "Content-Length: " + Server::ft_itos(content.length()) + "\r\n\r\n";
+  header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   send(this->_client_fd, response.c_str(), response.size(), 0);
   return ;
@@ -97,7 +97,7 @@ void  CGI::send_error_405(void){
 void  CGI::send_error_500(){
   std::string header = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/html\r\n";
   std::string content = storeFileIntoString_cgi("./responseFiles/error500.html");
-  header = header + "Content-Length: " + Server::ft_itos(content.length()) + "\r\n\r\n";
+  header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   send(this->_client_fd, response.c_str(), response.size(), 0);
   return ;
@@ -138,7 +138,7 @@ void  CGI::exec_cgi_default(){
   int fd = fork();
   if (fd == 0){
     char *argv[3] = {const_cast<char*>(this->_exec_path.c_str()), const_cast<char*>(this->_exec_name.c_str()), NULL};
-    std::string length = "CONTENT_LENGTH=" + Server::ft_itos(this->_body.length());
+    std::string length = "CONTENT_LENGTH=" + ft_itos(this->_body.length());
     std::string body = "QUERY_STRING=" + this->_body;
     std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
     std::string path_info = "PATH_INFO=" + this->_path_info;

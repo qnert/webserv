@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/23 12:58:31 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 15:53:28 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ std::string get_filename(std::string body){
 void  handle_name_input(int fd, Clients& req){
   char *argv[5];
   std::string cgi_filename = req.getUri().substr(req.getUri().find_last_of("/") + 1, req.getUri().size());
-  std::string file_fd = Server::ft_itos(fd);
+  std::string file_fd = ft_itos(fd);
   std::string first_name = get_first_name(req.getBody());
   std::string last_name = get_last_name(req.getBody());
 
@@ -113,7 +113,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
   std::string filename = get_filename(req.getBody());
   if (req.getBody() == "" || req.getBoundary().size() == 0){
     std::string msg = storeFileIntoString(req, "responseFiles/error400.html");
-    std::string length = Server::ft_itos(msg.size());
+    std::string length = ft_itos(msg.size());
     msg = check_and_add_header(400, data["html"], length, codes, req) + msg;
     if (send(fd, msg.c_str(), msg.size(), 0) < 0)
       req.setConStatus(CLOSE);
@@ -121,7 +121,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
   }
   else if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
     std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
-    std::string length = Server::ft_itos(msg.size());
+    std::string length = ft_itos(msg.size());
     msg = check_and_add_header(200, data["html"], length, codes, req) + msg;
     if (send(fd, msg.c_str(), msg.size(), 0) < 0)
       req.setConStatus(CLOSE);
@@ -134,7 +134,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
   upload.write(filecontent.c_str(), filecontent.size());
   upload.close();
   std::string msg = storeFileIntoString(req, "responseFiles/success.html");
-  std::string length = Server::ft_itos(msg.size());
+  std::string length = ft_itos(msg.size());
   msg = check_and_add_header(201, data["html"], length, codes, req) + msg;
   if (send(fd, msg.c_str(), msg.size(), 0) < 0)
     req.setConStatus(CLOSE);
@@ -144,17 +144,17 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri().substr(1, req.getUri().size());
   if (filepath.find("responseFiles/Upload") == std::string::npos){
-    msg = check_and_add_header(403, "text/plain", Server::ft_itos(15), codes, req) + "\t403 Forbidden\n";
+    msg = check_and_add_header(403, "text/plain", ft_itos(15), codes, req) + "\t403 Forbidden\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
   else if (access(filepath.c_str(), F_OK) != 0 || req.getUri() == "/responseFiles/Upload/"){
-    msg = check_and_add_header(404, "text/plain", Server::ft_itos(15), codes, req) + "\t404 Not Found\n";
+    msg = check_and_add_header(404, "text/plain", ft_itos(15), codes, req) + "\t404 Not Found\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
   std::remove(filepath.c_str());
-  msg = check_and_add_header(202, "text/plain", Server::ft_itos(14), codes, req) + "\t202 Accepted\n";
+  msg = check_and_add_header(202, "text/plain", ft_itos(14), codes, req) + "\t202 Accepted\n";
   send(fd, msg.c_str(), msg.size(), 0);
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
@@ -177,7 +177,7 @@ void  list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir){
 
 
   dir_str = directories.str();
-  std::string msg = check_and_add_header(200, "html", Server::ft_itos(dir_str.length()), codes, req) + dir_str;
+  std::string msg = check_and_add_header(200, "html", ft_itos(dir_str.length()), codes, req) + dir_str;
   send(fd, msg.c_str(), msg.size(), 0);
   closedir(dir);
 }
