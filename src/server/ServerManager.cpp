@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/22 18:39:09 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 12:40:40 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,6 @@ void ServerManager::handleRequest(size_t i)
     return;
   }
   buffer[bytesRead] = '\0';
-  std::cout << buffer << std::endl;
   this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
   if (this->_clientDetails[i].getPendingReceive() == false)
     this->_clientPollfds[i].events = POLLOUT;

@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:33:28 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/22 18:38:50 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 13:03:09 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ int  Server::postMethod(size_t idx)
 
 void  Server::notImplemented(size_t idx)
 {
+  this->_clientDetails[idx].setError(true);
   std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error501.html");
   std::string length = Server::ft_itos(msg.size());
   std::string response = check_and_add_header(501, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
@@ -76,6 +77,7 @@ void  Server::notImplemented(size_t idx)
 
 void  Server::methodNotAllowed(size_t idx)
 {
+  this->_clientDetails[idx].setError(true);
   std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error405.html");
   std::string length = Server::ft_itos(msg.size());
   std::string response = check_and_add_header(405, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
@@ -110,6 +112,7 @@ void  Server::handleGetDefault(std::string& msg, size_t idx)
 
 void  Server::NotFound(size_t idx)
 {
+  this->_clientDetails[idx].setError(true);
   std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error404.html");
   std::string length = Server::ft_itos(msg.size());
   std::string response = check_and_add_header(404, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
@@ -119,6 +122,7 @@ void  Server::NotFound(size_t idx)
 
 void  Server::versionNotSupported(size_t idx)
 {
+  this->_clientDetails[idx].setError(true);
   std::string msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/error505.html");
   std::string length = Server::ft_itos(msg.size());
   std::string response = check_and_add_header(505, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;

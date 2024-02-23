@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/21 14:59:08 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 12:58:31 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,10 @@
 
 std::string  storeFileIntoString(Clients& req, std::string path)
 {
-  if (req.getUri() == "/" && path != "responseFiles/error501.html"
+  if (req.getUri() == "/" && req.isError() == false
       && req.getMapValue("Cookie") != "user=admin")
     path = req.getCurrdir() + "responseFiles/index.html";
-  else if (req.getUri() == "/" && path != "responseFiles/error501.html"
+  else if (req.getUri() == "/" && req.isError() == false
           && req.getMapValue("Cookie") == "user=admin")
     path = req.getCurrdir() + "responseFiles/admin_index.html";
   else

@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/22 19:19:12 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 12:29:02 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ private:
   int                 getFreeSocket();
   void                cleanUpClientFds();
   bool                checkLocationPrelims(std::string method, size_t idx);
-  bool                checkReferer(size_t index);
+  bool                checkReferer(std::string method, size_t index);
 public:
   Server();
   Server(struct pollfd* pfds, Clients* cd, Config& cfg);

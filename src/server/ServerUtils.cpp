@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/22 19:30:22 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 12:49:45 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,15 +55,13 @@ std::string Server::ft_itos(size_t num)
 
 bool  Server::checkLocationPrelims(std::string method, size_t idx)
 {
-  std::string referer;
-  if (!(referer = checkReferer(idx)).empty())
-
   if (!this->_currLocation.empty())
   {
-    if (this->_currLocation["deny_methods"].find(method) != std::string::npos
-        || checkReferer(idx) == true)
+    if (this->_currLocation["deny_methods"].find(method) != std::string::npos)
       return (true);
   }
+  else if (checkReferer(method, idx) == true)
+    return (true);
   return (false);
 }
 
@@ -79,19 +77,23 @@ void  Server::getCurrLocation(size_t index)
   }
 }
 
-std::string  Server::checkReferer(size_t index)
+bool  Server::checkReferer(std::string method, size_t index)
 {
   std::vector<t_strmap>::iterator it;
   std::string referer = this->_clientDetails[index].getMapValue("Referer");
   if (!referer.empty()) {
     size_t pos = referer.find_last_of("/");
     std::string refererUri = referer.substr(pos);
-    std::cout << "referer: " << refererUri << std::endl;
     for (it = this->_locations.begin(); it != this->_locations.end(); ++it)
     {
-      if (refererUri == it->find("uri")->second)
-      it->find("uri")->second
+      if (refererUri != it->find("uri")->second)
+        continue;
+      if (it->find("deny_methods") == it->end())
+        continue;
+      if (it->find("deny_methods")->second.find(method) != std::string::npos)
         return (true);
+      else
+        return (false);
     }
   }
   return (false);
