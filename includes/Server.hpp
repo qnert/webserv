@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 16:35:28 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 18:54:22 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,7 @@ private:
 
   // Location
   void                initConfVars(Config& cfg);
-  bool                checkLocationPrelims(std::string method, size_t idx);
-  bool                checkReferer(std::string method, size_t index);
+  bool                checkLocationPrelims(std::string method);
 public:
   Server();
   Server(struct pollfd* pfds, Clients* cd, Config& cfg);

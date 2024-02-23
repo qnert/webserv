@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 15:55:14 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 18:54:52 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void  Server::getMethod(size_t idx, std::string& tmp)
       if (send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0) < 0)
         this->_clientDetails[idx].setConStatus(CLOSE);
     }
-    else if (checkLocationPrelims("DELETE",idx) == true)
+    else if (checkLocationPrelims("DELETE") == true)
       this->methodNotAllowed(idx);
     else
       this->NotFound(idx);

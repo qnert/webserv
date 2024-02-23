@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:23:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 16:15:08 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 18:55:07 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,18 @@ void  Server::chooseMethod(size_t idx)
     return;
   }
 
-  if (requestType == "GET" && !checkLocationPrelims("GET", idx)) {
+  if (requestType == "GET" && !checkLocationPrelims("GET")) {
     getMethod(idx, tmp);
     return;
   }
 
-  if (requestType == "POST" && !checkLocationPrelims("POST", idx)) {
+  if (requestType == "POST" && !checkLocationPrelims("POST")) {
     if (postMethod(idx) != 0)
       methodNotAllowed(idx);
     return;
   }
 
-  if (requestType == "DELETE" && !checkLocationPrelims("DELETE", idx)) {
+  if (requestType == "DELETE" && !checkLocationPrelims("DELETE")) {
     tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes);
     return;
   }
