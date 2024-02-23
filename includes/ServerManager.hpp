@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/21 15:54:46 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/22 17:19:42 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ private:
   void     matchRequestToServer(size_t index);
   void     clientsInit();
   void     cleanUpClientFds();
+
 public:
   ServerManager(std::string path);
   ~ServerManager();

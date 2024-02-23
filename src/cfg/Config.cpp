@@ -6,12 +6,29 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/22 18:21:38 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/23 16:51:40 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "../../includes/Config.hpp"
+
+// static int ft_stoi(const std::string& str)
+// {
+// 	int num;
+// 	std::stringstream ss(str);
+
+// 	ss >> num;
+// 	return num;
+// }
+
+// bool Config::locationExists(const std::string& uri)
+// {
+// 	for (std::vector<std::map<std::string, std::string> >::iterator i = _locations.begin(); i != _locations.end(); ++i)
+// 	{
+
+// 	}
+// }
 
 void addToMap(std::map<std::string, std::string>& map, const std::string& key, const std::string& value)
 {
@@ -60,7 +77,7 @@ void checkLocation(std::map<std::string, std::string> map)
 		map.insert(std::make_pair("root", "./responseFiles"));
 	if (map.find("index") == map.end())
 		map.insert(std::make_pair("index", "index.html"));
-	
+
 	std::cout << map.find("listen")->second << std::endl;
 	std::cout << map.find("server_name")->second << std::endl;
 	std::cout << map.find("root")->second << std::endl;
@@ -78,7 +95,7 @@ void checkConf(std::map<std::string, std::string> map)
 		map.insert(std::make_pair("root", "./responseFiles"));
 	if (map.find("index") == map.end())
 		map.insert(std::make_pair("index", "index.html"));
-	
+
 	std::cout << map.find("listen")->second << std::endl;
 	std::cout << map.find("server_name")->second << std::endl;
 	std::cout << map.find("root")->second << std::endl;
@@ -92,16 +109,15 @@ std::map<std::string,std::string> Config::locationDirective(std::ifstream& input
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
 	std::map<std::string,std::string> map;
+  std::istringstream sline(line);
 
 // figure out how to handle opening bracket on same line or different line
 	std::string key = "location ";
-	if (line.find('{') != std::string::npos)
-		addToMap(map, "uri", trim(line.substr(key.length(), line.length() - key.length() - 1)));
-	else
-	{
-		addToMap(map, "uri", trim(line.substr(key.length(), line.length() - key.length())));
+  std::string token;
+  sline >> token >> token;
+	addToMap(map, "uri", token);
+	if (line.find('{') == std::string::npos)
 		findOpeningBracket(input, line);
-	}
 	while (input.good())
 	{
 		std::getline(input, line);

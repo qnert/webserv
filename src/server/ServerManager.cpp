@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/22 15:50:46 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/23 12:40:40 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ std::vector<Config> parseConfigFile(std::string path)
 {
 	std::ifstream input(path, std::ifstream::in);
 	std::vector<Config> configs;
-	
+
 
 	if (input.is_open() && input.good())
 	{
@@ -33,16 +33,16 @@ std::vector<Config> parseConfigFile(std::string path)
 ServerManager::ServerManager(std::string path)
 {
   std::vector<Config> configs = parseConfigFile(path);
-//   for (std::vector<Config>::iterator cfg = configs.begin(); cfg < configs.end(); ++cfg)
-//   {
-// 	std::map<std::string, std::string> servercon = cfg->getConfig();
-// 	for (std::map<std::string, std::string>::iterator i = servercon.begin(); i != servercon.end(); ++i)
-// 		std::cout << "server: " << i->first << "->" << i->second << std::endl;
-// 	std::vector<std::map<std::string, std::string> > locations = cfg->getLocations();
-// 	for (std::vector<std::map<std::string, std::string> >::iterator i = locations.begin(); i != locations.end(); ++i)
-// 		for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
-// 			std::cout << "location: " << j->first << "->" << j->second << std::endl;
-//   }
+  // for (std::vector<Config>::iterator cfg = configs.begin(); cfg < configs.end(); ++cfg)
+  // {
+	// std::map<std::string, std::string> servercon = cfg->getConfig();
+	// for (std::map<std::string, std::string>::iterator i = servercon.begin(); i != servercon.end(); ++i)
+	// 	std::cout << "server: " << i->first << "->" << i->second << std::endl;
+	// std::vector<std::map<std::string, std::string> > locations = cfg->getLocations();
+	// for (std::vector<std::map<std::string, std::string> >::iterator i = locations.begin(); i != locations.end(); ++i)
+	// 	for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
+	// 		std::cout << "location: " << j->first << "->" << j->second << std::endl;
+  // }
   if (configs.empty())
 	throw std::runtime_error("no valid server configs");
   this->clientsInit();
@@ -121,12 +121,10 @@ void ServerManager::serverLoop()
 				{
 					this->handleRequest(i);
 					matchRequestToServer(i);
-					std::cout << "selected " << _currentServer.getServername() << std::endl;
 				}
 			}
 			else if (this->_clientPollfds[i].revents == POLLOUT)
 			{
-				std::cout << "sending answer from " << _currentServer.getServername() << std::endl;
 				this->_currentServer.sendAnswer(i);
 			}
 		} // * END OF CLIENT LOOP *

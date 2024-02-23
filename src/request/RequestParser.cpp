@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/18 15:22:30 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 15:45:25 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,8 @@ const std::string& RequestParser::getCurrdir() {return (this->_curr_dir);}
 const std::string& RequestParser::getFileType() const {return (this->_fileType);}
 
 const std::string& RequestParser::getBoundary() const{return (this->_boundary);}
+
+size_t  RequestParser::getBodySize() {return (this->_requestFields["Body"].size());}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {

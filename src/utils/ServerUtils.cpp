@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 14:35:15 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:40:24 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 15:53:41 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,6 @@ void  Server::removeFd(int i)
   this->_clientPollfds[i].revents = 0;
   this->_nfds--;
   std::cout << "Connection closed at idx: " << i << std::endl;
-}
-
-std::string Server::ft_itos(size_t num)
-{
-  std::ostringstream oss;
-  oss << num;
-  return (oss.str());
 }
 
 MIME_type& Server::getMimeType(void) {return (this->_data);}

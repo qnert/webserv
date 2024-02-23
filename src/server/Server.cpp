@@ -3,32 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/22 15:56:51 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/23 16:33:02 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
-
-static short ft_stosh(const std::string& str)
-{
-	short num;
-	std::stringstream ss(str);
-
-	ss >> num;
-	return num;
-}
-
-static size_t ft_stosize(const std::string& str)
-{
-	size_t num;
-	std::stringstream ss(str);
-
-	ss >> num;
-	return num;
-}
 
 Server::Server() {}
 
@@ -37,7 +19,7 @@ Server::Server() {}
 Server::Server(struct pollfd* pfds, Clients* cd, Config& cfg) : _clientPollfds(pfds), _clientDetails(cd), _nfds(1)
 {
 	int reuse = 1;
-  std::map<std::string, std::string> config = cfg.getConfig();
+  initConfVars(cfg);
   if ((this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("socket");
     throw(std::runtime_error(""));
@@ -51,14 +33,7 @@ Server::Server(struct pollfd* pfds, Clients* cd, Config& cfg) : _clientPollfds(p
 
   this->_serverAdress.sin_family = AF_INET;
   this->_serverAdress.sin_addr.s_addr = INADDR_ANY;
-  this->_serverAdress.sin_port = htons(ft_stosh(config.find("listen")->second));
-
-  std::cout << "server port: " << ft_stosh(config.find("listen")->second) << std::endl;
-  this->_port = config.find("listen")->second;
-  this->_servername = config.find("server_name")->second;
-  this->_root = config.find("root")->second;
-  this->_maxClientBody = ft_stosize(config.find("max_client_body")->second);
-  this->_locations = cfg.getLocations();
+  this->_serverAdress.sin_port = htons(ft_stosh(this->_port));
 
   // associates the server socket with the local address
   // and port specified in the "serverAddress" structure
@@ -89,45 +64,6 @@ Server::Server(struct pollfd* pfds, Clients* cd, Config& cfg) : _clientPollfds(p
 }
 
 Server::~Server() {}
-
-// sends an answer to the client
-void  Server::sendAnswer(size_t idx)
-{
-  static std::string tmp;
-  const std::string requestType = this->_clientDetails[idx].getRequestType();
-  for (std::vector<std::map<std::string, std::string> >::iterator i = this->_locations.begin(); i != _locations.end(); ++i)
-	for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
-		std::cout << "location: " << j->first << "->" << j->second << std::endl;
-	std::cout << std::endl;
-	if (this->_clientDetails[idx].getConStatus() != CLOSE)
-	{
-		if (this->_clientDetails[idx].getMapValue("Version") != "HTTP/1.1")
-			this->versionNotSupported(idx);
-		else if (requestType == "GET")
-			this->getMethod(idx, tmp);
-		else if (requestType == "POST")
-		{
-			if (this->postMethod(idx) != 0)
-			this->methodNotAllowed(idx);
-		}
-		else if (requestType == "DELETE")
-			tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx],
-									this->_codes, this->_data);
-		else
-			this->notImplemented(idx);
-	}
-
-  if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive"
-      || this->_clientDetails[idx].getConStatus() == CLOSE) {
-    std::cout << "answer sent at idx: " << idx << " set back to POLLIN" << std::endl;
-    this->removeFd(idx);
-  }
-  else if (this->_clientDetails[idx].getPendingResponse() == false) {
-    this->_clientDetails[idx].cleanUp();
-    this->_clientDetails[idx].cleanUpResponse();
-    this->_clientPollfds[idx].events = POLLIN;
-  }
-}
 
 // accept every client in that wants to connect
 void  Server::acceptConnections()
