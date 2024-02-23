@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 14:36:32 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 16:51:49 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/23 16:54:26 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,11 +53,13 @@ void ServerManager::matchRequestToServer(size_t index)
 		if ((*i).getServername() == hostname.substr(0, hostname.find(':')) && (*i).getPort() == hostname.substr(hostname.find(':')+1))
 		{
 			this->_currentServer = *i;
+			_clientDetails[index].setConStatus(KEEPALIVE);
 			return;
 		}
 		else if ((*i).getPort() == hostname.substr(hostname.find(':') + 1))
 		{
 			this->_currentServer = *(_servers.begin());
+			_clientDetails[index].setConStatus(KEEPALIVE);
 			return;
 		}
 		else

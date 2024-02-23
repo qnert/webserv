@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ProcessResponse.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:23:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 16:15:08 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 19:12:24 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void  Server::chooseMethod(size_t idx)
 
 // sends an answer to the client
 void  Server::sendAnswer(size_t idx)
-{
+{	
   this->getCurrLocation(idx);
   this->chooseMethod(idx);
 

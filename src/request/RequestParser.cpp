@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 15:45:25 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 17:29:45 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void  RequestParser::parseRequestBody(const std::string& buffer)
   char buff[PATH_MAX];
   if (getcwd(buff, sizeof(buff)) == NULL)
     throw std::runtime_error("Couldn't fine working directory!");
-  this->_curr_dir = buff;
+  this->_curr_dir = "/Users/rnauke/Documents/GitHub/fodler";
   this->_curr_dir.append("/");
   if (this->_requestFields["Uri"] == "/" || this->_requestFields["Type"] == "POST"
         || this->_requestFields["Type"] == "DELETE")

@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/23 16:51:40 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/23 19:16:16 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,16 @@
 
 // 	}
 // }
+
+bool lessThanShort(const std::string& str)
+{
+	return isLessThanMaxValue(ft_stoll(str), short());
+}
+
+bool lessThanSizet(const std::string& str)
+{
+	return isLessThanMaxValue(ft_stosize(str), size_t());
+}
 
 void addToMap(std::map<std::string, std::string>& map, const std::string& key, const std::string& value)
 {
@@ -57,7 +67,7 @@ void Config::findOpeningBracket(std::ifstream& input, std::string& line)
 			continue;
 		if (line.find('{') != std::string::npos)
 		{
-			if (!trim(line.substr(0, line.find('{'))).empty()) // maybe false if there is "server" right before the opening bracket
+			if (!trim(line.substr(0, line.find('{'))).empty())
 				throw std::runtime_error("invalid config throw");
 			return;
 		}
@@ -66,58 +76,87 @@ void Config::findOpeningBracket(std::ifstream& input, std::string& line)
 	}
 }
 
-// verifies the config and makes sure nothing is undefined
-void checkLocation(std::map<std::string, std::string> map)
+bool isNumeric(const std::string& str)
 {
-	if (map.find("autoindex") == map.end())
-		map.insert(std::make_pair("listen", "80"));
-	if (map.find("server_name") == map.end())
-		map.insert(std::make_pair("server_name", ""));
-	if (map.find("root") == map.end())
-		map.insert(std::make_pair("root", "./responseFiles"));
-	if (map.find("index") == map.end())
-		map.insert(std::make_pair("index", "index.html"));
+    if (str.empty())
+        return false;
+    for (std::string::const_iterator c = str.begin(); c != str.end(); ++c)
+        if (!std::isdigit(*c))
+            return false;
+    return true;
+}
 
-	std::cout << map.find("listen")->second << std::endl;
-	std::cout << map.find("server_name")->second << std::endl;
-	std::cout << map.find("root")->second << std::endl;
-	std::cout << map.find("index")->second << std::endl << std::endl;
+
+bool Config::locationExists(std::string uri)
+{
+	if (uri.find('{') != std::string::npos)
+		uri.erase(uri.length() - 1);
+	for (t_confVector::iterator i = _locations.begin(); i < _locations.end(); ++i)
+	{
+		std::map<std::string, std::string>::iterator a = (*i).find("uri");
+		if (a != (*i).end())
+			if (a->second == uri)
+				return true;
+	}
+	return false;
 }
 
 // verifies the config and makes sure nothing is undefined
-void checkConf(std::map<std::string, std::string> map)
+void Config::checkLocation(std::map<std::string, std::string>& map)
 {
-	if (map.find("listen") == map.end())
-		map.insert(std::make_pair("listen", "80"));
-	if (map.find("server_name") == map.end())
-		map.insert(std::make_pair("server_name", ""));
+	if (map.find("max_client_body") == map.end())
+		map.insert(std::make_pair("max_client_body", _config.find("max_client_body")->second));
+	if (map.find("autoindex") == map.end())
+		map.insert(std::make_pair("autoindex", "off"));
+	else if (map.find("autoindex")->second != "on")
+		map.insert(std::make_pair("autoindex", "off"));
+	if (map.find("redirect") == map.end())
+		map.insert(std::make_pair("redirect", ""));
 	if (map.find("root") == map.end())
-		map.insert(std::make_pair("root", "./responseFiles"));
+		map.insert(std::make_pair("root", _config.find("root")->second));
 	if (map.find("index") == map.end())
-		map.insert(std::make_pair("index", "index.html"));
+		map.insert(std::make_pair("index", _config.find("index")->second));
+	if (map.find("deny_methods") == map.end())
+		map.insert(std::make_pair("deny_methods", ""));
+	if (map.find("enable_cgi") == map.end())
+		map.insert(std::make_pair("enable_cgi", ""));
+}
 
-	std::cout << map.find("listen")->second << std::endl;
-	std::cout << map.find("server_name")->second << std::endl;
-	std::cout << map.find("root")->second << std::endl;
-	std::cout << map.find("index")->second << std::endl << std::endl;
+// verifies the config and makes sure nothing is undefined
+void Config::checkConf()
+{
+	if (_config.find("listen") == _config.end())
+		_config.insert(std::make_pair("listen", "80"));
+	else if (!lessThanShort(_config.find("listen")->second))
+		throw std::runtime_error("invalid port provided");
+	if (_config.find("max_client_body") == _config.end())
+		_config.insert(std::make_pair("max_client_body", "1844674407370954"));
+	else if (!lessThanSizet(_config.find("listen")->second))
+		throw std::runtime_error("invalid port provided");
+	if (_config.find("server_name") == _config.end())
+		_config.insert(std::make_pair("server_name", ""));
+	if (_config.find("root") == _config.end())
+		_config.insert(std::make_pair("root", "./responseFiles"));
+	if (_config.find("index") == _config.end())
+		_config.insert(std::make_pair("index", "index.html"));
 }
 
 // handles parsing of the location directive
 std::map<std::string,std::string> Config::locationDirective(std::ifstream& input, std::string& line)
 {
-	std::string a[] = {"autoindex ", "deny_methods ", "root ", "index ", "enable_cgi ", "redirect ", "max_client_body "};
+	std::string a[] = {"autoindex ", "deny_methods ", "root ", "index ", "enable_cgi ", "redirect ", "max_client_body ", "error_page "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
 	std::map<std::string,std::string> map;
-  std::istringstream sline(line);
-
-// figure out how to handle opening bracket on same line or different line
+	
 	std::string key = "location ";
-  std::string token;
-  sline >> token >> token;
-	addToMap(map, "uri", token);
-	if (line.find('{') == std::string::npos)
+	if (line.find('{') != std::string::npos)
+		addToMap(map, "uri", trim(line.substr(key.length(), line.length() - key.length() - 1)));
+	else
+	{
+		addToMap(map, "uri", trim(line.substr(key.length(), line.length() - key.length())));
 		findOpeningBracket(input, line);
+	}
 	while (input.good())
 	{
 		std::getline(input, line);
@@ -167,8 +206,8 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 					return map;
 				if (trim(line.substr(0, line.find(' '))) == "location")
 				{
-					// if (locationExists())
-					// 	continue;
+					if (locationExists(trim(line.substr((*i).length(), line.length() - (*i).length()))))
+						continue;
 					_locations.push_back(locationDirective(input, line));
 					break;
 				}
@@ -211,8 +250,6 @@ bool Config::findNextServerDirective(std::ifstream& input, std::string& line)
 			}
 			if ((line.find('{') != std::string::npos) && trim(line.substr(0, line.length()-1)) == "server")
 				return true;
-			// else
-			// 	throw std::runtime_error("argument found outside of server directive");
 		}
 	}
 	return false;
@@ -227,7 +264,11 @@ Config::Config(std::ifstream& input)
 		if (findNextServerDirective(input, line))
 		{
 			_config = serverDirective(input);
-			checkConf(_config);
+			checkConf();
+			for (t_confVector::iterator i = _locations.begin(); i < _locations.end(); ++i)
+			{
+				checkLocation(*i);
+			}
 		}
 	}
 	catch(const std::exception& e)
