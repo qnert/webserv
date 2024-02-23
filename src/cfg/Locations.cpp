@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 18:53:07 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 20:50:57 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,7 @@ void  Server::initConfVars(Config& cfg)
   this->_port = config.find("listen")->second;
   this->_servername = config.find("server_name")->second;
   this->_root = config.find("root")->second;
-  if (config.find("max_client_body") != config.end())
-    this->_maxClientBody = ft_stosize(config.find("max_client_body")->second);
-  else
-    this->_maxClientBody = LONG_MAX;
+  this->_maxClientBody = ft_stosize(config.find("max_client_body")->second);
   this->_locations = cfg.getLocations();
 }
 
@@ -49,3 +46,11 @@ void  Server::getCurrLocation(size_t index)
   }
 }
 
+void  Server::setRightCurrDir(size_t idx)
+{
+  if (!this->_currLocation.empty()) {
+    this->_clientDetails[idx].setCurrDir(this->_currLocation["root"]);
+  }
+  else
+    this->_clientDetails[idx].setCurrDir(this->_root);
+}

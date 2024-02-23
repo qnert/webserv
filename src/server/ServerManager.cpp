@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 12:40:40 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 19:45:39 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,14 @@ ServerManager::ServerManager(std::string path)
 	// 	std::cout << "server: " << i->first << "->" << i->second << std::endl;
 	// std::vector<std::map<std::string, std::string> > locations = cfg->getLocations();
 	// for (std::vector<std::map<std::string, std::string> >::iterator i = locations.begin(); i != locations.end(); ++i)
+	// {
+	// 	std::cout << std::endl;
 	// 	for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
 	// 		std::cout << "location: " << j->first << "->" << j->second << std::endl;
+	// }
+	// std::cout << std::endl;
   // }
+  // std::cout << std::endl;
   if (configs.empty())
 	throw std::runtime_error("no valid server configs");
   this->clientsInit();

@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 18:54:52 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 21:47:40 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void  Server::getMethod(size_t idx, std::string& tmp)
     std::string filename = uri.substr(start, end - start);
     if (tmp == filename && filename.size() > 0)
     {
-      msg = storeFileIntoString(this->_clientDetails[idx], "responseFiles/erased.html");
+      msg = storeFileIntoString(this->_clientDetails[idx], "erased.html");
       std::string length = ft_itos(msg.size());
       std::string response = check_and_add_header(200, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
       if (send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0) < 0)
@@ -73,7 +73,8 @@ void  Server::handleGetDefault(std::string& msg, size_t idx)
 int  Server::postMethod(size_t idx)
 {
   std::string uri = this->_clientDetails[idx].getUri();
-  if (uri == "/responseFiles/cgi-bin/first.cgi")
+  std::cout << uri << std::endl;
+  if (uri == "/cgi-bin/first.cgi")
   {
     pid_t pid = fork();
     if (pid == 0)
@@ -81,12 +82,12 @@ int  Server::postMethod(size_t idx)
     waitpid(0, NULL, 0);
     return (0);
   }
-  else if (uri == "/responseFiles/cgi-bin/cpp_uploadfile.cgi"){
+  else if (uri == "/cgi-bin/cpp_uploadfile.cgi"){
     handle_file_upload(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_data, this->_codes);
     return (0);
   }
   else{
-    CGI(this->_clientPollfds[idx].fd, uri, this->_clientDetails[idx].getBody());
+    CGI(this->_clientPollfds[idx].fd, uri, this->_clientDetails[idx].getBody(), this->_clientDetails[idx].getCurrdir());
     return (0);
   }
   return (1);

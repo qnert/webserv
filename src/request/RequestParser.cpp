@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 15:45:25 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 20:51:15 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,6 @@ void  RequestParser::parseRequestBody(const std::string& buffer)
   }
   else
     this->_requestFields["Body"] = buffer.substr(it + 4);
-  char buff[PATH_MAX];
-  if (getcwd(buff, sizeof(buff)) == NULL)
-    throw std::runtime_error("Couldn't fine working directory!");
-  this->_curr_dir = buff;
-  this->_curr_dir.append("/");
   if (this->_requestFields["Uri"] == "/" || this->_requestFields["Type"] == "POST"
         || this->_requestFields["Type"] == "DELETE")
     this->_fileType = "html";
@@ -98,11 +93,12 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer, ssize_t bytes
 
 void  RequestParser::cleanUp()
 {
-  this->_curr_dir.clear();
   this->_boundary.clear();
   this->_fileType.clear();
   this->_requestFields.clear();
 }
+
+void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir + "/";}
 
 bool  RequestParser::getPendingReceive() const {return (this->_pendingReceive);}
 

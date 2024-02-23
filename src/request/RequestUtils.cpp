@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/23 15:53:28 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 21:24:41 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,13 @@
 
 std::string  storeFileIntoString(Clients& req, std::string path)
 {
+  std::cout << "currdir: " << req.getCurrdir() << std::endl;
   if (req.getUri() == "/" && req.isError() == false
       && req.getMapValue("Cookie") != "user=admin")
-    path = req.getCurrdir() + "responseFiles/index.html";
+    path = req.getCurrdir() + "index.html";
   else if (req.getUri() == "/" && req.isError() == false
           && req.getMapValue("Cookie") == "user=admin")
-    path = req.getCurrdir() + "responseFiles/admin_index.html";
+    path = req.getCurrdir() + "admin_index.html";
   else
     path = req.getCurrdir() + path;
   std::ifstream file(path, std::ios::binary);
@@ -108,11 +109,12 @@ void  handle_name_input(int fd, Clients& req){
   execve((req.getCurrdir() + req.getUri()).c_str(), argv, NULL);
 }
 
+// muss man nochmal anschauen... wegen root und location
 void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& codes)
 {
   std::string filename = get_filename(req.getBody());
   if (req.getBody() == "" || req.getBoundary().size() == 0){
-    std::string msg = storeFileIntoString(req, "responseFiles/error400.html");
+    std::string msg = storeFileIntoString(req, "error400.html");
     std::string length = ft_itos(msg.size());
     msg = check_and_add_header(400, data["html"], length, codes, req) + msg;
     if (send(fd, msg.c_str(), msg.size(), 0) < 0)
@@ -120,7 +122,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
     return ;
   }
   else if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
-    std::string msg = storeFileIntoString(req, "responseFiles/used_name.html");
+    std::string msg = storeFileIntoString(req, "used_name.html");
     std::string length = ft_itos(msg.size());
     msg = check_and_add_header(200, data["html"], length, codes, req) + msg;
     if (send(fd, msg.c_str(), msg.size(), 0) < 0)
@@ -133,7 +135,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
     return ;
   upload.write(filecontent.c_str(), filecontent.size());
   upload.close();
-  std::string msg = storeFileIntoString(req, "responseFiles/success.html");
+  std::string msg = storeFileIntoString(req, "success.html");
   std::string length = ft_itos(msg.size());
   msg = check_and_add_header(201, data["html"], length, codes, req) + msg;
   if (send(fd, msg.c_str(), msg.size(), 0) < 0)
@@ -143,12 +145,13 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
 std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri().substr(1, req.getUri().size());
-  if (filepath.find("responseFiles/Upload") == std::string::npos){
+  std::cout << req.getCurrdir() << std::endl;
+  if (filepath.find("Upload") == std::string::npos){
     msg = check_and_add_header(403, "text/plain", ft_itos(15), codes, req) + "\t403 Forbidden\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
-  else if (access(filepath.c_str(), F_OK) != 0 || req.getUri() == "/responseFiles/Upload/"){
+  else if (access(filepath.c_str(), F_OK) != 0 || req.getUri() == "/Upload/"){
     msg = check_and_add_header(404, "text/plain", ft_itos(15), codes, req) + "\t404 Not Found\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");

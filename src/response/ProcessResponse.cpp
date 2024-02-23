@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:23:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 18:55:07 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 20:39:53 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ void  Server::chooseMethod(size_t idx)
 void  Server::sendAnswer(size_t idx)
 {
   this->getCurrLocation(idx);
+  this->setRightCurrDir(idx);
   this->chooseMethod(idx);
 
   if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive"
