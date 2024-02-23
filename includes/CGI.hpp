@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 16:59:31 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/17 12:56:04 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 21:47:12 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class CGI{
     std::string _exec_name;
     std::string _path_info;
     std::string _body;
+    std::string _root;
 
   CGI(CGI const& other);
   CGI&  operator=(CGI const& other);
@@ -42,6 +43,6 @@ class CGI{
     void    send_error_405();
     void    send_error_500();
 
-  CGI(int fd, std::string exec_name, std::string body);
+  CGI(int fd, std::string exec_name, std::string body, std::string root);
   ~CGI();
 };

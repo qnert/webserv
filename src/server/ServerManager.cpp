@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 19:17:44 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/23 22:01:34 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,21 +33,21 @@ std::vector<Config> parseConfigFile(std::string path)
 ServerManager::ServerManager(std::string path)
 {
   std::vector<Config> configs = parseConfigFile(path);
-//   for (std::vector<Config>::iterator cfg = configs.begin(); cfg < configs.end(); ++cfg)
-//   {
-// 	std::map<std::string, std::string> servercon = cfg->getConfig();
-// 	for (std::map<std::string, std::string>::iterator i = servercon.begin(); i != servercon.end(); ++i)
-// 		std::cout << "server: " << i->first << "->" << i->second << std::endl;
-// 	std::vector<std::map<std::string, std::string> > locations = cfg->getLocations();
-// 	for (std::vector<std::map<std::string, std::string> >::iterator i = locations.begin(); i != locations.end(); ++i)
-// 	{
-// 		std::cout << std::endl;
-// 		for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
-// 			std::cout << "location: " << j->first << "->" << j->second << std::endl;
-// 	}
-// 	std::cout << std::endl;
-//   }
-//   std::cout << std::endl;
+  // for (std::vector<Config>::iterator cfg = configs.begin(); cfg < configs.end(); ++cfg)
+  // {
+	// std::map<std::string, std::string> servercon = cfg->getConfig();
+	// for (std::map<std::string, std::string>::iterator i = servercon.begin(); i != servercon.end(); ++i)
+	// 	std::cout << "server: " << i->first << "->" << i->second << std::endl;
+	// std::vector<std::map<std::string, std::string> > locations = cfg->getLocations();
+	// for (std::vector<std::map<std::string, std::string> >::iterator i = locations.begin(); i != locations.end(); ++i)
+	// {
+	// 	std::cout << std::endl;
+	// 	for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
+	// 		std::cout << "location: " << j->first << "->" << j->second << std::endl;
+	// }
+	// std::cout << std::endl;
+  // }
+  // std::cout << std::endl;
   if (configs.empty())
 	throw std::runtime_error("no valid server configs");
   this->clientsInit();

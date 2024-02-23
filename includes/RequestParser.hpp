@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 15:44:35 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 21:47:57 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@ public:
 
   void  parseRequestBuffer(const std::string& buffer, ssize_t bytes);
   void  cleanUp();
+
+  void               setCurrDir(std::string currDir);
 
   bool               getPendingReceive() const;
   const std::string& getFileType() const;

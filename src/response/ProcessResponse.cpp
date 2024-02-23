@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ProcessResponse.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:23:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 19:12:24 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/23 20:39:53 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,18 @@ void  Server::chooseMethod(size_t idx)
     return;
   }
 
-  if (requestType == "GET" && !checkLocationPrelims("GET", idx)) {
+  if (requestType == "GET" && !checkLocationPrelims("GET")) {
     getMethod(idx, tmp);
     return;
   }
 
-  if (requestType == "POST" && !checkLocationPrelims("POST", idx)) {
+  if (requestType == "POST" && !checkLocationPrelims("POST")) {
     if (postMethod(idx) != 0)
       methodNotAllowed(idx);
     return;
   }
 
-  if (requestType == "DELETE" && !checkLocationPrelims("DELETE", idx)) {
+  if (requestType == "DELETE" && !checkLocationPrelims("DELETE")) {
     tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes);
     return;
   }
@@ -58,8 +58,9 @@ void  Server::chooseMethod(size_t idx)
 
 // sends an answer to the client
 void  Server::sendAnswer(size_t idx)
-{	
+{
   this->getCurrLocation(idx);
+  this->setRightCurrDir(idx);
   this->chooseMethod(idx);
 
   if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive"

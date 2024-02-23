@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/23 15:54:54 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 21:56:29 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,8 @@ static std::string  storeFileIntoString_cgi(std::string path)
 }
 
 void  get_path_info(std::string&  exec_name, std::string& path_info){
-  size_t start = exec_name.find("responseFiles/cgi-bin/");
-  std::string path = exec_name.substr(start + 22, exec_name.length() - start + 22);
+  size_t start = exec_name.find("cgi-bin/");
+  std::string path = exec_name.substr(start + 8, exec_name.length() - start + 22);
   start = path.find_first_of('/');
   if (start == std::string::npos){
     exec_name = exec_name.substr(1, exec_name.length());
@@ -70,7 +70,7 @@ void  get_path_info(std::string&  exec_name, std::string& path_info){
     return ;
   }
   else{
-    exec_name = "responseFiles/cgi-bin/" + path.substr(0, start);
+    exec_name = "cgi-bin/" + path.substr(0, start);
     path_info = path.substr(start + 1, path_info.length() - start + 1);
     return ;
   }
@@ -103,8 +103,8 @@ void  CGI::send_error_500(){
   return ;
 }
 
-CGI::CGI(int fd, std::string exec_name, std::string body) : _client_fd(fd), _exec_name(exec_name), _body(body){
-  if (this->_exec_name.find("/responseFiles/cgi-bin/") != 0){
+CGI::CGI(int fd, std::string exec_name, std::string body, std::string root) : _client_fd(fd), _exec_name(exec_name), _body(body), _root(root){
+  if (this->_exec_name.find("/cgi-bin/") != 0){
     this->send_error_404();
     return ;
   }
@@ -112,7 +112,7 @@ CGI::CGI(int fd, std::string exec_name, std::string body) : _client_fd(fd), _exe
   this->_exec_type = get_exec_type(this->_exec_name);
   this->_exec_path = check_exec_type(this->_exec_type);
   // std::cout << this->_exec_name << " " << this->_path_info << " " << this->_exec_type << " " << this->_exec_path << std::endl;
-  if (this->_exec_path == "" || this->_exec_name.find("responseFiles/cgi-bin/") == std::string::npos){
+  if (this->_exec_path == "" || this->_exec_name.find("/cgi-bin/") == std::string::npos){
     this->send_error_404();
     return ;
   }
@@ -122,7 +122,10 @@ CGI::CGI(int fd, std::string exec_name, std::string body) : _client_fd(fd), _exe
 
 CGI::~CGI(){}
 
-void  CGI::exec_cgi_default(){
+void  CGI::exec_cgi_default()
+{
+  this->_exec_name = this->_root + this->_exec_name;
+  std::cout << "exec_name: " << _exec_name << std::endl;
   if (access((this->_exec_name).c_str(), F_OK) == -1){
     this->send_error_404();
     return ;
@@ -151,3 +154,13 @@ void  CGI::exec_cgi_default(){
   }
 }
 
+/* Need to fix that shiiiiiii
+server port: 8080
+server port: 8123
+server port: 8124
+New client connected at index: 3
+New client connected at index: 4
+currdir: /Users/njantsch/Documents/webserv/responseFiles/
+currdir: /Users/njantsch/Documents/webserv/responseFiles/
+/cgi-bin/print_env.pl
+basic_string*/
