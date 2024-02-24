@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 21:47:57 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 12:37:38 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ private:
   std::map<std::string, std::string> _requestFields;
   std::string                        _buffer;
   std::string                        _curr_dir;
+  std::string                        _indexFile;
   std::string                        _fileType;
   std::string                        _boundary;
   bool                               _pendingReceive;
@@ -43,6 +44,7 @@ public:
   void  cleanUp();
 
   void               setCurrDir(std::string currDir);
+  void               setIndexFile(std::string indexFile);
 
   bool               getPendingReceive() const;
   const std::string& getFileType() const;
@@ -53,5 +55,6 @@ public:
   const std::string& getBody();
   size_t             getBodySize();
   const std::string& getCurrdir();
+  const std::string& getIndexFile();
   const std::string  getMapValue(const std::string key);
 };
