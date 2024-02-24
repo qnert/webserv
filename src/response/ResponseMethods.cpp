@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseMethods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 21:47:40 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:51:06 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ void  Server::getMethod(size_t idx, std::string& tmp)
   DIR*  check;
   std::string uri = this->_clientDetails[idx].getUri();
   check = opendir((uri.substr(1, uri.length())).c_str());
-  std::string msg = storeFileIntoString(this->_clientDetails[idx], uri);
+  std::string msg = storeFileIntoString(this->_clientDetails[idx], getIndexFile());
 
   if (!msg.empty())
     this->handleGetDefault(msg, idx);

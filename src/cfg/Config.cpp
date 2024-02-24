@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/23 19:16:16 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/24 15:16:21 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,15 @@ bool Config::locationExists(std::string uri)
 	return false;
 }
 
+void addErrorCodes(std::map<std::string, std::string>& map)
+{
+	std::string arr[] = {"400", "403", "404", "405", "413", "500", "501", "505"};
+	std::vector<std::string> ec(arr, arr + sizeof(arr)/sizeof(std::string));
+    for (std::vector<std::string>::iterator code = ec.begin(); code != ec.end(); ++code)
+        if (map.find(*code) == map.end())
+            map.insert(std::make_pair(*code, *code + ".html"));
+}
+
 // verifies the config and makes sure nothing is undefined
 void Config::checkLocation(std::map<std::string, std::string>& map)
 {
@@ -120,6 +129,7 @@ void Config::checkLocation(std::map<std::string, std::string>& map)
 		map.insert(std::make_pair("deny_methods", ""));
 	if (map.find("enable_cgi") == map.end())
 		map.insert(std::make_pair("enable_cgi", ""));
+	addErrorCodes(map);
 }
 
 // verifies the config and makes sure nothing is undefined
@@ -139,6 +149,7 @@ void Config::checkConf()
 		_config.insert(std::make_pair("root", "./responseFiles"));
 	if (_config.find("index") == _config.end())
 		_config.insert(std::make_pair("index", "index.html"));
+	addErrorCodes(_config);
 }
 
 // handles parsing of the location directive

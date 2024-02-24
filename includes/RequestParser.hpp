@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 12:37:38 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:52:23 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ private:
   std::map<std::string, std::string> _requestFields;
   std::string                        _buffer;
   std::string                        _curr_dir;
-  std::string                        _indexFile;
   std::string                        _fileType;
   std::string                        _boundary;
   bool                               _pendingReceive;
@@ -44,17 +43,15 @@ public:
   void  cleanUp();
 
   void               setCurrDir(std::string currDir);
-  void               setIndexFile(std::string indexFile);
 
   bool               getPendingReceive() const;
+  size_t             getBodySize();
+  const std::string  getMapValue(const std::string key);
   const std::string& getFileType() const;
   const std::string& getBoundary() const;
   const std::string& getRequestType();
   const std::string& getUri();
   const std::string& getHost();
   const std::string& getBody();
-  size_t             getBodySize();
   const std::string& getCurrdir();
-  const std::string& getIndexFile();
-  const std::string  getMapValue(const std::string key);
 };

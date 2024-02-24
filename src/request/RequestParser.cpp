@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 20:51:15 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:48:51 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ void  RequestParser::cleanUp()
   this->_fileType.clear();
   this->_requestFields.clear();
 }
+
 
 void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir + "/";}
 
