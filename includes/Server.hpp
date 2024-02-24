@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 13:29:50 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 19:06:41 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ private:
 
   std::string         _servername;
   std::string         _port;
-  std::string         _root;
+  std::string         _serverRoot;
   std::string         _index;
   size_t              _maxClientBody;
 
