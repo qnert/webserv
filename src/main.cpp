@@ -3,28 +3,31 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/08 18:17:31 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/22 14:31:24 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/Server.hpp"
+#include "../includes/ServerManager.hpp"
 #include "../includes/MIME_type.hpp"
 #include "../includes/Statuscodes.hpp"
 #include "../includes/Config.hpp"
 
 int main(int argc, char** argv)
 {
+  if (argc > 2)
+    return 1;
   try
   {
-    MIME_type     data_types;
-    Statuscodes   statuscodes;
-    Server httpServer(data_types, statuscodes);
-	  if (argc == 2)
-	    Config cfg = Config(argv[1]);
-    httpServer.serverLoop();
+    std::string path;
+	if (argc < 2)
+		path = "config/default.conf";
+    else
+      path = argv[1];
+    ServerManager servers(path);
+    // servers.serverLoop();
   }
   catch(const std::exception& e)
   {

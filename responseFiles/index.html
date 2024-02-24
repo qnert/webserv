@@ -13,7 +13,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-image: url("responseFiles/background.webp");
+            background-image: url("background.webp");
             background-size: cover;
             background-position: center;
         }
@@ -50,7 +50,7 @@
     <script>
       function sendDeleteRequest() {
           var searchTerm = document.getElementById('searchTerm').value;
-          var url = 'responseFiles/Upload/' + encodeURIComponent(searchTerm);
+          var url = '/Upload/' + encodeURIComponent(searchTerm);
 
           var xhr = new XMLHttpRequest();
           xhr.open('DELETE', url, true);
@@ -72,16 +72,16 @@
       }
   </script>
 </head>
-<link rel="icon" type="image/x-icon" href="responseFiles/favicon.ico">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <body>
     <div class="cool-container">
         <h1>Delfis hitman service!</h1>
-        <form action = "responseFiles/cgi-bin/print_env.pl" method = "post" accept-charset="UTF-8">
+        <form action = "cgi-bin/print_env.pl" method = "post" accept-charset="UTF-8">
           User Input: <input type = "text" name = "user_input">  <br />
           <input type = "submit" value = "Submit" />
         </form>
           <br>
-        <form action = "responseFiles/cgi-bin/authenticate.py" method = "post" accept-charset="UTF-8">
+        <form action = "cgi-bin/authenticate.py" method = "post" accept-charset="UTF-8">
           User Name: <input type = "text" name = "user_name">  <br />
 
           Password: <input type="password" name = "password">
@@ -89,7 +89,7 @@
           <input type = "submit" value = "Submit" />
         </form>
           <br>
-        <form action = "responseFiles/cgi-bin/first.cgi" method = "post" accept-charset="UTF-8">
+        <form action = "cgi-bin/first.cgi" method = "post" accept-charset="UTF-8">
             First Name: <input type = "text" name = "first_name">  <br />
 
             Last Name: <input type = "text" name = "last_name" />
@@ -97,7 +97,7 @@
             <input type = "submit" value = "Submit" />
           </form>
             <br>
-          <form enctype = "multipart/form-data" action = "responseFiles/cgi-bin/cpp_uploadfile.cgi"
+          <form enctype = "multipart/form-data" action = "cgi-bin/cpp_uploadfile.cgi"
                  method = "post">
                  <p>File: <input type = "file" name = "userfile" accept="text/*"/></p>
                  <p><input type = "submit" value = "Upload" /></p>
