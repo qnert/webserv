@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 12:37:38 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:24:59 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ private:
   std::string                        _boundary;
   bool                               _pendingReceive;
   ssize_t                            _totalReadBytes;
+  std::string                        _redirectURL;
 
   void  parseRequestBody(const std::string& buffer);
   void  parseRequestHeader(const std::string& buffer);
@@ -43,6 +44,7 @@ public:
   void  parseRequestBuffer(const std::string& buffer, ssize_t bytes);
   void  cleanUp();
 
+  void               setRedirect(std::string redir);
   void               setCurrDir(std::string currDir);
   void               setIndexFile(std::string indexFile);
 
@@ -56,5 +58,6 @@ public:
   size_t             getBodySize();
   const std::string& getCurrdir();
   const std::string& getIndexFile();
+  const std::string& getRedirectURL();
   const std::string  getMapValue(const std::string key);
 };

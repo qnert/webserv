@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/23 21:24:41 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:25:22 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,8 +192,10 @@ std::string  check_and_add_header(int status, std::string const& type, std::stri
   header << "HTTP/1.1 " << status << " " << codes[status] << "\r\n";
   if (status != 204 && status != 202)
     header << "Content-Type: " << type << "\r\n";
+  if (status == 302)
+    header << "Location: " << req.getRedirectURL() << "\r\n";
   header << "Content-Length: " << length << "\r\n";
-  if (req.getMapValue("Connection") == "close")
+  if (req.getMapValue("Connection") == "close" || status == 302)
     header << "Connection: close" << "\r\n";
   else
     header << "Connection: keep-alive" << "\r\n";
