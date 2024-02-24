@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/23 21:56:29 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 14:55:32 by simonkunert      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,8 @@
 #include "../../includes/Server.hpp"
 
 static std::string get_exec_type(std::string const& file_path){
-  size_t  end;
-  size_t  start = file_path.find("responseFiles/cgi-bin/") + 22;
-  end = file_path.find_first_of('/', start);
-  if (end == std::string::npos) {
-    end = file_path.length();
-  }
+  size_t  start = file_path.find_last_of('.');
+  size_t  end = file_path.length();
   std::string file = file_path.substr(start, end - start);
   size_t prefix = file.find_last_of('.');
   if (prefix == std::string::npos)
@@ -111,7 +107,8 @@ CGI::CGI(int fd, std::string exec_name, std::string body, std::string root) : _c
   get_path_info(this->_exec_name, this->_path_info);
   this->_exec_type = get_exec_type(this->_exec_name);
   this->_exec_path = check_exec_type(this->_exec_type);
-  // std::cout << this->_exec_name << " " << this->_path_info << " " << this->_exec_type << " " << this->_exec_path << std::endl;
+  this->_exec_name = this->_root + this->_exec_name;
+  std::cout << this->_exec_name << std::endl;
   if (this->_exec_path == "" || this->_exec_name.find("/cgi-bin/") == std::string::npos){
     this->send_error_404();
     return ;
@@ -124,8 +121,6 @@ CGI::~CGI(){}
 
 void  CGI::exec_cgi_default()
 {
-  this->_exec_name = this->_root + this->_exec_name;
-  std::cout << "exec_name: " << _exec_name << std::endl;
   if (access((this->_exec_name).c_str(), F_OK) == -1){
     this->send_error_404();
     return ;
