@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:23:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 20:39:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:57:58 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,12 @@ void  Server::chooseMethod(size_t idx)
   if (requestType == "DELETE" && !checkLocationPrelims("DELETE")) {
     tmp = handle_file_erasing(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes);
     return;
+  }
+
+  if (checkLocationPrelims(requestType) \
+      && this->_currLocation["deny_methods"].find(requestType) == std::string::npos) {
+    handleRedirectLocation(idx);
+    return ;
   }
 
   if (requestType != "GET" && requestType != "POST" && requestType != "DELETE") {

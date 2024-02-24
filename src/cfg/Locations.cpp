@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 20:50:57 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:58:18 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ bool  Server::checkLocationPrelims(std::string method)
 {
   if (!this->_currLocation.empty())
   {
-    if (this->_currLocation["deny_methods"].find(method) != std::string::npos)
+    if (this->_currLocation["deny_methods"].find(method) != std::string::npos
+        || !this->_currLocation["redirect"].empty())
       return (true);
   }
   return (false);

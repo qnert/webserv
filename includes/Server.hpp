@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 20:31:21 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:29:50 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ private:
   void                NotFound(size_t idx);
   void                versionNotSupported(size_t idx);
   void                payloadTooLarge(size_t idx);
+  void                handleRedirectLocation(size_t idx);
 
   int                 getFreeSocket();
   void                cleanUpClientFds();

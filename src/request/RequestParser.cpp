@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 20:51:15 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 13:29:01 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,8 @@ void  RequestParser::cleanUp()
 
 void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir + "/";}
 
+void  RequestParser::setRedirect(std::string redir) {this->_redirectURL = redir;}
+
 bool  RequestParser::getPendingReceive() const {return (this->_pendingReceive);}
 
 const std::string& RequestParser::getRequestType() {return (this->_requestFields["Type"]);}
@@ -117,6 +119,8 @@ const std::string& RequestParser::getFileType() const {return (this->_fileType);
 const std::string& RequestParser::getBoundary() const{return (this->_boundary);}
 
 size_t  RequestParser::getBodySize() {return (this->_requestFields["Body"].size());}
+
+const std::string& RequestParser::getRedirectURL() {return (this->_redirectURL);}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {
