@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 19:06:41 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 14:22:54 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ private:
   struct pollfd*      _clientPollfds;
   Clients*            _clientDetails;
   int                 reuse;
-  nfds_t              _nfds;
   size_t              _currSize;
   int                 _serverSocket;
   sockaddr_in         _serverAdress;
@@ -84,15 +83,15 @@ public:
   Server(struct pollfd* pfds, Clients* cd, Config& cfg);
   ~Server();
 
-  void                removeFd(int i);
+  void                removeFd(int i, nfds_t& nfds);
   Statuscodes&        getStatuscodes(void);
   MIME_type&          getMimeType(void);
 
   // ProcessResponse
-  void                sendAnswer(size_t idx);
+  void                sendAnswer(size_t idx, nfds_t& nfds);
 
 	int                 getFd();
-	void                acceptConnections();
+	void                acceptConnections(nfds_t& nfds);
 	std::string         getServername();
 	std::string         getPort();
 	std::string         getRoot();
