@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: simonkunert <simonkunert@student.42.fr>    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/24 13:25:22 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 19:20:40 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,15 @@
 
 std::string  storeFileIntoString(Clients& req, std::string path)
 {
+  std::string root = req.getCurrdir();
   if (req.getUri() == "/" && req.isError() == false
       && req.getMapValue("Cookie") != "user=admin")
-    path = req.getCurrdir() + "index.html";
+    path = root + "/index.html";
   else if (req.getUri() == "/" && req.isError() == false
           && req.getMapValue("Cookie") == "user=admin")
-    path = req.getCurrdir() + "admin_index.html";
+    path = root + "/admin_index.html";
   else
-    path = req.getCurrdir() + path;
-  std::cout << path << std::endl;
+    path = root + path;
   std::ifstream file(path, std::ios::binary);
   if (!file.is_open())
     return ("");
@@ -114,7 +114,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
 {
   std::string filename = get_filename(req.getBody());
   if (req.getBody() == "" || req.getBoundary().size() == 0){
-    std::string msg = storeFileIntoString(req, "error400.html");
+    std::string msg = storeFileIntoString(req, "/error400.html");
     std::string length = ft_itos(msg.size());
     msg = check_and_add_header(400, data["html"], length, codes, req) + msg;
     if (send(fd, msg.c_str(), msg.size(), 0) < 0)
@@ -122,7 +122,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
     return ;
   }
   else if (access(("./responseFiles/Upload/" + filename).c_str(), F_OK) == 0){
-    std::string msg = storeFileIntoString(req, "used_name.html");
+    std::string msg = storeFileIntoString(req, "/used_name.html");
     std::string length = ft_itos(msg.size());
     msg = check_and_add_header(200, data["html"], length, codes, req) + msg;
     if (send(fd, msg.c_str(), msg.size(), 0) < 0)
@@ -135,7 +135,7 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
     return ;
   upload.write(filecontent.c_str(), filecontent.size());
   upload.close();
-  std::string msg = storeFileIntoString(req, "success.html");
+  std::string msg = storeFileIntoString(req, "/success.html");
   std::string length = ft_itos(msg.size());
   msg = check_and_add_header(201, data["html"], length, codes, req) + msg;
   if (send(fd, msg.c_str(), msg.size(), 0) < 0)
@@ -144,8 +144,8 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
 
 std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   std::string msg;
-  std::string filepath = req.getCurrdir() + req.getUri().substr(1, req.getUri().size());
-  std::cout << req.getCurrdir() << std::endl;
+  std::string filepath = req.getCurrdir() + req.getUri().substr(0, req.getUri().size());
+  std::cout << filepath << std::endl;
   if (filepath.find("Upload") == std::string::npos){
     msg = check_and_add_header(403, "text/plain", ft_itos(15), codes, req) + "\t403 Forbidden\n";
     send(fd, msg.c_str(), msg.size(), 0);
@@ -162,25 +162,28 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
 
-void  list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir){
-  struct  dirent*     dent;
-  std::string         uri(req.getUri().substr(1, req.getUri().length()) + "/");
-  std::string         dir_str;
-  std::ostringstream  directories;
+void list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir)
+{
+  struct dirent* dent;
+  std::string uri = req.getUri().substr(1);
+  if (uri[uri.length() - 1] != '/')
+      uri += "/";
 
+  std::ostringstream directories;
   directories << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Directory Listing</title>\n<body>\n<body>\n";
   directories << "<h1>Directory Listing: " << uri << "</h1>\n<body>\n</html>\n";
-  size_t  start = uri.find_first_of('/');
-  if (uri.find_first_of('/', start + 1) != std::string::npos)
-    uri = uri.substr(start + 1, uri.length());
-  while ((dent = readdir(dir)) != NULL){
-    if (std::string(dent->d_name) != "." && std::string(dent->d_name)  != "..")
-      directories << "<a href=\"" << (uri + dent->d_name) << "\">" << dent->d_name << "</a>" << "<br>";
+
+  while ((dent = readdir(dir)) != NULL) {
+    if (std::string(dent->d_name) != "." && std::string(dent->d_name) != "..") {
+      std::string link = dent->d_name;
+      if (dent->d_type == DT_DIR)
+          link += "/";
+      directories << "<a href=\"" << link << "\">" << dent->d_name << "</a><br>";
+    }
   }
 
-
-  dir_str = directories.str();
-  std::string msg = check_and_add_header(200, "html", ft_itos(dir_str.length()), codes, req) + dir_str;
+  std::string dir_str = directories.str();
+  std::string msg = check_and_add_header(200, "text/html", ft_itos(dir_str.length()), codes, req) + dir_str;
   send(fd, msg.c_str(), msg.size(), 0);
   closedir(dir);
 }

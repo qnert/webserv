@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 16:33:02 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 19:07:24 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,6 @@ std::string Server::getPort()
 }
 std::string Server::getRoot()
 {
-	return _root;
+	return _serverRoot;
 }
 

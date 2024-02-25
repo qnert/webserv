@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 13:29:01 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/24 16:48:54 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void  RequestParser::cleanUp()
   this->_requestFields.clear();
 }
 
-void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir + "/";}
+void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir;}
 
 void  RequestParser::setRedirect(std::string redir) {this->_redirectURL = redir;}
 
