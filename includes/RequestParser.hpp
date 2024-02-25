@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 13:24:59 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 13:22:42 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <string>
 #include <unistd.h>
 #include <climits>
+#include <ctime>
 
 #define RECV_BUFFER_SIZE 10000
 

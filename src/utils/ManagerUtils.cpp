@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 14:36:32 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 19:19:42 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 14:22:09 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,4 +65,18 @@ void ServerManager::matchRequestToServer(size_t index)
 		else
 			_clientDetails[index].setConStatus(CLOSE);
 	}
+}
+
+void  ServerManager::timeoutIdleClient()
+{
+  time_t currTime = std::time(NULL);
+
+  for (size_t i = 0; i < MAX_CLIENTS; i++) {
+    if (this->_clientDetails[i].getFdStatus() == USED \
+        && this->_clientDetails[i].getSocketType() == CLIENT \
+        && (currTime - this->_clientDetails[i].getTime()) >= CLIENT_TIMEOUT) {
+      this->_currentServer.removeFd(i, this->_nfds);
+      break ;
+    }
+  }
 }

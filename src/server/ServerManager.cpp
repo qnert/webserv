@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 17:57:49 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 14:25:41 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ std::vector<Config> parseConfigFile(std::string path)
 	return configs;
 }
 
-ServerManager::ServerManager(std::string path)
+ServerManager::ServerManager(std::string path) : _nfds(0)
 {
   std::vector<Config> configs = parseConfigFile(path);
   // for (std::vector<Config>::iterator cfg = configs.begin(); cfg < configs.end(); ++cfg)
@@ -54,6 +54,7 @@ ServerManager::ServerManager(std::string path)
 	for (std::vector<Config>::iterator i = configs.begin(); i < configs.end(); ++i)
 	{
     	this->_servers.push_back(Server(this->_clientPollfds, this->_clientDetails, *i.base()));
+      this->_nfds++;
 	}
   this->serverLoop();
   this->cleanUpClientFds();
@@ -75,7 +76,7 @@ bool  ServerManager::checkRevents(size_t index)
     error = 1;
   if (error == 1)
   {
-    this->_currentServer.removeFd(index);
+    this->_currentServer.removeFd(index, this->_nfds);
     return (true);
   }
   return (false);
@@ -88,25 +89,27 @@ void ServerManager::handleRequest(size_t i)
 
   if (bytesRead < 0) {
     perror("recv");
-    this->_currentServer.removeFd(i);
+    this->_currentServer.removeFd(i, this->_nfds);
     return;
   }
   if (bytesRead == 0 && this->_clientDetails[i].getPendingReceive() == false) {
     std::cout << "Client has closed the connection" << std::endl;
-    this->_currentServer.removeFd(i);
+    this->_currentServer.removeFd(i, this->_nfds);
     return;
   }
   buffer[bytesRead] = '\0';
   this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
-  if (this->_clientDetails[i].getPendingReceive() == false)
+  if (this->_clientDetails[i].getPendingReceive() == false) {
+    this->_clientDetails[i].refreshTime(std::time(NULL));
     this->_clientPollfds[i].events = POLLOUT;
+  }
 }
 
 void ServerManager::serverLoop()
 {
 	while (true)
 	{
-		if (poll(this->_clientPollfds, MAX_CLIENTS, 5000) < 0)
+		if (poll(this->_clientPollfds, MAX_CLIENTS, 10000) < 0)
 		{
 			perror("poll");
 			// there needs to be a function that closes all open fds in case of a crash
@@ -121,7 +124,7 @@ void ServerManager::serverLoop()
 			if (this->_clientPollfds[i].revents == POLLIN)
 			{
 				if (isServerSocket(this->_clientPollfds[i].fd))
-					this->_currentServer.acceptConnections();
+					this->_currentServer.acceptConnections(_nfds);
 				else
 				{
 					this->handleRequest(i);
@@ -130,8 +133,9 @@ void ServerManager::serverLoop()
 			}
 			else if (this->_clientPollfds[i].revents == POLLOUT)
 			{
-				this->_currentServer.sendAnswer(i);
+				this->_currentServer.sendAnswer(i, this->_nfds);
 			}
 		} // * END OF CLIENT LOOP *
+    timeoutIdleClient();
 	}
 }
