@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/24 19:20:40 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 15:57:25 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,13 +145,12 @@ void  handle_file_upload(int fd, Clients& req, MIME_type& data, Statuscodes& cod
 std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   std::string msg;
   std::string filepath = req.getCurrdir() + req.getUri().substr(0, req.getUri().size());
-  std::cout << filepath << std::endl;
-  if (filepath.find("Upload") == std::string::npos){
+  if (filepath.find("/..") != std::string::npos || filepath.find("/../") != std::string::npos){
     msg = check_and_add_header(403, "text/plain", ft_itos(15), codes, req) + "\t403 Forbidden\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
   }
-  else if (access(filepath.c_str(), F_OK) != 0 || req.getUri() == "/Upload/"){
+  else if (access(filepath.c_str(), F_OK) != 0){
     msg = check_and_add_header(404, "text/plain", ft_itos(15), codes, req) + "\t404 Not Found\n";
     send(fd, msg.c_str(), msg.size(), 0);
     return ("");
