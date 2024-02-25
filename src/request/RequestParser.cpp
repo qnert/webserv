@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 21:26:45 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/25 21:33:00 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ void  RequestParser::parseRequestHeader(const std::string& buffer)
   std::string line;
   size_t headerLength = 0;
 
-//   std::cout << buffer << std::endl;
   std::getline(bufferStream, line, '\n');
 
   headerLength += line.size() + 1;

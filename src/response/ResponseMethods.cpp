@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 21:07:37 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/25 21:33:22 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void  Server::getMethod(size_t idx, std::string& tmp)
   check = opendir((root + uri).c_str());
   this->_clientDetails[idx].setIndexFile(getRightIndexFile());
   std::string msg = storeFileIntoString(this->_clientDetails[idx], uri);
-//  std::cout << "msg: " << msg << std::endl;
   if (check != NULL && !this->_currLocation.empty() && this->_currLocation["autoindex"] == "on")
     list_directories(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes, check);
   else if (!msg.empty())
