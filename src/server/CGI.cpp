@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/24 17:55:39 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 18:40:02 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,12 +115,26 @@ CGI::CGI(int fd, std::string exec_name, std::string body, std::string root) : _c
     return ;
   }
   if (this->_exec_type == ".pl" || this->_exec_type == ".py" || this->_exec_type == ".sh")
-    exec_cgi_default();
+    prepare_execution();
 }
 
 CGI::~CGI(){}
 
-void  CGI::exec_cgi_default()
+void   CGI::execute(){
+  char *argv[3] = {const_cast<char*>(this->_exec_path.c_str()), const_cast<char*>(this->_exec_name.c_str()), NULL};
+  std::string length = "CONTENT_LENGTH=" + ft_itos(this->_body.length());
+  std::string body = "QUERY_STRING=" + this->_body;
+  std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
+  std::string path_info = "PATH_INFO=" + this->_path_info;
+  char *envp[6] = {const_cast<char*>("REQUEST_METHOD=POST"), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
+  const_cast<char*>(script_name.c_str()), const_cast<char*>(path_info.c_str()), NULL};
+  dup2(this->_client_fd, STDOUT_FILENO);
+  execve(argv[0], argv, envp);
+  perror("execve fail");
+  std::exit(100);
+}
+
+void  CGI::prepare_execution()
 {
   if (access((this->_exec_name).c_str(), F_OK) == -1){
     this->send_error_404();
@@ -134,18 +148,28 @@ void  CGI::exec_cgi_default()
       std::string msg = add_header_cgi(201, this->_codes);
       send(this->_client_fd, msg.c_str(), msg.size(), 0);
   }
-  int fd = fork();
-  if (fd == 0){
-    char *argv[3] = {const_cast<char*>(this->_exec_path.c_str()), const_cast<char*>(this->_exec_name.c_str()), NULL};
-    std::string length = "CONTENT_LENGTH=" + ft_itos(this->_body.length());
-    std::string body = "QUERY_STRING=" + this->_body;
-    std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
-    std::string path_info = "PATH_INFO=" + this->_path_info;
-    char *envp[6] = {const_cast<char*>("REQUEST_METHOD=POST"), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
-      const_cast<char*>(script_name.c_str()), const_cast<char*>(path_info.c_str()), NULL};
-    dup2(this->_client_fd, STDOUT_FILENO);
-    execve(argv[0], argv, envp);
-    this->send_error_500();
-    std::exit(0);
+  int timeout_seconds = 3;
+  int exitcode = 0;
+  pid_t fd = fork();
+  if (fd == -1)
+    return (perror("fork failed"));
+  else if (fd == 0){
+    this->execute();
+  }
+  else{
+    sleep(timeout_seconds);
+    pid_t result = waitpid(fd, &exitcode, WNOHANG);
+    if (result == 0) {
+        this->send_error_500();
+        kill(fd, SIGKILL);
+        waitpid(fd, &exitcode, 0);
+    } else if (result < 0) {
+        // Error occurred
+        perror("waitpid");
+    }
+    else{
+      if (WIFEXITED(exitcode))
+        this->send_error_500();
+    }
   }
 }

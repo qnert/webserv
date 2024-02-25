@@ -21,16 +21,16 @@ def main():
     #create content
     str = '<html>\n<head><title>User Authentication</title></head>\n<body>\n<h1>User Authentication</h1>\n'
     if user_name and password:
-      str += "<p>Welcome, {}! Your password is: {}</p>".format(user_name, password)
+      str += "<p>Welcome, {}! Your password is: {}!</p>".format(user_name, password)
     else:
       str += "<p>No user name or password provided.</p>"
     str += "</body>\n</html>\n"
     # Print HTML content
     print("Content-type: text/html")
     if user_name == "admin" and password == "42":
-      print('Set-Cookie: user=admin; domain=127.0.0.1; path=/; max-age=30')
+      print("Set-Cookie: user=admin; domain=127.0.0.1; path=/; max-age=30")
     print("Content-length: {}\r\n\r\n".format(len(str)))
     print(str)
 
 if __name__ == "__main__":
-    main()
+  main()
