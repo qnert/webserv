@@ -26,7 +26,7 @@ def main():
       str += "<p>No user name or password provided.</p>"
     str += "</body>\n</html>\n"
     # Print HTML content
-    print("Content-type: text/plain")
+    print("Content-type: text/html")
     if user_name == "admin" and password == "42":
       print("Set-Cookie: user=admin; domain=127.0.0.1; path=/; max-age=30")
     print("Content-length: {}\r\n\r\n".format(len(str)))
