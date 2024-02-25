@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/24 15:16:21 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/25 18:48:32 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,10 @@
 
 bool lessThanShort(const std::string& str)
 {
-	return isLessThanMaxValue(ft_stoll(str), short());
+	if (ft_stoll(str) > 0)
+		return isLessThanMaxValue(ft_stoll(str), short());
+	else
+		return false;
 }
 
 bool lessThanSizet(const std::string& str)
@@ -152,6 +155,14 @@ void Config::checkConf()
 	addErrorCodes(_config);
 }
 
+void errorPageName(std::map<std::string, std::string>& map, std::string line)
+{
+	size_t delim;
+	if ((delim = line.find(' ')) == std::string::npos)
+		throw std::runtime_error("Config: expected 2 arguments: error_page <number> <filename>");
+	addToMap(map, line.substr(0, delim), line.substr(delim +1, delim-line.length()));
+}
+
 // handles parsing of the location directive
 std::map<std::string,std::string> Config::locationDirective(std::ifstream& input, std::string& line)
 {
@@ -183,7 +194,10 @@ std::map<std::string,std::string> Config::locationDirective(std::ifstream& input
 					return map;
 				if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in location directive");
-				addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
+				else if (trim(line.substr(0, line.find(' '))) == "error_page")
+					errorPageName(map, trim(line.substr(i.base()->length(), delim-i.base()->length())));
+				else
+					addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
 			}
 			else if (next(i) == params.end())
@@ -224,7 +238,10 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 				}
 				else if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in server directive");
-				addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
+				else if (trim(line.substr(0, line.find(' '))) == "error_page")
+					errorPageName(map, trim(line.substr(i.base()->length(), delim-i.base()->length())));
+				else
+					addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
 			}
 			else if (next(i) == params.end())
