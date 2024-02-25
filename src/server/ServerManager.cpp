@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 14:25:41 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 17:21:18 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ void ServerManager::handleRequest(size_t i)
     return;
   }
   buffer[bytesRead] = '\0';
+  std::cout << buffer << std::endl;
   this->_clientDetails[i].parseRequestBuffer(buffer, bytesRead);
   if (this->_clientDetails[i].getPendingReceive() == false) {
     this->_clientDetails[i].refreshTime(std::time(NULL));

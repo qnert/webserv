@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/25 16:07:50 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/25 16:23:53 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,14 +171,6 @@ void list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir)
   std::ostringstream directories;
   directories << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Directory Listing</title>\n<body>\n<body>\n";
   directories << "<h1>Directory Listing: " << uri << "</h1>\n<body>\n</html>\n";
-<<<<<<< HEAD:src/server/RequestUtils.cpp
-  while ((dent = readdir(dir)) != NULL){
-    if (std::string(dent->d_name) != "." && std::string(dent->d_name)  != "..")
-      directories << "<a href=\"" << "/" + (uri + dent->d_name) << "\">" << dent->d_name << "</a>" << "<br>";
-  }
-=======
->>>>>>> 74a0f1dcbb9502e71dd12cff617ce3d0f2c5b82a:src/request/RequestUtils.cpp
-
   while ((dent = readdir(dir)) != NULL) {
     if (std::string(dent->d_name) != "." && std::string(dent->d_name) != "..") {
       std::string link = dent->d_name;
@@ -187,7 +179,6 @@ void list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir)
       directories << "<a href=\"" << link << "\">" << dent->d_name << "</a><br>";
     }
   }
-
   std::string dir_str = directories.str();
   std::string msg = check_and_add_header(200, "text/html", ft_itos(dir_str.length()), codes, req) + dir_str;
   send(fd, msg.c_str(), msg.size(), 0);

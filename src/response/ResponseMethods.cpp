@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseMethods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 19:13:51 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 18:00:19 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
