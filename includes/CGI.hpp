@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 16:59:31 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/25 18:00:23 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/25 18:56:14 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class CGI{
     Statuscodes _codes;
     MIME_type   _data;
     int         _client_fd;
+    int         _error;
     std::string _exec_type;
     std::string _exec_path;
     std::string _exec_name;
@@ -45,6 +46,7 @@ class CGI{
     void    send_error_404();
     void    send_error_405();
     void    send_error_500();
+    void    send_error_508();
 
   CGI(int fd, std::string exec_name, std::string body, std::string root);
   ~CGI();
