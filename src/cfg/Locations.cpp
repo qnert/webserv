@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Locations.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 20:04:51 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 21:08:11 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,9 +63,10 @@ std::string Server::getRightIndexFile()
 	std::string token, path, stream;
 
 	if (!this->_currLocation.empty())
-    stream = this->_currLocation["index"];
+    	stream = this->_currLocation["index"];
 	else
 		stream = _index;
+	std::cout << "stream: " << stream << std::endl;
 	std::istringstream str(stream);
 	while (str >> token)
 	{

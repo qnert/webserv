@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/25 20:13:56 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 21:18:23 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 std::string  storeFileIntoString(Clients& req, std::string path)
 {
   std::string root = req.getCurrdir();
-  if (req.getUri() == "/" && req.isError() == false
+  if (req.getUri().back() == '/' && req.isError() == false
       && req.getMapValue("Cookie") != "user=admin")
     path = root + req.getIndexFile();
   else if (req.getUri() == "/" && req.isError() == false
@@ -31,6 +31,7 @@ std::string  storeFileIntoString(Clients& req, std::string path)
     path = root + "/admin_index.html";
   else
     path = root + path;
+std::cout << "store: " << path << std::endl;
   std::ifstream file(path, std::ios::binary);
   if (!file.is_open())
     return ("");

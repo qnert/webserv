@@ -3,20 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 19:53:14 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 21:26:45 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/RequestParser.hpp"
 
 std::string trimTrailingSlashes(const std::string& str) {
-  if (str.find_last_not_of('/') == std::string::npos)
+  size_t last = str.find_last_not_of('/');
+  if (last == std::string::npos)
     return ("/");
-  size_t end = str.find_last_not_of('/');
-  return (end == std::string::npos) ? "" : str.substr(0, end + 1);
+  else if (last < str.length() - 1)
+    return str.substr(0, last + 1) + "/";
+  return str;
 }
 
 RequestParser::RequestParser() : _pendingReceive(false), _totalReadBytes(0) {}
@@ -29,6 +31,7 @@ void  RequestParser::parseRequestHeader(const std::string& buffer)
   std::string line;
   size_t headerLength = 0;
 
+//   std::cout << buffer << std::endl;
   std::getline(bufferStream, line, '\n');
 
   headerLength += line.size() + 1;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ProcessResponse.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:23:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 19:58:47 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 20:19:37 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,10 @@ void  Server::chooseMethod(size_t idx)
     return;
   }
 
+  if (requestType == "HEAD") {
+    methodNotAllowed(idx);
+  return;
+  }
   if (requestType == "GET" && !checkLocationPrelims("GET")) {
     getMethod(idx, tmp);
     return;
