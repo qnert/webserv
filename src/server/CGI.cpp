@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/25 18:40:02 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/25 18:55:55 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,8 @@ void  CGI::send_error_404(void){
   std::string content = storeFileIntoString_cgi("./responseFiles/error404.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
-  send(this->_client_fd, response.c_str(), response.size(), 0);
+  if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
+    this->_error = 1;
   return ;
 }
 
@@ -88,7 +89,8 @@ void  CGI::send_error_405(void){
   std::string content = storeFileIntoString_cgi("./responseFiles/error405.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
-  send(this->_client_fd, response.c_str(), response.size(), 0);
+  if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
+    this->_error = 1;
   return ;
 }
 
@@ -97,11 +99,23 @@ void  CGI::send_error_500(){
   std::string content = storeFileIntoString_cgi("./responseFiles/error500.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
-  send(this->_client_fd, response.c_str(), response.size(), 0);
+  if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
+    this->_error = 1;
+  return ;
+}
+
+void  CGI::send_error_508(){
+  std::string header = "HTTP/1.1 508 Loop Detected\r\nContent-Type: text/html\r\n";
+  std::string content = storeFileIntoString_cgi("./responseFiles/error508.html");
+  header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
+  std::string response = header + content;
+  if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
+    this->_error = 1;
   return ;
 }
 
 CGI::CGI(int fd, std::string exec_name, std::string body, std::string root) : _client_fd(fd), _exec_name(exec_name), _body(body), _root(root){
+  this->_error = 0;
   if (this->_exec_name.find("/cgi-bin/") != 0){
     this->send_error_404();
     return ;
@@ -146,7 +160,10 @@ void  CGI::prepare_execution()
   }
   else{
       std::string msg = add_header_cgi(201, this->_codes);
-      send(this->_client_fd, msg.c_str(), msg.size(), 0);
+      if (send(this->_client_fd, msg.c_str(), msg.size(), 0)  <= 0){
+        this->_error = 1;
+        return ;
+      }
   }
   int timeout_seconds = 3;
   int exitcode = 0;
@@ -160,12 +177,13 @@ void  CGI::prepare_execution()
     sleep(timeout_seconds);
     pid_t result = waitpid(fd, &exitcode, WNOHANG);
     if (result == 0) {
-        this->send_error_500();
+        this->send_error_508();
         kill(fd, SIGKILL);
         waitpid(fd, &exitcode, 0);
     } else if (result < 0) {
-        // Error occurred
         perror("waitpid");
+        kill(fd, SIGKILL);
+        waitpid(fd, &exitcode, 0);
     }
     else{
       if (WIFEXITED(exitcode))
