@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 16:33:02 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 14:09:35 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ Server::Server() {}
 
 // server will get initialized. That means a listening socket (serverSocket) will
 // be created, set to non-blocking, set to be reused and binded to the local address.
-Server::Server(struct pollfd* pfds, Clients* cd, Config& cfg) : _clientPollfds(pfds), _clientDetails(cd), _nfds(1)
+Server::Server(struct pollfd* pfds, Clients* cd, Config& cfg) : _clientPollfds(pfds), _clientDetails(cd)
 {
 	int reuse = 1;
   initConfVars(cfg);
@@ -61,16 +61,17 @@ Server::Server(struct pollfd* pfds, Clients* cd, Config& cfg) : _clientPollfds(p
   int index = getFreeSocket();
   this->_clientPollfds[index] = serverPollfd;
   this->_clientDetails[index].setFdStatus(USED);
+  this->_clientDetails[index].setSocketType(SERVER);
 }
 
 Server::~Server() {}
 
 // accept every client in that wants to connect
-void  Server::acceptConnections()
+void  Server::acceptConnections(nfds_t& nfds)
 {
   int newClientSocket;
 
-  if (this->_nfds == MAX_CLIENTS) {
+  if (nfds == MAX_CLIENTS) {
     std::cout << "Maximum amount of clients reached" << std::endl;
     return ;
   }
@@ -91,7 +92,9 @@ void  Server::acceptConnections()
   int index = this->getFreeSocket();
   this->_clientPollfds[index].fd = newClientSocket;
   this->_clientDetails[index].setFdStatus(USED);
-  this->_nfds++;
+  this->_clientDetails[index].refreshTime(std::time(NULL));
+  this->_clientDetails[index].setSocketType(CLIENT);
+  nfds++;
   std::cout << "New client connected at index: " << index << std::endl;
 }
 
@@ -111,6 +114,6 @@ std::string Server::getPort()
 }
 std::string Server::getRoot()
 {
-	return _root;
+	return _serverRoot;
 }
 

@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 15:19:30 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 15:44:46 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 13:58:03 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,13 @@
 
 Clients::Clients() : RequestParser(), _pendingResponse(false), _totalBytesSend(0),
                   _totalBufferSize(0), _headerSize(0), _connectionStatus(KEEPALIVE),
-                  _fdStatus(UNUSED), _error(false) {}
+                  _fdStatus(UNUSED), _error(false), _idleStartTime(0) {}
 
 Clients::~Clients() {}
+
+time_t Clients::getTime() const {return (this->_idleStartTime);}
+
+int    Clients::getSocketType() const {return (this->_socketType);}
 
 bool  Clients::getPendingResponse() const {return (this->_pendingResponse);}
 
@@ -54,6 +58,10 @@ void  Clients::setError(bool status) {this->_error = status;}
 void  Clients::setConStatus(int status) {this->_connectionStatus = status;}
 
 void  Clients::setFdStatus(int status) {this->_fdStatus = status;}
+
+void  Clients::refreshTime(time_t refresh) {this->_idleStartTime = refresh;}
+
+void  Clients::setSocketType(int type) {this->_socketType = type;}
 
 void  Clients::cleanUpResponse()
 {

@@ -15,11 +15,15 @@
 void  Server::getMethod(size_t idx, std::string& tmp)
 {
   DIR*  check;
+  std::string root = this->_clientDetails[idx].getCurrdir();
   std::string uri = this->_clientDetails[idx].getUri();
-  check = opendir((uri.substr(1, uri.length())).c_str());
-  std::string msg = storeFileIntoString(this->_clientDetails[idx], getIndexFile());
+  // std::cout << "root: " << root << " uri: " << uri << std::endl;
+  check = opendir((root + uri).c_str());
+  std::string msg = storeFileIntoString(this->_clientDetails[idx], uri);
 
-  if (!msg.empty())
+  if (check != NULL && !this->_currLocation.empty() && this->_currLocation["autoindex"] == "on")
+    list_directories(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes, check);
+  else if (!msg.empty())
     this->handleGetDefault(msg, idx);
   else if (uri.find("/?searchTerm=") != std::string::npos) // searching for file in url if it's already there
   {
@@ -28,7 +32,7 @@ void  Server::getMethod(size_t idx, std::string& tmp)
     std::string filename = uri.substr(start, end - start);
     if (tmp == filename && filename.size() > 0)
     {
-      msg = storeFileIntoString(this->_clientDetails[idx], "erased.html");
+      msg = storeFileIntoString(this->_clientDetails[idx], "/erased.html");
       std::string length = ft_itos(msg.size());
       std::string response = check_and_add_header(200, this->_data["html"], length, this->_codes, this->_clientDetails[idx]) + msg;
       if (send(this->_clientPollfds[idx].fd, response.c_str(), response.size(), 0) < 0)
@@ -39,8 +43,6 @@ void  Server::getMethod(size_t idx, std::string& tmp)
     else
       this->NotFound(idx);
   }
-  else if (check != NULL)
-    list_directories(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes, check);
   else
     this->NotFound(idx);
 }
@@ -73,7 +75,6 @@ void  Server::handleGetDefault(std::string& msg, size_t idx)
 int  Server::postMethod(size_t idx)
 {
   std::string uri = this->_clientDetails[idx].getUri();
-  std::cout << uri << std::endl;
   if (uri == "/cgi-bin/first.cgi")
   {
     pid_t pid = fork();

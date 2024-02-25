@@ -42,14 +42,13 @@ private:
   struct pollfd*      _clientPollfds;
   Clients*            _clientDetails;
   int                 reuse;
-  nfds_t              _nfds;
   size_t              _currSize;
   int                 _serverSocket;
   sockaddr_in         _serverAdress;
 
   std::string         _servername;
   std::string         _port;
-  std::string         _root;
+  std::string         _serverRoot;
   std::string         _index;
   size_t              _maxClientBody;
 
@@ -71,6 +70,7 @@ private:
   void                NotFound(size_t idx);
   void                versionNotSupported(size_t idx);
   void                payloadTooLarge(size_t idx);
+  void                handleRedirectLocation(size_t idx);
 
   int                 getFreeSocket();
   void                cleanUpClientFds();
@@ -86,15 +86,15 @@ public:
   Server(struct pollfd* pfds, Clients* cd, Config& cfg);
   ~Server();
 
-  void                removeFd(int i);
+  void                removeFd(int i, nfds_t& nfds);
   Statuscodes&        getStatuscodes(void);
   MIME_type&          getMimeType(void);
 
   // ProcessResponse
-  void                sendAnswer(size_t idx);
+  void                sendAnswer(size_t idx, nfds_t& nfds);
 
 	int                 getFd();
-	void                acceptConnections();
+	void                acceptConnections(nfds_t& nfds);
 	std::string         getServername();
 	std::string         getPort();
 	std::string         getRoot();

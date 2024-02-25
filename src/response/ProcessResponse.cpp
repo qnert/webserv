@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:23:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/23 20:39:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 14:23:56 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,12 @@ void  Server::chooseMethod(size_t idx)
     return;
   }
 
+  if (checkLocationPrelims(requestType) \
+      && this->_currLocation["deny_methods"].find(requestType) == std::string::npos) {
+    handleRedirectLocation(idx);
+    return ;
+  }
+
   if (requestType != "GET" && requestType != "POST" && requestType != "DELETE") {
     notImplemented(idx);
     return;
@@ -57,7 +63,7 @@ void  Server::chooseMethod(size_t idx)
 }
 
 // sends an answer to the client
-void  Server::sendAnswer(size_t idx)
+void  Server::sendAnswer(size_t idx, nfds_t& nfds)
 {
   this->getCurrLocation(idx);
   this->setRightCurrDir(idx);
@@ -66,11 +72,12 @@ void  Server::sendAnswer(size_t idx)
   if (this->_clientDetails[idx].getMapValue("Connection") != "keep-alive"
       || this->_clientDetails[idx].getConStatus() == CLOSE) {
     std::cout << "answer sent at idx: " << idx << " set back to POLLIN" << std::endl;
-    this->removeFd(idx);
+    this->removeFd(idx, nfds);
   }
   else if (this->_clientDetails[idx].getPendingResponse() == false) {
     this->_clientDetails[idx].cleanUp();
     this->_clientDetails[idx].cleanUpResponse();
+    this->_clientDetails[idx].refreshTime(std::time(NULL));
     this->_clientPollfds[idx].events = POLLIN;
   }
 }

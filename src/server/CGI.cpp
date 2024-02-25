@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/23 21:56:29 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 18:55:55 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,10 @@
 #include "../../includes/Server.hpp"
 
 static std::string get_exec_type(std::string const& file_path){
-  size_t  end;
-  size_t  start = file_path.find("responseFiles/cgi-bin/") + 22;
-  end = file_path.find_first_of('/', start);
-  if (end == std::string::npos) {
-    end = file_path.length();
-  }
+  size_t  start = file_path.find_last_of('.');
+  if (start == std::string::npos)
+    return ("");
+  size_t  end = file_path.length();
   std::string file = file_path.substr(start, end - start);
   size_t prefix = file.find_last_of('.');
   if (prefix == std::string::npos)
@@ -61,16 +59,16 @@ static std::string  storeFileIntoString_cgi(std::string path)
 }
 
 void  get_path_info(std::string&  exec_name, std::string& path_info){
-  size_t start = exec_name.find("cgi-bin/");
-  std::string path = exec_name.substr(start + 8, exec_name.length() - start + 22);
+  size_t start = exec_name.find("/cgi-bin/");
+  std::string path = exec_name.substr(start + 9, exec_name.length() - start + 22);
   start = path.find_first_of('/');
   if (start == std::string::npos){
-    exec_name = exec_name.substr(1, exec_name.length());
+    exec_name = exec_name.substr(0, exec_name.length());
     path_info = "/";
     return ;
   }
   else{
-    exec_name = "cgi-bin/" + path.substr(0, start);
+    exec_name = "/cgi-bin/" + path.substr(0, start);
     path_info = path.substr(start + 1, path_info.length() - start + 1);
     return ;
   }
@@ -81,7 +79,8 @@ void  CGI::send_error_404(void){
   std::string content = storeFileIntoString_cgi("./responseFiles/error404.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
-  send(this->_client_fd, response.c_str(), response.size(), 0);
+  if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
+    this->_error = 1;
   return ;
 }
 
@@ -90,7 +89,8 @@ void  CGI::send_error_405(void){
   std::string content = storeFileIntoString_cgi("./responseFiles/error405.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
-  send(this->_client_fd, response.c_str(), response.size(), 0);
+  if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
+    this->_error = 1;
   return ;
 }
 
@@ -99,11 +99,23 @@ void  CGI::send_error_500(){
   std::string content = storeFileIntoString_cgi("./responseFiles/error500.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
-  send(this->_client_fd, response.c_str(), response.size(), 0);
+  if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
+    this->_error = 1;
+  return ;
+}
+
+void  CGI::send_error_508(){
+  std::string header = "HTTP/1.1 508 Loop Detected\r\nContent-Type: text/html\r\n";
+  std::string content = storeFileIntoString_cgi("./responseFiles/error508.html");
+  header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
+  std::string response = header + content;
+  if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
+    this->_error = 1;
   return ;
 }
 
 CGI::CGI(int fd, std::string exec_name, std::string body, std::string root) : _client_fd(fd), _exec_name(exec_name), _body(body), _root(root){
+  this->_error = 0;
   if (this->_exec_name.find("/cgi-bin/") != 0){
     this->send_error_404();
     return ;
@@ -111,21 +123,33 @@ CGI::CGI(int fd, std::string exec_name, std::string body, std::string root) : _c
   get_path_info(this->_exec_name, this->_path_info);
   this->_exec_type = get_exec_type(this->_exec_name);
   this->_exec_path = check_exec_type(this->_exec_type);
-  // std::cout << this->_exec_name << " " << this->_path_info << " " << this->_exec_type << " " << this->_exec_path << std::endl;
+  this->_exec_name = this->_root + this->_exec_name;
   if (this->_exec_path == "" || this->_exec_name.find("/cgi-bin/") == std::string::npos){
     this->send_error_404();
     return ;
   }
   if (this->_exec_type == ".pl" || this->_exec_type == ".py" || this->_exec_type == ".sh")
-    exec_cgi_default();
+    prepare_execution();
 }
 
 CGI::~CGI(){}
 
-void  CGI::exec_cgi_default()
+void   CGI::execute(){
+  char *argv[3] = {const_cast<char*>(this->_exec_path.c_str()), const_cast<char*>(this->_exec_name.c_str()), NULL};
+  std::string length = "CONTENT_LENGTH=" + ft_itos(this->_body.length());
+  std::string body = "QUERY_STRING=" + this->_body;
+  std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
+  std::string path_info = "PATH_INFO=" + this->_path_info;
+  char *envp[6] = {const_cast<char*>("REQUEST_METHOD=POST"), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
+  const_cast<char*>(script_name.c_str()), const_cast<char*>(path_info.c_str()), NULL};
+  dup2(this->_client_fd, STDOUT_FILENO);
+  execve(argv[0], argv, envp);
+  perror("execve fail");
+  std::exit(100);
+}
+
+void  CGI::prepare_execution()
 {
-  this->_exec_name = this->_root + this->_exec_name;
-  std::cout << "exec_name: " << _exec_name << std::endl;
   if (access((this->_exec_name).c_str(), F_OK) == -1){
     this->send_error_404();
     return ;
@@ -136,31 +160,34 @@ void  CGI::exec_cgi_default()
   }
   else{
       std::string msg = add_header_cgi(201, this->_codes);
-      send(this->_client_fd, msg.c_str(), msg.size(), 0);
+      if (send(this->_client_fd, msg.c_str(), msg.size(), 0)  <= 0){
+        this->_error = 1;
+        return ;
+      }
   }
-  int fd = fork();
-  if (fd == 0){
-    char *argv[3] = {const_cast<char*>(this->_exec_path.c_str()), const_cast<char*>(this->_exec_name.c_str()), NULL};
-    std::string length = "CONTENT_LENGTH=" + ft_itos(this->_body.length());
-    std::string body = "QUERY_STRING=" + this->_body;
-    std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
-    std::string path_info = "PATH_INFO=" + this->_path_info;
-    char *envp[6] = {const_cast<char*>("REQUEST_METHOD=POST"), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
-      const_cast<char*>(script_name.c_str()), const_cast<char*>(path_info.c_str()), NULL};
-    dup2(this->_client_fd, STDOUT_FILENO);
-    execve(argv[0], argv, envp);
-    this->send_error_500();
-    std::exit(0);
+  int timeout_seconds = 3;
+  int exitcode = 0;
+  pid_t fd = fork();
+  if (fd == -1)
+    return (perror("fork failed"));
+  else if (fd == 0){
+    this->execute();
+  }
+  else{
+    sleep(timeout_seconds);
+    pid_t result = waitpid(fd, &exitcode, WNOHANG);
+    if (result == 0) {
+        this->send_error_508();
+        kill(fd, SIGKILL);
+        waitpid(fd, &exitcode, 0);
+    } else if (result < 0) {
+        perror("waitpid");
+        kill(fd, SIGKILL);
+        waitpid(fd, &exitcode, 0);
+    }
+    else{
+      if (WIFEXITED(exitcode))
+        this->send_error_500();
+    }
   }
 }
-
-/* Need to fix that shiiiiiii
-server port: 8080
-server port: 8123
-server port: 8124
-New client connected at index: 3
-New client connected at index: 4
-currdir: /Users/njantsch/Documents/webserv/responseFiles/
-currdir: /Users/njantsch/Documents/webserv/responseFiles/
-/cgi-bin/print_env.pl
-basic_string*/

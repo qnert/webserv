@@ -12,6 +12,13 @@
 
 #include "../../includes/RequestParser.hpp"
 
+std::string trimTrailingSlashes(const std::string& str) {
+  if (str.find_last_not_of('/') == std::string::npos)
+    return ("/");
+  size_t end = str.find_last_not_of('/');
+  return (end == std::string::npos) ? "" : str.substr(0, end + 1);
+}
+
 RequestParser::RequestParser() : _pendingReceive(false), _totalReadBytes(0) {}
 
 RequestParser::~RequestParser() {}
@@ -46,6 +53,7 @@ void  RequestParser::parseRequestHeader(const std::string& buffer)
     }
     headerLength += line.size() + 1;
   }
+  this->_requestFields["Uri"] = trimTrailingSlashes(this->_requestFields["Uri"]);
 }
 
 void  RequestParser::parseRequestBody(const std::string& buffer)
@@ -98,8 +106,9 @@ void  RequestParser::cleanUp()
   this->_requestFields.clear();
 }
 
+void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir;}
 
-void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir + "/";}
+void  RequestParser::setRedirect(std::string redir) {this->_redirectURL = redir;}
 
 bool  RequestParser::getPendingReceive() const {return (this->_pendingReceive);}
 
@@ -118,6 +127,8 @@ const std::string& RequestParser::getFileType() const {return (this->_fileType);
 const std::string& RequestParser::getBoundary() const{return (this->_boundary);}
 
 size_t  RequestParser::getBodySize() {return (this->_requestFields["Body"].size());}
+
+const std::string& RequestParser::getRedirectURL() {return (this->_redirectURL);}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {

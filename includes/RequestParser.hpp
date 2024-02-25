@@ -19,6 +19,7 @@
 #include <string>
 #include <unistd.h>
 #include <climits>
+#include <ctime>
 
 #define RECV_BUFFER_SIZE 10000
 
@@ -32,6 +33,7 @@ private:
   std::string                        _boundary;
   bool                               _pendingReceive;
   ssize_t                            _totalReadBytes;
+  std::string                        _redirectURL;
 
   void  parseRequestBody(const std::string& buffer);
   void  parseRequestHeader(const std::string& buffer);
@@ -42,6 +44,7 @@ public:
   void  parseRequestBuffer(const std::string& buffer, ssize_t bytes);
   void  cleanUp();
 
+  void               setRedirect(std::string redir);
   void               setCurrDir(std::string currDir);
 
   bool               getPendingReceive() const;
@@ -54,4 +57,6 @@ public:
   const std::string& getHost();
   const std::string& getBody();
   const std::string& getCurrdir();
+  const std::string& getIndexFile();
+  const std::string& getRedirectURL();
 };
