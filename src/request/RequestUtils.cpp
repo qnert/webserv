@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/25 16:23:53 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/24 14:18:07 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,10 @@
 
 std::string  storeFileIntoString(Clients& req, std::string path)
 {
-  std::string root = req.getCurrdir();
+  std::cout << "path: " << path << std::endl;
   if (req.getUri() == "/" && req.isError() == false
       && req.getMapValue("Cookie") != "user=admin")
-    path = root + "/index.html";
+    path = req.getCurrdir() + path;
   else if (req.getUri() == "/" && req.isError() == false
           && req.getMapValue("Cookie") == "user=admin")
     path = root + "/admin_index.html";

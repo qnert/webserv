@@ -6,7 +6,7 @@
 /*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/23 19:16:16 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/25 18:48:32 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,10 @@
 
 bool lessThanShort(const std::string& str)
 {
-	return isLessThanMaxValue(ft_stoll(str), short());
+	if (ft_stoll(str) > 0)
+		return isLessThanMaxValue(ft_stoll(str), short());
+	else
+		return false;
 }
 
 bool lessThanSizet(const std::string& str)
@@ -101,6 +104,15 @@ bool Config::locationExists(std::string uri)
 	return false;
 }
 
+void addErrorCodes(std::map<std::string, std::string>& map)
+{
+	std::string arr[] = {"400", "403", "404", "405", "413", "500", "501", "505"};
+	std::vector<std::string> ec(arr, arr + sizeof(arr)/sizeof(std::string));
+    for (std::vector<std::string>::iterator code = ec.begin(); code != ec.end(); ++code)
+        if (map.find(*code) == map.end())
+            map.insert(std::make_pair(*code, *code + ".html"));
+}
+
 // verifies the config and makes sure nothing is undefined
 void Config::checkLocation(std::map<std::string, std::string>& map)
 {
@@ -120,6 +132,7 @@ void Config::checkLocation(std::map<std::string, std::string>& map)
 		map.insert(std::make_pair("deny_methods", ""));
 	if (map.find("enable_cgi") == map.end())
 		map.insert(std::make_pair("enable_cgi", ""));
+	addErrorCodes(map);
 }
 
 // verifies the config and makes sure nothing is undefined
@@ -139,6 +152,15 @@ void Config::checkConf()
 		_config.insert(std::make_pair("root", "./responseFiles"));
 	if (_config.find("index") == _config.end())
 		_config.insert(std::make_pair("index", "index.html"));
+	addErrorCodes(_config);
+}
+
+void errorPageName(std::map<std::string, std::string>& map, std::string line)
+{
+	size_t delim;
+	if ((delim = line.find(' ')) == std::string::npos)
+		throw std::runtime_error("Config: expected 2 arguments: error_page <number> <filename>");
+	addToMap(map, line.substr(0, delim), line.substr(delim +1, delim-line.length()));
 }
 
 // handles parsing of the location directive
@@ -172,7 +194,10 @@ std::map<std::string,std::string> Config::locationDirective(std::ifstream& input
 					return map;
 				if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in location directive");
-				addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
+				else if (trim(line.substr(0, line.find(' '))) == "error_page")
+					errorPageName(map, trim(line.substr(i.base()->length(), delim-i.base()->length())));
+				else
+					addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
 			}
 			else if (next(i) == params.end())
@@ -213,7 +238,10 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 				}
 				else if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in server directive");
-				addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
+				else if (trim(line.substr(0, line.find(' '))) == "error_page")
+					errorPageName(map, trim(line.substr(i.base()->length(), delim-i.base()->length())));
+				else
+					addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
 			}
 			else if (next(i) == params.end())
