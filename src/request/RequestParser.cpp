@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 13:48:51 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/25 19:53:14 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,8 @@ void  RequestParser::cleanUp()
 
 void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir;}
 
+void  RequestParser::setIndexFile(std::string index) {this->_indexFile = index;}
+
 void  RequestParser::setRedirect(std::string redir) {this->_redirectURL = redir;}
 
 bool  RequestParser::getPendingReceive() const {return (this->_pendingReceive);}
@@ -129,6 +131,8 @@ const std::string& RequestParser::getBoundary() const{return (this->_boundary);}
 size_t  RequestParser::getBodySize() {return (this->_requestFields["Body"].size());}
 
 const std::string& RequestParser::getRedirectURL() {return (this->_redirectURL);}
+
+const std::string& RequestParser::getIndexFile() {return (this->_indexFile);}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {

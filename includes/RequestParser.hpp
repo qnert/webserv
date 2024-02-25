@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 13:52:23 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/25 19:47:43 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ private:
   bool                               _pendingReceive;
   ssize_t                            _totalReadBytes;
   std::string                        _redirectURL;
+  std::string                        _indexFile;
 
   void  parseRequestBody(const std::string& buffer);
   void  parseRequestHeader(const std::string& buffer);
@@ -46,6 +47,7 @@ public:
 
   void               setRedirect(std::string redir);
   void               setCurrDir(std::string currDir);
+  void               setIndexFile(std::string index);
 
   bool               getPendingReceive() const;
   size_t             getBodySize();

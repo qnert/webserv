@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Locations.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 14:35:15 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/25 20:04:51 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,36 +58,24 @@ void  Server::setRightCurrDir(size_t idx)
     this->_clientDetails[idx].setCurrDir(this->_serverRoot);
 }
 
-std::string Server::getIndexFile()
+std::string Server::getRightIndexFile()
 {
 	std::string token, path, stream;
-	
+
 	if (!this->_currLocation.empty())
-	{
-		std::cout << "found: " << this->_currLocation["index"] << std::endl;
-    	stream = this->_currLocation["index"];
-	}
+    stream = this->_currLocation["index"];
 	else
-	{
 		stream = _index;
-		std::cout << "inside: " << _index << std::endl;
-	}
 	std::istringstream str(stream);
 	while (str >> token)
 	{
 		if (!this->_currLocation.empty())
-		{
     		path = this->_currLocation["root"] + "/" + token;
-			std::cout << "full path: " << this->_currLocation["root"] + "/" + token << std::endl;
-		}
 		else
-		{
-			path = this->_root + "/" + token;
-			std::cout << "full path: " << _root + "/" + token << std::endl;
-		}
+			path = this->_serverRoot + "/" + token;
 		std::ifstream file(path);
     	if (file.good())
-			return token;
+			return "/" + token;
 	}
 	return "";
 }
