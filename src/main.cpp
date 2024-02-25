@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 15:07:17 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/22 14:31:24 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,12 @@ int main(int argc, char** argv)
   try
   {
     std::string path;
-	  if (argc < 2) {
-      (void) argv;
-      path = "config/default.conf";
-    }
+	if (argc < 2)
+		path = "config/default.conf";
     else
       path = argv[1];
-    Config cfg(path);
-    ServerManager servers(cfg);
-    servers.serverLoop();
+    ServerManager servers(path);
+    // servers.serverLoop();
   }
   catch(const std::exception& e)
   {

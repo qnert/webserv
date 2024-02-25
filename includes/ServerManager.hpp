@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:35 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/20 16:35:59 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/25 14:09:12 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ private:
   struct pollfd                                    _clientPollfds[MAX_CLIENTS];
   Clients                                          _clientDetails[MAX_CLIENTS];
   Server                                           _currentServer;
+  nfds_t                                           _nfds;
 
   void  handleRequest(size_t i);
   bool  checkRevents(size_t index);
@@ -34,9 +35,10 @@ private:
   void     matchRequestToServer(size_t index);
   void     clientsInit();
   void     cleanUpClientFds();
+  void     timeoutIdleClient();
 
 public:
-  ServerManager(Config config);
+  ServerManager(std::string path);
   ~ServerManager();
 
   void  serverLoop();

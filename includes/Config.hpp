@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/29 16:01:58 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/20 15:39:57 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/23 19:16:20 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,25 +20,33 @@
 #include <fstream>
 #include <sstream>
 #include <unistd.h>
+#include "Utils.hpp"
 
 typedef std::vector<std::map<std::string, std::string> > t_confVector;
 
 class Config
 {
 private:
-	std::vector<std::map<std::string, std::string> > _configs;
+	std::map<std::string, std::string> _config;
+	std::vector<std::map<std::string, std::string> > _locations;
+	
+	void findOpeningBracket(std::ifstream& input, std::string& line);
+	bool findNextServerDirective(std::ifstream& input, std::string& line);
+	bool locationExists(std::string uri);
+	void checkConf();
+	void checkLocation(std::map<std::string, std::string>& map);
 public:
-	Config(const std::string& path);
+	Config(std::ifstream& input);
 	~Config();
 
-	class InvalidConfigurationException : public std::exception
-	{
-		public:
-			virtual const char *what() const throw();
-	};
-
-	std::vector<std::map<std::string, std::string> > getConfigs();
-	void parseConf(std::string path);
+	std::map<std::string, std::string>& getConfig();
+	t_confVector& getLocations();
 	std::map<std::string,std::string> serverDirective(std::ifstream& input);
-	void locationDirective(std::ifstream& input, std::map<std::string, std::string> map);
+	std::map<std::string,std::string> locationDirective(std::ifstream& input, std::string& line);
 };
+
+template <typename T, typename C>
+bool isLessThanMaxValue(T value, C)
+{
+	return value < std::numeric_limits<C>::max();
+}

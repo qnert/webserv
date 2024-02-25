@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/21 10:58:57 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/25 14:22:54 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "Config.hpp"
 #include "RequestUtils.hpp"
 #include "CGI.hpp"
+#include "Utils.hpp"
 #include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -30,6 +31,8 @@
 
 #define MAX_CLIENTS 200
 
+typedef std::map<std::string, std::string> t_strmap;
+
 class Server
 {
 private:
@@ -38,48 +41,61 @@ private:
   struct pollfd*      _clientPollfds;
   Clients*            _clientDetails;
   int                 reuse;
-  nfds_t              _nfds;
   size_t              _currSize;
   int                 _serverSocket;
   sockaddr_in         _serverAdress;
 
   std::string         _servername;
   std::string         _port;
-  std::string         _root;
-  bool                _defaultserver;
+  std::string         _serverRoot;
+  std::string         _index;
+  size_t              _maxClientBody;
 
+  std::vector<t_strmap> _locations;
+  t_strmap              _currLocation;
+  t_strmap              _error_pages; // key = Error code ("404"->"./path/to/file")
+
+  // ResponseMethods
   void                getMethod(size_t idx, std::string& tmp);
   int                 postMethod(size_t idx);
+  void                handleGetDefault(std::string& msg, size_t idx);
+
+  // ProcessResponse
+  void                chooseMethod(size_t idx);
+
+  // ErrorResponses
   void                notImplemented(size_t idx);
   void                methodNotAllowed(size_t idx);
-  void                handleGetDefault(std::string& msg, size_t idx);
   void                NotFound(size_t idx);
   void                versionNotSupported(size_t idx);
+  void                payloadTooLarge(size_t idx);
+  void                handleRedirectLocation(size_t idx);
 
   int                 getFreeSocket();
-//   void                handleRequest(int i);
-//   void                checkRevents(int i);
-//   void                acceptConnections(void);
   void                cleanUpClientFds();
 
-	// void createServerSockets(std::vector<std::map<std::string, std::string> > configs);
-	// bool isServerSocket(int fd);
+  // Location
+  void                initConfVars(Config& cfg);
+  bool                checkLocationPrelims(std::string method);
+  void                setRightCurrDir(size_t idx);
 public:
   Server();
-  Server(MIME_type& data, Statuscodes& codes, struct pollfd* pfds, Clients* cd, std::map<std::string, std::string> cfg);
+  Server(struct pollfd* pfds, Clients* cd, Config& cfg);
   ~Server();
 
-//   void                serverLoop(void);
-  void                removeFd(int i);
-  static std::string  ft_itos(size_t num);
+  void                removeFd(int i, nfds_t& nfds);
   Statuscodes&        getStatuscodes(void);
   MIME_type&          getMimeType(void);
 
+  // ProcessResponse
+  void                sendAnswer(size_t idx, nfds_t& nfds);
+
 	int                 getFd();
-	void                acceptConnections();
-  void                sendAnswer(size_t idx);
+	void                acceptConnections(nfds_t& nfds);
 	std::string         getServername();
 	std::string         getPort();
 	std::string         getRoot();
-  bool                isDefaultServer();
+
+  // Location
+  void                getCurrLocation(size_t index);
 };
