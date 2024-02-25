@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/25 18:55:55 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/25 21:01:38 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,22 @@ static std::string  storeFileIntoString_cgi(std::string path)
   return (fileContent);
 }
 
-void  get_path_info(std::string&  exec_name, std::string& path_info){
+void  get_path_info_get(std::string&  exec_name, std::string& path_info){
+  size_t  start = exec_name.find("/cgi-bin/");
+  if (start == std::string::npos){
+    exec_name = "";
+    return ;
+  }
+  size_t  end = exec_name.find_first_of('?', start);
+  if (exec_name.find('?', end + 1) != std::string::npos){
+    exec_name = "";
+    return ;
+  }
+  path_info = exec_name.substr(exec_name.find_last_of('?') + 1, exec_name.length());
+  exec_name = exec_name.substr(start, end - start);
+}
+
+void  get_path_info_post(std::string&  exec_name, std::string& path_info){
   size_t start = exec_name.find("/cgi-bin/");
   std::string path = exec_name.substr(start + 9, exec_name.length() - start + 22);
   start = path.find_first_of('/');
@@ -114,13 +129,22 @@ void  CGI::send_error_508(){
   return ;
 }
 
-CGI::CGI(int fd, std::string exec_name, std::string body, std::string root) : _client_fd(fd), _exec_name(exec_name), _body(body), _root(root){
+CGI::CGI(int fd, std::string exec_name, std::string body, std::string root, std::string method) : _client_fd(fd), _exec_name(exec_name), _body(body), _root(root), _method(method){
+  if (this->_method == "POST")
+    this->handle_post();
+  else if (this->_method == "GET")
+    this->handle_get();
+}
+
+CGI::~CGI(){}
+
+void  CGI::handle_get(){
   this->_error = 0;
   if (this->_exec_name.find("/cgi-bin/") != 0){
     this->send_error_404();
     return ;
   }
-  get_path_info(this->_exec_name, this->_path_info);
+  get_path_info_get(this->_exec_name, this->_path_info);
   this->_exec_type = get_exec_type(this->_exec_name);
   this->_exec_path = check_exec_type(this->_exec_type);
   this->_exec_name = this->_root + this->_exec_name;
@@ -132,15 +156,40 @@ CGI::CGI(int fd, std::string exec_name, std::string body, std::string root) : _c
     prepare_execution();
 }
 
-CGI::~CGI(){}
+void  CGI::handle_post(){
+  this->_error = 0;
+  if (this->_exec_name.find("/cgi-bin/") != 0){
+    this->send_error_404();
+    return ;
+  }
+  get_path_info_post(this->_exec_name, this->_path_info);
+  this->_exec_type = get_exec_type(this->_exec_name);
+  this->_exec_path = check_exec_type(this->_exec_type);
+  this->_exec_name = this->_root + this->_exec_name;
+  if (this->_exec_path == "" || this->_exec_name.find("/cgi-bin/") == std::string::npos){
+    this->send_error_404();
+    return ;
+  }
+  if (this->_exec_type == ".pl" || this->_exec_type == ".py" || this->_exec_type == ".sh")
+    prepare_execution();
+}
 
 void   CGI::execute(){
   char *argv[3] = {const_cast<char*>(this->_exec_path.c_str()), const_cast<char*>(this->_exec_name.c_str()), NULL};
+  std::string method = "REQUEST_METHOD=" + this->_method;
   std::string length = "CONTENT_LENGTH=" + ft_itos(this->_body.length());
-  std::string body = "QUERY_STRING=" + this->_body;
+  std::string body;
+  if (this->_method == "GET")
+    body = "QUERY_STRING=" + this->_path_info;
+  else
+    body = "QUERY_STRING=" + this->_body;
   std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
-  std::string path_info = "PATH_INFO=" + this->_path_info;
-  char *envp[6] = {const_cast<char*>("REQUEST_METHOD=POST"), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
+  std::string path_info;
+  if (this->_method == "GET")
+    path_info = "PATH_INFO=";
+  else
+    path_info = "PATH_INFO=" + this->_path_info;
+  char *envp[6] = {const_cast<char*>(method.c_str()), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
   const_cast<char*>(script_name.c_str()), const_cast<char*>(path_info.c_str()), NULL};
   dup2(this->_client_fd, STDOUT_FILENO);
   execve(argv[0], argv, envp);
