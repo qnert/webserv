@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 19:34:32 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 20:04:51 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void  Server::setRightCurrDir(size_t idx)
     this->_clientDetails[idx].setCurrDir(this->_serverRoot);
 }
 
-std::string Server::getIndexFile()
+std::string Server::getRightIndexFile()
 {
 	std::string token, path, stream;
 
