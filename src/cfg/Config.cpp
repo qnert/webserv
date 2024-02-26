@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/26 11:00:59 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 12:01:11 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void Config::checkConf()
 		_config.insert(std::make_pair("root", "./responseFiles"));
 	if (_config.find("index") == _config.end())
 		_config.insert(std::make_pair("index", "index.html"));
-	addErrorCodes(_config);
+	addErrorCodes(_error_pages);
 }
 
 void errorPageName(std::map<std::string, std::string>& map, std::string line)
