@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 11:56:35 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 12:22:53 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ void  Server::setRightCurrDir(size_t idx)
 {
   if (!this->_currLocation.empty()) {
     this->_clientDetails[idx].setCurrDir(this->_currLocation["root"]);
+    this->_clientDetails[idx].setLocUri(this->_currLocation["uri"]);
   }
   else
     this->_clientDetails[idx].setCurrDir(this->_serverRoot);

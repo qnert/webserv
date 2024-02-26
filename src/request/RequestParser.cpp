@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 11:05:39 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 12:21:15 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,8 @@ void  RequestParser::setLocIndexFile(std::string index) {this->_locIndexFile = i
 
 void  RequestParser::setRedirect(std::string redir) {this->_redirectURL = redir;}
 
+void  RequestParser::setLocUri(std::string uri) {this->_locUri = uri;}
+
 bool  RequestParser::getPendingReceive() const {return (this->_pendingReceive);}
 
 const std::string& RequestParser::getRequestType() {return (this->_requestFields["Type"]);}
@@ -140,6 +142,8 @@ const std::string& RequestParser::getRedirectURL() {return (this->_redirectURL);
 const std::string& RequestParser::getIndexFile() {return (this->_indexFile);}
 
 const std::string& RequestParser::getLocIndexFile() {return (this->_locIndexFile);}
+
+const std::string& RequestParser::getLocUri() {return (this->_locUri);}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {

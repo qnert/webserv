@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 12:03:59 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 12:23:38 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ std::string  storeFileIntoString(Clients& req, std::string path)
   std::string root = req.getCurrdir();
   std::string locIndex = req.getLocIndexFile();
   std::string servIndex = req.getIndexFile();
-  if (req.getUri().back() == '/' && req.isError() == false
+  if (req.getUri() == req.getLocUri() && req.isError() == false
       && !locIndex.empty()
       && req.getMapValue("Cookie") != "user=admin")
     path = root + locIndex;

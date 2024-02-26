@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 11:04:27 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 12:20:01 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ private:
   std::string                        _redirectURL;
   std::string                        _indexFile;
   std::string                        _locIndexFile;
+  std::string                        _locUri;
 
   void  parseRequestBody(const std::string& buffer);
   void  parseRequestHeader(const std::string& buffer);
@@ -47,6 +48,7 @@ public:
   void  cleanUp();
 
   void               setRedirect(std::string redir);
+  void               setLocUri(std::string uri);
   void               setCurrDir(std::string currDir);
   void               setIndexFile(std::string index);
   void               setLocIndexFile(std::string index);
@@ -60,6 +62,7 @@ public:
   const std::string& getUri();
   const std::string& getHost();
   const std::string& getBody();
+  const std::string& getLocUri();
   const std::string& getCurrdir();
   const std::string& getIndexFile();
   const std::string& getRedirectURL();
