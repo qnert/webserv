@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 16:59:31 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/25 18:56:14 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/25 20:41:08 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,14 @@ class CGI{
     std::string _body;
     std::string _root;
     std::string _server_name;
+    std::string _method;
 
   CGI(CGI const& other);
   CGI&  operator=(CGI const& other);
 
   public:
+    void    handle_post();
+    void    handle_get();
     void    execute();
     void    prepare_execution();
     void    send_error_404();
@@ -48,6 +51,6 @@ class CGI{
     void    send_error_500();
     void    send_error_508();
 
-  CGI(int fd, std::string exec_name, std::string body, std::string root);
+  CGI(int fd, std::string exec_name, std::string body, std::string root, std::string method);
   ~CGI();
 };
