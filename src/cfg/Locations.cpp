@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Locations.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 21:08:11 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/26 11:07:13 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ void  Server::initConfVars(Config& cfg)
   this->_serverRoot = config.find("root")->second;
   this->_maxClientBody = ft_stosize(config.find("max_client_body")->second);
   this->_locations = cfg.getLocations();
+  this->_error_pages = cfg.getErrorPages();
 }
 
 bool  Server::checkLocationPrelims(std::string method)
@@ -58,25 +59,40 @@ void  Server::setRightCurrDir(size_t idx)
     this->_clientDetails[idx].setCurrDir(this->_serverRoot);
 }
 
-std::string Server::getRightIndexFile()
+void  Server::getRightIndexFile(size_t idx)
 {
 	std::string token, path, stream;
+  bool        isLoc = false;
 
-	if (!this->_currLocation.empty())
-    	stream = this->_currLocation["index"];
+	if (!this->_currLocation.empty() && !this->_currLocation["index"].empty()) {
+    stream = this->_currLocation["index"];
+    isLoc = true;
+  }
 	else
 		stream = _index;
-	std::cout << "stream: " << stream << std::endl;
 	std::istringstream str(stream);
 	while (str >> token)
 	{
 		if (!this->_currLocation.empty())
-    		path = this->_currLocation["root"] + "/" + token;
+      path = this->_currLocation["root"] + "/" + token;
 		else
 			path = this->_serverRoot + "/" + token;
 		std::ifstream file(path);
-    	if (file.good())
-			return "/" + token;
+    if (file.good()) {
+      if (isLoc == true)
+        this->_clientDetails[idx].setLocIndexFile("/" + token);
+      else
+        this->_clientDetails[idx].setIndexFile("/" + token);
+    }
 	}
-	return "";
+}
+
+std::string Server::getRightErrorPage(std::string code)
+{
+  std::string filePath;
+  if (!this->_currLocation.empty())
+    filePath = "/" + this->_currLocation[code];
+  else
+    filePath = "/" + this->_error_pages[code];
+  return (filePath);
 }

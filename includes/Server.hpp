@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 20:04:35 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 11:14:38 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ private:
   void                initConfVars(Config& cfg);
   bool                checkLocationPrelims(std::string method);
   void                setRightCurrDir(size_t idx);
-  std::string         getRightIndexFile();
+  void                getRightIndexFile(size_t idx);
 public:
   Server();
   Server(struct pollfd* pfds, Clients* cd, Config& cfg);
@@ -101,4 +101,5 @@ public:
 
   // Location
   void                getCurrLocation(size_t index);
+  std::string         getRightErrorPage(std::string code);
 };

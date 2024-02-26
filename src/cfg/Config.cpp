@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/25 18:48:32 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/26 11:00:59 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ bool Config::locationExists(std::string uri)
 
 void addErrorCodes(std::map<std::string, std::string>& map)
 {
-	std::string arr[] = {"400", "403", "404", "405", "413", "500", "501", "505"};
+	std::string arr[] = {"400", "403", "404", "405", "413", "500", "501", "505", "508"};
 	std::vector<std::string> ec(arr, arr + sizeof(arr)/sizeof(std::string));
     for (std::vector<std::string>::iterator code = ec.begin(); code != ec.end(); ++code)
         if (map.find(*code) == map.end())
@@ -127,7 +127,7 @@ void Config::checkLocation(std::map<std::string, std::string>& map)
 	if (map.find("root") == map.end())
 		map.insert(std::make_pair("root", _config.find("root")->second));
 	if (map.find("index") == map.end())
-		map.insert(std::make_pair("index", _config.find("index")->second));
+		map.insert(std::make_pair("index", ""));
 	if (map.find("deny_methods") == map.end())
 		map.insert(std::make_pair("deny_methods", ""));
 	if (map.find("enable_cgi") == map.end())
@@ -170,7 +170,7 @@ std::map<std::string,std::string> Config::locationDirective(std::ifstream& input
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
 	std::map<std::string,std::string> map;
-	
+
 	std::string key = "location ";
 	if (line.find('{') != std::string::npos)
 		addToMap(map, "uri", trim(line.substr(key.length(), line.length() - key.length() - 1)));
@@ -239,7 +239,7 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 				else if (line.substr(i.base()->length(), line.length()).find(';') == std::string::npos)
 					throw std::runtime_error("missing semicolon in server directive");
 				else if (trim(line.substr(0, line.find(' '))) == "error_page")
-					errorPageName(map, trim(line.substr(i.base()->length(), delim-i.base()->length())));
+					errorPageName(_error_pages, trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				else
 					addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
@@ -259,6 +259,11 @@ t_confVector& Config::getLocations()
 std::map<std::string, std::string>& Config::getConfig()
 {
 	return _config;
+}
+
+std::map<std::string, std::string>& Config::getErrorPages()
+{
+  return _error_pages;
 }
 
 bool Config::findNextServerDirective(std::ifstream& input, std::string& line)

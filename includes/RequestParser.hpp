@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 19:47:43 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 11:04:27 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ private:
   ssize_t                            _totalReadBytes;
   std::string                        _redirectURL;
   std::string                        _indexFile;
+  std::string                        _locIndexFile;
 
   void  parseRequestBody(const std::string& buffer);
   void  parseRequestHeader(const std::string& buffer);
@@ -48,6 +49,7 @@ public:
   void               setRedirect(std::string redir);
   void               setCurrDir(std::string currDir);
   void               setIndexFile(std::string index);
+  void               setLocIndexFile(std::string index);
 
   bool               getPendingReceive() const;
   size_t             getBodySize();
@@ -61,4 +63,5 @@ public:
   const std::string& getCurrdir();
   const std::string& getIndexFile();
   const std::string& getRedirectURL();
+  const std::string& getLocIndexFile();
 };
