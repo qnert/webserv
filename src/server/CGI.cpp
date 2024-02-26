@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 15:01:38 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 15:26:32 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ CGI::CGI(int fd, std::string exec_name, std::string body, std::string root, std:
     this->handle_post(_server);
   else if (this->_method == "GET")
     this->handle_get(_server);
+  if (this->_error == 1)
+    throw std::runtime_error("Send failed");
 }
 
 CGI::~CGI(){}
