@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:05 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 09:26:34 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 16:58:53 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,10 +70,11 @@ Server::~Server() {}
 void  Server::acceptConnections(nfds_t& nfds)
 {
   int newClientSocket;
+  int max_clients = 0;
 
-  if (nfds == MAX_CLIENTS) {
+  if (nfds >= MAX_CLIENTS) {
+    max_clients = 1;
     std::cout << "Maximum amount of clients reached" << std::endl;
-    return ;
   }
 
   socklen_t serverAdressLen = sizeof(this->_serverAdress);
@@ -89,13 +90,30 @@ void  Server::acceptConnections(nfds_t& nfds)
   if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
     perror("fcntl client");
 
-  int index = this->getFreeSocket();
-  this->_clientPollfds[index].fd = newClientSocket;
-  this->_clientDetails[index].setFdStatus(USED);
-  this->_clientDetails[index].refreshTime(std::time(NULL));
-  this->_clientDetails[index].setSocketType(CLIENT);
-  nfds++;
-  std::cout << "New client connected at index: " << index << std::endl;
+  if (max_clients == 0)
+  {
+    int index = this->getFreeSocket();
+    this->_clientPollfds[index].fd = newClientSocket;
+    this->_clientDetails[index].setFdStatus(USED);
+    this->_clientDetails[index].refreshTime(std::time(NULL));
+    this->_clientDetails[index].setSocketType(CLIENT);
+    nfds++;
+  }
+  else if (max_clients == 1)
+  {
+    std::ostringstream header;
+    header << "HTTP/1.1 " << "503" << " " << _codes[503] << "\r\n";
+    header << "Content-Type: " << _data["plain"] << "\r\n";
+    header << "Content-Length: " << "52" << "\r\n";
+    header << "Connection: close" << "\r\n";
+    header << "\r\n";
+    header << "Service Unavailable\n";
+    header << "Server is currently overloaded!\n";
+    std::string response(header.str());
+    send(newClientSocket, response.c_str(), response.size(), 0);
+    close(newClientSocket);
+  }
+  // std::cout << "New client connected at index: " << index << std::endl;
 }
 
 int Server::getFd()
