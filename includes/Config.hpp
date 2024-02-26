@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/29 16:01:58 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/26 10:00:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 15:38:02 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <fstream>
 #include <sstream>
 #include <unistd.h>
+#include <limits>
 #include "Utils.hpp"
 
 typedef std::vector<std::map<std::string, std::string> > t_confVector;

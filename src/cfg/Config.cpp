@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 18:12:35 by rnauke            #+#    #+#             */
-/*   Updated: 2024/02/26 12:01:11 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 16:25:16 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,13 +50,31 @@ void addToMap(std::map<std::string, std::string>& map, const std::string& key, c
 	map.insert(std::make_pair(key, value));
 }
 
+// std::string trim(const std::string& line)
+// {
+// 	std::string::const_iterator start = std::find_if_not(line.begin(), line.end(), isspace);
+// 	std::string::const_iterator end = std::find_if_not(line.rbegin(), line.rend(), isspace).base();
+// 	if (start >= end)
+// 		return std::string();
+// 	return std::string(start, end);
+// }
+
+
 std::string trim(const std::string& line)
 {
-	std::string::const_iterator start = std::find_if_not(line.begin(), line.end(), isspace);
-	std::string::const_iterator end = std::find_if_not(line.rbegin(), line.rend(), isspace).base();
-	if (start >= end)
-		return std::string();
-	return std::string(start, end);
+    std::string trimmed = line;
+
+    size_t start = 0;
+    while (start < trimmed.length() && std::isspace(trimmed[start])) {
+        ++start;
+    }
+    trimmed.erase(0, start);
+    size_t end = trimmed.length();
+    while (end > 0 && std::isspace(trimmed[end - 1])) {
+        --end;
+    }
+    trimmed.erase(end);
+    return trimmed;
 }
 
 // advances file descriptor until theres a opening bracket of a directive
@@ -66,7 +84,7 @@ void Config::findOpeningBracket(std::ifstream& input, std::string& line)
 	{
 		std::getline(input, line);
 		line = trim(line);
-		if (line.empty() || line.front() == '#')
+		if (line.empty() || line.at(0) == '#')
 			continue;
 		if (line.find('{') != std::string::npos)
 		{
@@ -94,6 +112,7 @@ bool Config::locationExists(std::string uri)
 {
 	if (uri.find('{') != std::string::npos)
 		uri.erase(uri.length() - 1);
+	uri = trim(uri);
 	for (t_confVector::iterator i = _locations.begin(); i < _locations.end(); ++i)
 	{
 		std::map<std::string, std::string>::iterator a = (*i).find("uri");
@@ -166,7 +185,7 @@ void errorPageName(std::map<std::string, std::string>& map, std::string line)
 // handles parsing of the location directive
 std::map<std::string,std::string> Config::locationDirective(std::ifstream& input, std::string& line)
 {
-	std::string a[] = {"autoindex ", "deny_methods ", "root ", "index ", "enable_cgi ", "redirect ", "max_client_body ", "error_page "};
+	std::string a[] = {"autoindex ", "deny_methods ", "root ", "index ", "redirect ", "max_client_body ", "error_page "};
 	std::vector<std::string> params(a, a + sizeof(a)/sizeof(std::string));
 	std::vector<std::string>::iterator i;
 	std::map<std::string,std::string> map;
@@ -183,7 +202,7 @@ std::map<std::string,std::string> Config::locationDirective(std::ifstream& input
 	{
 		std::getline(input, line);
 		line = trim(line);
-		if (line.empty() || line.front() == '#')
+		if (line.empty() || line.at(0) == '#')
 			continue;
 		for (i = params.begin(); i != params.end(); ++i)
 		{
@@ -200,7 +219,7 @@ std::map<std::string,std::string> Config::locationDirective(std::ifstream& input
 					addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
 			}
-			else if (next(i) == params.end())
+			else if (i == params.end())
 				throw std::runtime_error("invalid argument in location directive");
 		}
 	}
@@ -220,7 +239,7 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 	{
 		std::getline(input, line);
 		line = trim(line);
-		if (line.empty() || line.front() == '#')
+		if (line.empty() || line.at(0) == '#')
 			continue;
 		for (i = params.begin(); i != params.end(); ++i)
 		{
@@ -232,7 +251,7 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 				if (trim(line.substr(0, line.find(' '))) == "location")
 				{
 					if (locationExists(trim(line.substr((*i).length(), line.length() - (*i).length()))))
-						continue;
+						throw std::runtime_error("duplicate location directive");
 					_locations.push_back(locationDirective(input, line));
 					break;
 				}
@@ -244,7 +263,7 @@ std::map<std::string, std::string> Config::serverDirective(std::ifstream& input)
 					addToMap(map, trim(*i), trim(line.substr(i.base()->length(), delim-i.base()->length())));
 				break;
 			}
-			else if (next(i) == params.end())
+			else if (i == params.end())
 				throw std::runtime_error("invalid argument server directive");
 		}
 	}
@@ -274,7 +293,7 @@ bool Config::findNextServerDirective(std::ifstream& input, std::string& line)
 		{
 			std::getline(input, line);
 			line = trim(line);
-			if (line.empty() || line.front() == '#')
+			if (line.empty() || line.at(0) == '#')
 				continue;
 			if (((line.find('{') == std::string::npos) && line == "server"))
 			{

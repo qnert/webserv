@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Locations.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 12:22:53 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 15:59:01 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void  Server::getRightIndexFile(size_t idx)
       path = this->_currLocation["root"] + "/" + token;
 		else
 			path = this->_serverRoot + "/" + token;
-		std::ifstream file(path);
+		std::ifstream file(path.c_str());
     if (file.good()) {
       if (isLoc == true)
         this->_clientDetails[idx].setLocIndexFile("/" + token);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 12:20:01 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 15:39:34 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,14 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <map>
 #include <vector>
 #include <string>
 #include <unistd.h>
 #include <climits>
 #include <ctime>
+#include <cstdlib>
 
 #define RECV_BUFFER_SIZE 10000
 

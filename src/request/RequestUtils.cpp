@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 15:24:15 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 16:21:05 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <utility>
 #include <iostream>
 #include <sstream>
 #include "../../includes/RequestUtils.hpp"
@@ -38,7 +39,7 @@ std::string  storeFileIntoString(Clients& req, std::string path)
     path = root + "/admin_index.html";
   else
     path = root + path;
-  std::ifstream file(path, std::ios::binary);
+  std::ifstream file(path.c_str(), std::ios::binary);
   if (!file.is_open())
     return ("");
 
