@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 10:07:41 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 12:41:19 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 void  CGI::send_error_404(void){
   std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
-  std::string content = storeFileIntoString_cgi("./responseFiles/error404.html");
+  std::string content = storeFileIntoString_cgi("./responseFiles/404.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
@@ -26,7 +26,7 @@ void  CGI::send_error_404(void){
 
 void  CGI::send_error_405(void){
   std::string header = "HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/html\r\n";
-  std::string content = storeFileIntoString_cgi("./responseFiles/error405.html");
+  std::string content = storeFileIntoString_cgi("./responseFiles/405.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
@@ -36,7 +36,7 @@ void  CGI::send_error_405(void){
 
 void  CGI::send_error_500(){
   std::string header = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/html\r\n";
-  std::string content = storeFileIntoString_cgi("./responseFiles/error500.html");
+  std::string content = storeFileIntoString_cgi("./responseFiles/500.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
@@ -46,7 +46,7 @@ void  CGI::send_error_500(){
 
 void  CGI::send_error_508(){
   std::string header = "HTTP/1.1 508 Loop Detected\r\nContent-Type: text/html\r\n";
-  std::string content = storeFileIntoString_cgi("./responseFiles/error508.html");
+  std::string content = storeFileIntoString_cgi("./responseFiles/508.html");
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
@@ -77,7 +77,7 @@ void  CGI::handle_get(){
     this->send_error_404();
     return ;
   }
-  if (this->_exec_type == ".pl" || this->_exec_type == ".py" || this->_exec_type == ".sh")
+  if (this->_exec_type == ".pl" || this->_exec_type == ".py")
     prepare_execution();
 }
 
@@ -95,7 +95,7 @@ void  CGI::handle_post(){
     this->send_error_404();
     return ;
   }
-  if (this->_exec_type == ".pl" || this->_exec_type == ".py" || this->_exec_type == ".sh")
+  if (this->_exec_type == ".pl" || this->_exec_type == ".py")
     prepare_execution();
 }
 
@@ -139,13 +139,14 @@ void  CGI::prepare_execution()
         return ;
       }
   }
-  int timeout_seconds = 3;
+  int timeout_seconds = 1;
   int exitcode = 0;
   pid_t fd = fork();
   if (fd == -1)
     return (perror("fork failed"));
   else if (fd == 0){
     this->execute();
+    exit(0);
   }
   else{
     sleep(timeout_seconds);
@@ -160,8 +161,11 @@ void  CGI::prepare_execution()
         waitpid(fd, &exitcode, 0);
     }
     else{
-      if (WIFEXITED(exitcode))
-        this->send_error_500();
+      if (WIFEXITED(exitcode)) {
+            int exit_code = WEXITSTATUS(exitcode);
+            if (exit_code != 0)
+              this->send_error_500();
+      }
     }
   }
 }

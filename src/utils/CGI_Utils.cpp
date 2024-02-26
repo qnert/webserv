@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/26 10:05:00 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 10:05:05 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 12:41:06 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,6 @@ std::string check_exec_type(std::string const& exec_type){
   else if (exec_type == ".pl"){
     return ("/usr/bin/perl");
   }
-  else if (exec_type == ".sh")
-    return ("/bin/sh");
   return ("");
 }
 
