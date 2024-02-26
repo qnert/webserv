@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/20 12:35:23 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 15:58:47 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/26 16:41:38 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,26 +33,15 @@ std::vector<Config> parseConfigFile(std::string path)
 ServerManager::ServerManager(std::string path) : _nfds(0)
 {
   std::vector<Config> configs = parseConfigFile(path);
-  for (std::vector<Config>::iterator cfg = configs.begin(); cfg < configs.end(); ++cfg)
-  {
-	std::map<std::string, std::string> servercon = cfg->getConfig();
-	for (std::map<std::string, std::string>::iterator i = servercon.begin(); i != servercon.end(); ++i)
-		std::cout << "server: " << i->first << "->" << i->second << std::endl;
-	std::vector<std::map<std::string, std::string> > locations = cfg->getLocations();
-	for (std::vector<std::map<std::string, std::string> >::iterator i = locations.begin(); i != locations.end(); ++i)
-	{
-		std::cout << std::endl;
-		for (std::map<std::string, std::string>::iterator j = i.base()->begin(); j != i.base()->end(); ++j)
-			std::cout << "location: " << j->first << "->" << j->second << std::endl;
-	}
-	std::cout << std::endl;
-  }
-  std::cout << std::endl;
   if (configs.empty())
 	throw std::runtime_error("no valid server configs");
   this->clientsInit();
 	for (std::vector<Config>::iterator i = configs.begin(); i < configs.end(); ++i)
 	{
+      if (this->_nfds >= MAX_CLIENTS){
+        std::cout << "PLEASE REMOVE ONE SERVER, THX" << std::endl;
+        break;
+      }
     	this->_servers.push_back(Server(this->_clientPollfds, this->_clientDetails, *i.base()));
       this->_nfds++;
 	}
