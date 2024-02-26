@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:33 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 21:33:00 by rnauke           ###   ########.fr       */
+/*   Updated: 2024/02/26 11:05:39 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ void  RequestParser::parseRequestBuffer(const std::string& buffer, ssize_t bytes
 
 void  RequestParser::cleanUp()
 {
+  this->_locIndexFile.clear();
   this->_boundary.clear();
   this->_fileType.clear();
   this->_requestFields.clear();
@@ -111,6 +112,8 @@ void  RequestParser::cleanUp()
 void  RequestParser::setCurrDir(std::string currDir) {this->_curr_dir = currDir;}
 
 void  RequestParser::setIndexFile(std::string index) {this->_indexFile = index;}
+
+void  RequestParser::setLocIndexFile(std::string index) {this->_locIndexFile = index;}
 
 void  RequestParser::setRedirect(std::string redir) {this->_redirectURL = redir;}
 
@@ -135,6 +138,8 @@ size_t  RequestParser::getBodySize() {return (this->_requestFields["Body"].size(
 const std::string& RequestParser::getRedirectURL() {return (this->_redirectURL);}
 
 const std::string& RequestParser::getIndexFile() {return (this->_indexFile);}
+
+const std::string& RequestParser::getLocIndexFile() {return (this->_locIndexFile);}
 
 const std::string RequestParser::getMapValue(const std::string key)
 {

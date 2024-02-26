@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseMethods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
+/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 20:57:20 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 11:07:55 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,9 @@ void  Server::getMethod(size_t idx, std::string& tmp)
   std::string root = this->_clientDetails[idx].getCurrdir();
   std::string uri = this->_clientDetails[idx].getUri();
   check = opendir((root + uri).c_str());
-  this->_clientDetails[idx].setIndexFile(getRightIndexFile());
+  getRightIndexFile(idx);
   std::string msg = storeFileIntoString(this->_clientDetails[idx], uri);
+
   if (check != NULL && !this->_currLocation.empty() && this->_currLocation["autoindex"] == "on")
     list_directories(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes, check);
   else if (!msg.empty()){
