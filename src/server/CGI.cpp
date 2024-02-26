@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 12:50:01 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 15:01:38 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 #include "../../includes/CGI.hpp"
 #include "../../includes/Server.hpp"
 
-void  CGI::send_error_404(void){
+void  CGI::send_error_404(Server& _server){
   std::string header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n";
-  std::string content = storeFileIntoString_cgi("./responseFiles/404.html");
+  std::string content = storeFileIntoString_cgi(_server.getRightErrorPage("404"));
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
@@ -24,9 +24,9 @@ void  CGI::send_error_404(void){
   return ;
 }
 
-void  CGI::send_error_405(void){
+void  CGI::send_error_405(Server& _server){
   std::string header = "HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/html\r\n";
-  std::string content = storeFileIntoString_cgi("./responseFiles/405.html");
+  std::string content = storeFileIntoString_cgi(_server.getRightErrorPage("405"));
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
@@ -34,9 +34,9 @@ void  CGI::send_error_405(void){
   return ;
 }
 
-void  CGI::send_error_500(){
+void  CGI::send_error_500(Server& _server){
   std::string header = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/html\r\n";
-  std::string content = storeFileIntoString_cgi("./responseFiles/500.html");
+  std::string content = storeFileIntoString_cgi(_server.getRightErrorPage("500"));
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
@@ -44,9 +44,9 @@ void  CGI::send_error_500(){
   return ;
 }
 
-void  CGI::send_error_508(){
+void  CGI::send_error_508(Server& _server){
   std::string header = "HTTP/1.1 508 Loop Detected\r\nContent-Type: text/html\r\n";
-  std::string content = storeFileIntoString_cgi("./responseFiles/508.html");
+  std::string content = storeFileIntoString_cgi(_server.getRightErrorPage("508"));
   header = header + "Content-Length: " + ft_itos(content.length()) + "\r\n\r\n";
   std::string response = header + content;
   if (send(this->_client_fd, response.c_str(), response.size(), 0) <= 0)
@@ -54,19 +54,19 @@ void  CGI::send_error_508(){
   return ;
 }
 
-CGI::CGI(int fd, std::string exec_name, std::string body, std::string root, std::string method) : _client_fd(fd), _exec_name(exec_name), _body(body), _root(root), _method(method){
+CGI::CGI(int fd, std::string exec_name, std::string body, std::string root, std::string method, Server& _server) : _client_fd(fd), _exec_name(exec_name), _body(body), _root(root), _method(method){
   if (this->_method == "POST")
-    this->handle_post();
+    this->handle_post(_server);
   else if (this->_method == "GET")
-    this->handle_get();
+    this->handle_get(_server);
 }
 
 CGI::~CGI(){}
 
-void  CGI::handle_get(){
+void  CGI::handle_get(Server& _server){
   this->_error = 0;
   if (this->_exec_name.find("/cgi-bin/") != 0){
-    this->send_error_404();
+    this->send_error_404(_server);
     return ;
   }
   get_path_info_get(this->_exec_name, this->_path_info, this->_body);
@@ -74,17 +74,17 @@ void  CGI::handle_get(){
   this->_exec_path = check_exec_type(this->_exec_type);
   this->_exec_name = this->_root + this->_exec_name;
   if (this->_exec_path == "" || this->_exec_name.find("/cgi-bin/") == std::string::npos){
-    this->send_error_404();
+    this->send_error_404(_server);
     return ;
   }
   if (this->_exec_type == ".pl" || this->_exec_type == ".py")
-    prepare_execution();
+    prepare_execution(_server);
 }
 
-void  CGI::handle_post(){
+void  CGI::handle_post(Server& _server){
   this->_error = 0;
   if (this->_exec_name.find("/cgi-bin/") != 0){
-    this->send_error_404();
+    this->send_error_404(_server);
     return ;
   }
   get_path_info_post(this->_exec_name, this->_path_info);
@@ -92,11 +92,11 @@ void  CGI::handle_post(){
   this->_exec_path = check_exec_type(this->_exec_type);
   this->_exec_name = this->_root + this->_exec_name;
   if (this->_exec_path == "" || this->_exec_name.find("/cgi-bin/") == std::string::npos){
-    this->send_error_404();
+    this->send_error_404(_server);
     return ;
   }
   if (this->_exec_type == ".pl" || this->_exec_type == ".py")
-    prepare_execution();
+    prepare_execution(_server);
 }
 
 void   CGI::execute(){
@@ -114,14 +114,14 @@ void   CGI::execute(){
   std::exit(100);
 }
 
-void  CGI::prepare_execution()
+void  CGI::prepare_execution(Server& _server)
 {
   if (access((this->_exec_name).c_str(), F_OK) == -1){
-    this->send_error_404();
+    this->send_error_404(_server);
     return ;
   }
   else if (access((this->_exec_name).c_str(), X_OK) == -1){
-    this->send_error_405();
+    this->send_error_405(_server);
     return ;
   }
   else{
@@ -144,7 +144,7 @@ void  CGI::prepare_execution()
     sleep(timeout_seconds);
     pid_t result = waitpid(fd, &exitcode, WNOHANG);
     if (result == 0) {
-        this->send_error_508();
+        this->send_error_508(_server);
         kill(fd, SIGKILL);
         waitpid(fd, &exitcode, 0);
     } else if (result < 0) {
@@ -156,7 +156,7 @@ void  CGI::prepare_execution()
       if (WIFEXITED(exitcode)) {
             int exit_code = WEXITSTATUS(exitcode);
             if (exit_code != 0)
-              this->send_error_500();
+              this->send_error_500(_server);
       }
     }
   }

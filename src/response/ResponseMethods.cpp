@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseMethods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 11:07:55 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 15:02:03 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void  Server::getMethod(size_t idx, std::string& tmp)
       this->handleGetDefault(msg, idx);
   }
   else if (uri.find("/?searchTerm=") == std::string::npos && uri.find("?") != std::string::npos){
-      CGI(this->_clientPollfds[idx].fd, uri, this->_clientDetails[idx].getBody(), this->_clientDetails[idx].getCurrdir(), "GET");
+      CGI(this->_clientPollfds[idx].fd, uri, this->_clientDetails[idx].getBody(), this->_clientDetails[idx].getCurrdir(), "GET", *this);
   }
   else if (uri.find("/?searchTerm=") != std::string::npos) // searching for file in url if it's already there
   {
@@ -92,7 +92,7 @@ int  Server::postMethod(size_t idx)
     return (0);
   }
   else{
-    CGI(this->_clientPollfds[idx].fd, uri, this->_clientDetails[idx].getBody(), this->_clientDetails[idx].getCurrdir(), "POST");
+    CGI(this->_clientPollfds[idx].fd, uri, this->_clientDetails[idx].getBody(), this->_clientDetails[idx].getCurrdir(), "POST", *this);
     return (0);
   }
   return (1);

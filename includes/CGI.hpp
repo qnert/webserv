@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 16:59:31 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/25 20:41:08 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 15:00:08 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 
 class Statuscodes;
 class MIME_type;
+class Server;
 
 class CGI{
   private:
@@ -42,15 +43,15 @@ class CGI{
   CGI&  operator=(CGI const& other);
 
   public:
-    void    handle_post();
-    void    handle_get();
+    void    handle_post(Server& _server);
+    void    handle_get(Server& _server);
     void    execute();
-    void    prepare_execution();
-    void    send_error_404();
-    void    send_error_405();
-    void    send_error_500();
-    void    send_error_508();
+    void    prepare_execution(Server& _server);
+    void    send_error_404(Server& _server);
+    void    send_error_405(Server& _server);
+    void    send_error_500(Server& _server);
+    void    send_error_508(Server& _server);
 
-  CGI(int fd, std::string exec_name, std::string body, std::string root, std::string method);
+  CGI(int fd, std::string exec_name, std::string body, std::string root, std::string method, Server& _server);
   ~CGI();
 };
