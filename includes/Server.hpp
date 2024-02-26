@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/13 15:10:16 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 14:22:54 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 20:04:35 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <dirent.h>
 #include <unistd.h>
+#include <fstream>
 
 #define MAX_CLIENTS 200
 
@@ -74,10 +75,12 @@ private:
   int                 getFreeSocket();
   void                cleanUpClientFds();
 
+
   // Location
   void                initConfVars(Config& cfg);
   bool                checkLocationPrelims(std::string method);
   void                setRightCurrDir(size_t idx);
+  std::string         getRightIndexFile();
 public:
   Server();
   Server(struct pollfd* pfds, Clients* cd, Config& cfg);

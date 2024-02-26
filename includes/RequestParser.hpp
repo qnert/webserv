@@ -6,7 +6,7 @@
 /*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/14 17:22:44 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/25 13:22:42 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 19:47:43 by njantsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,12 @@ private:
   std::map<std::string, std::string> _requestFields;
   std::string                        _buffer;
   std::string                        _curr_dir;
-  std::string                        _indexFile;
   std::string                        _fileType;
   std::string                        _boundary;
   bool                               _pendingReceive;
   ssize_t                            _totalReadBytes;
   std::string                        _redirectURL;
+  std::string                        _indexFile;
 
   void  parseRequestBody(const std::string& buffer);
   void  parseRequestHeader(const std::string& buffer);
@@ -47,18 +47,18 @@ public:
 
   void               setRedirect(std::string redir);
   void               setCurrDir(std::string currDir);
-  void               setIndexFile(std::string indexFile);
+  void               setIndexFile(std::string index);
 
   bool               getPendingReceive() const;
+  size_t             getBodySize();
+  const std::string  getMapValue(const std::string key);
   const std::string& getFileType() const;
   const std::string& getBoundary() const;
   const std::string& getRequestType();
   const std::string& getUri();
   const std::string& getHost();
   const std::string& getBody();
-  size_t             getBodySize();
   const std::string& getCurrdir();
   const std::string& getIndexFile();
   const std::string& getRedirectURL();
-  const std::string  getMapValue(const std::string key);
 };

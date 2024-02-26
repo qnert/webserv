@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Locations.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rnauke <rnauke@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:37:26 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/24 19:09:07 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/25 21:08:11 by rnauke           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void  Server::initConfVars(Config& cfg)
   std::cout << "server port: " << ft_stosh(config.find("listen")->second) << std::endl;
   this->_port = config.find("listen")->second;
   this->_servername = config.find("server_name")->second;
+  this->_index = config.find("index")->second;
   this->_serverRoot = config.find("root")->second;
   this->_maxClientBody = ft_stosize(config.find("max_client_body")->second);
   this->_locations = cfg.getLocations();
@@ -55,4 +56,27 @@ void  Server::setRightCurrDir(size_t idx)
   }
   else
     this->_clientDetails[idx].setCurrDir(this->_serverRoot);
+}
+
+std::string Server::getRightIndexFile()
+{
+	std::string token, path, stream;
+
+	if (!this->_currLocation.empty())
+    	stream = this->_currLocation["index"];
+	else
+		stream = _index;
+	std::cout << "stream: " << stream << std::endl;
+	std::istringstream str(stream);
+	while (str >> token)
+	{
+		if (!this->_currLocation.empty())
+    		path = this->_currLocation["root"] + "/" + token;
+		else
+			path = this->_serverRoot + "/" + token;
+		std::ifstream file(path);
+    	if (file.good())
+			return "/" + token;
+	}
+	return "";
 }
