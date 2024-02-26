@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestUtils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: njantsch <njantsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/30 11:00:07 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 12:23:38 by njantsch         ###   ########.fr       */
+/*   Updated: 2024/02/26 15:24:15 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,17 +154,20 @@ std::string handle_file_erasing(int fd, Clients& req, Statuscodes& codes){
   std::string filepath = req.getCurrdir() + req.getUri().substr(0, req.getUri().size());
   if (filepath.find("/..") != std::string::npos || filepath.find("/../") != std::string::npos){
     msg = check_and_add_header(403, "text/plain", ft_itos(15), codes, req) + "\t403 Forbidden\n";
-    send(fd, msg.c_str(), msg.size(), 0);
+    if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+      req.setConStatus(CLOSE);
     return ("");
   }
   else if (access(filepath.c_str(), F_OK) != 0){
     msg = check_and_add_header(404, "text/plain", ft_itos(15), codes, req) + "\t404 Not Found\n";
-    send(fd, msg.c_str(), msg.size(), 0);
+    if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+      req.setConStatus(CLOSE);
     return ("");
   }
   std::remove(filepath.c_str());
   msg = check_and_add_header(202, "text/plain", ft_itos(14), codes, req) + "\t202 Accepted\n";
-  send(fd, msg.c_str(), msg.size(), 0);
+  if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+      req.setConStatus(CLOSE);
   return (filepath.substr(filepath.find_last_of('/') + 1, filepath.size() - filepath.find_last_of('/')));
 }
 
@@ -188,7 +191,8 @@ void list_directories(int fd, Clients& req, Statuscodes& codes, DIR* dir)
   }
   std::string dir_str = directories.str();
   std::string msg = check_and_add_header(200, "text/html", ft_itos(dir_str.length()), codes, req) + dir_str;
-  send(fd, msg.c_str(), msg.size(), 0);
+  if (send(fd, msg.c_str(), msg.size(), 0) < 0)
+    req.setConStatus(CLOSE);
   closedir(dir);
 }
 
