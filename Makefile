@@ -10,7 +10,7 @@ SOURCES = ./src/main.cpp ./src/server/Server.cpp  ./src/utils/ServerUtils.cpp \
 					./src/data_classes/Statuscodes.cpp ./src/request/RequestUtils.cpp ./src/cfg/Config.cpp \
 					./src/response/ErrorResponses.cpp ./src/server/Clients.cpp ./src/server/CGI.cpp \
 					./src/server/ServerManager.cpp ./src/utils/ManagerUtils.cpp ./src/response/ResponseMethods.cpp \
-					./src/response/ProcessResponse.cpp ./src/cfg/Locations.cpp ./src/utils/Utils.cpp
+					./src/response/ProcessResponse.cpp ./src/cfg/Locations.cpp ./src/utils/Utils.cpp ./src/utils/CGI_Utils.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
