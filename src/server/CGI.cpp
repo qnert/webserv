@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 17:02:44 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 12:41:19 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 12:50:01 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void  CGI::handle_get(){
     this->send_error_404();
     return ;
   }
-  get_path_info_get(this->_exec_name, this->_path_info);
+  get_path_info_get(this->_exec_name, this->_path_info, this->_body);
   this->_exec_type = get_exec_type(this->_exec_name);
   this->_exec_path = check_exec_type(this->_exec_type);
   this->_exec_name = this->_root + this->_exec_name;
@@ -103,17 +103,9 @@ void   CGI::execute(){
   char *argv[3] = {const_cast<char*>(this->_exec_path.c_str()), const_cast<char*>(this->_exec_name.c_str()), NULL};
   std::string method = "REQUEST_METHOD=" + this->_method;
   std::string length = "CONTENT_LENGTH=" + ft_itos(this->_body.length());
-  std::string body;
-  if (this->_method == "GET")
-    body = "QUERY_STRING=" + this->_path_info;
-  else
-    body = "QUERY_STRING=" + this->_body;
+  std::string body = "QUERY_STRING=" + this->_body;
   std::string script_name = "SCRIPT_NAME=" + this->_exec_name;
-  std::string path_info;
-  if (this->_method == "GET")
-    path_info = "PATH_INFO=";
-  else
-    path_info = "PATH_INFO=" + this->_path_info;
+  std::string path_info = "PATH_INFO=" + this->_path_info;
   char *envp[6] = {const_cast<char*>(method.c_str()), const_cast<char*>(length.c_str()), const_cast<char*>(body.c_str()),
   const_cast<char*>(script_name.c_str()), const_cast<char*>(path_info.c_str()), NULL};
   dup2(this->_client_fd, STDOUT_FILENO);

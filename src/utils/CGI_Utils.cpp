@@ -6,7 +6,7 @@
 /*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/26 10:05:00 by skunert           #+#    #+#             */
-/*   Updated: 2024/02/26 12:41:06 by skunert          ###   ########.fr       */
+/*   Updated: 2024/02/26 12:59:33 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,18 +56,23 @@ std::string  storeFileIntoString_cgi(std::string path)
   return (fileContent);
 }
 
-void  get_path_info_get(std::string&  exec_name, std::string& path_info){
+void  get_path_info_get(std::string&  exec_name, std::string& path_info, std::string& body){
   size_t  start = exec_name.find("/cgi-bin/");
   if (start == std::string::npos){
     exec_name = "";
     return ;
   }
   size_t  end = exec_name.find_first_of('?', start);
+  size_t  body_start = exec_name.find_first_of('/', end + 1);
   if (exec_name.find('?', end + 1) != std::string::npos){
     exec_name = "";
     return ;
   }
-  path_info = exec_name.substr(exec_name.find_last_of('?') + 1, exec_name.length());
+  if (body_start == std::string::npos)
+    path_info = "";
+  else
+    path_info = exec_name.substr(body_start, exec_name.length() - body_start);
+  body = exec_name.substr(end + 1, body_start - end - 1);
   exec_name = exec_name.substr(start, end - start);
 }
 
@@ -82,7 +87,7 @@ void  get_path_info_post(std::string&  exec_name, std::string& path_info){
   }
   else{
     exec_name = "/cgi-bin/" + path.substr(0, start);
-    path_info = path.substr(start + 1, path_info.length() - start + 1);
+    path_info = path.substr(start, path_info.length() - start + 1);
     return ;
   }
 }
