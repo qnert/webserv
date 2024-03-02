@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseMethods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: nicolasjantsch <nicolasjantsch@student.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/02/26 15:28:34 by skunert          ###   ########.fr       */
+/*   Updated: 2024/03/02 11:24:10 by nicolasjant      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,10 @@ void  Server::getMethod(size_t idx, std::string& tmp)
   getRightIndexFile(idx);
   std::string msg = storeFileIntoString(this->_clientDetails[idx], uri);
 
-  if (check != NULL && !this->_currLocation.empty() && this->_currLocation["autoindex"] == "on")
+  if (check != NULL && !this->_currLocation.empty() && this->_currLocation["autoindex"] == "on") {
     list_directories(this->_clientPollfds[idx].fd, this->_clientDetails[idx], this->_codes, check);
+    check = NULL;
+  }
   else if (!msg.empty()){
       this->handleGetDefault(msg, idx);
   }
@@ -54,6 +56,8 @@ void  Server::getMethod(size_t idx, std::string& tmp)
   }
   else
     this->NotFound(idx);
+  if (check != NULL)
+    closedir(check);
 }
 
 void  Server::handleGetDefault(std::string& msg, size_t idx)
