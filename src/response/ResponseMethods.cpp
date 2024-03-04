@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseMethods.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nicolasjantsch <nicolasjantsch@student.    +#+  +:+       +#+        */
+/*   By: skunert <skunert@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:05:57 by njantsch          #+#    #+#             */
-/*   Updated: 2024/03/02 11:24:10 by nicolasjant      ###   ########.fr       */
+/*   Updated: 2024/03/04 17:24:32 by skunert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,11 @@ void  Server::getMethod(size_t idx, std::string& tmp)
 void  Server::handleGetDefault(std::string& msg, size_t idx)
 {
   std::string response;
-  const std::string requestType = this->_clientDetails[idx].getRequestType();
+  const std::string fileType = this->_clientDetails[idx].getFileType();
 
   if (this->_clientDetails[idx].getPendingResponse() == false) {
     std::string length = ft_itos(msg.size());
-    response = check_and_add_header(200, this->_data[requestType], length, this->_codes, this->_clientDetails[idx]);
+    response = check_and_add_header(200, this->_data[fileType], length, this->_codes, this->_clientDetails[idx]);
     this->_clientDetails[idx].storeHeaderSize(response.size());
     response += msg;
     this->_clientDetails[idx].storeBufferSize(response.size());
