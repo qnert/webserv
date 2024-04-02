@@ -5,7 +5,8 @@ This project is an HTTP web server implemented in C++98, designed to serve stati
 
 ## Usage
 ```bash
-$ git clone https://github.com/your_username/http-web-server.git
-$ cd http-web-server
-$ g++ -std=c++98 -o server server.cpp
-$ ./server config.ini
+$ git clone [https://github.com/your_username/http-web-server.git](https://github.com/qnert/webserv.git)
+$ cd webserv
+$ ## Make use of the Makefile
+$ make
+$ ./webserv ./path/to/configfile
