@@ -22,6 +22,6 @@ The server can handle stress tests to stay available even under heavy loads of r
 ## Credits
 This project was developed by:
 - [Nico](https://github.com/njantsch)
-- [Simon](https://github.com/skunert)
+- [Simon](https://github.com/qnert)
 - [Rouven](https://github.com/Narouv)
 
