@@ -20,5 +20,8 @@ By referencing NGINX configuration, users familiar with NGINX can quickly grasp 
 The server can handle stress tests to stay available even under heavy loads of requests as well as refering to NGINX to provide similar functionalities.
 
 ## Credits
-This project was developed by njantsch, rnauke and skunert as a university project.
+This project was developed by:
+- [Nico](https://github.com/njantsch)
+- [Simon](https://github.com/skunert)
+- [Rouven](https://github.com/Narouv)
 
